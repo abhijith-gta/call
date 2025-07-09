@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Voice Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ✨ Animated Background Blobs -->
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+
+  <!-- 🔤 Nickname Entry Screen -->
+  <div class="screen active" id="nicknameScreen">
+    <h2>Enter Your Nickname</h2>
+    <input
+      type="text"
+      id="nicknameInput"
+      placeholder="e.g. CoolUser"
+      autocomplete="off"
+      aria-label="Enter your nickname"
+    />
+    <button id="startButton" class="start-btn">Start Chat</button>
+  </div>
+
+  <!-- 📞 Main Call Screen -->
+  <div class="screen" id="call-screen">
+    <div class="phone-container">
+      <div class="call-avatar">🎧</div>
+      <h2 class="caller-name" id="caller-name">Stranger</h2>
+      <p class="call-timer" id="call-timer">00:00</p>
+      <p class="status-message" id="status-message">🔁 Searching for a partner...</p>
+      <div class="button-row">
+        <button class="circle-btn" id="muteBtn" title="Mute / Unmute">🔇</button>
+        <button class="circle-btn end-call" id="endButton" title="End Call">📞</button>
+        <button class="circle-btn" id="nextButton" title="Next Partner">➡️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔊 Hidden audio element to play the remote stream -->
+  <audio id="remoteAudio" autoplay playsinline></audio>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
