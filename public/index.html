@@ -51,6 +51,8 @@
              border-radius: 40px; 
         }
         
+        /* Removed the animated border CSS */
+
         .animate-in { animation: fade-in-up 0.8s cubic-bezier(0.25, 1, 0.5, 1) both; }
         @keyframes fade-in-up {
             from { opacity: 0; transform: translateY(20px); }
@@ -72,19 +74,9 @@
             opacity: calc(0.2 + var(--audio-level) * 0.8);
         }
         
-        /* Modal Styles */
-        #modal-overlay {
-            background-color: rgba(0,0,0,0.7);
-            backdrop-filter: blur(5px);
-            transition: opacity 0.3s ease-in-out;
-        }
-        #modal-content {
-            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-        }
-        #modal-body a {
-            color: var(--accent);
-            text-decoration: underline;
-        }
+        #modal-overlay { background-color: rgba(0,0,0,0.7); backdrop-filter: blur(5px); transition: opacity 0.3s ease-in-out; }
+        #modal-content { transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out; }
+        #modal-body a { color: var(--accent); text-decoration: underline; }
 
         @media (max-width: 640px) {
             body { padding: 0; }
@@ -145,6 +137,7 @@
         const ui = {
             nicknameScreen: document.getElementById('nickname-screen'), nicknameForm: document.getElementById('nickname-form'),
             nicknameInput: document.getElementById('nickname-input'), callScreen: document.getElementById('call-screen'),
+            callContainer: document.getElementById('call-container'),
             partnerNickname: document.getElementById('partner-nickname'), statusText: document.getElementById('status-text'),
             callTimer: document.getElementById('call-timer'), muteButton: document.getElementById('mute-button'),
             speakerButton: document.getElementById('speaker-button'), nextButton: document.getElementById('next-button'),
@@ -156,12 +149,7 @@
         const addIcons = () => { ui.muteButton.innerHTML=`<svg class="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>`;ui.speakerButton.innerHTML=`<svg class="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>`;ui.nextButton.innerHTML=`<svg class="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>`;ui.endButton.innerHTML=`<svg class="w-10 h-10 transform rotate-[135deg]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10.707 3.293a1 1 0 010 1.414L6.414 9H16a1 1 0 110 2H6.414l4.293 4.293a1 1 0 01-1.414 1.414l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>`;};
         addIcons();
         
-        // --- Modal Logic ---
-        const modalData = {
-            terms: { title: 'Terms and Conditions', content: `<h3>Welcome to TalkLoop!</h3><p>This is placeholder text. Replace this with your own Terms and Conditions.</p><p>By using our service, you agree to not engage in any abusive, hateful, or illegal behavior. Users must be of legal age in their jurisdiction. We reserve the right to disconnect users at our discretion.</p>` },
-            privacy: { title: 'Privacy Policy', content: `<h3>Your Privacy at TalkLoop</h3><p>This is placeholder text. Replace this with your own Privacy Policy.</p><p>We do not store your conversations. Voice chat is transmitted peer-to-peer. We may collect anonymous analytical data to improve the service. We do not sell your data.</p>` },
-            contact: { title: 'Contact Us', content: `<h3>Get in Touch</h3><p>This is placeholder text. Replace this with your own contact information.</p><p>For questions or feedback, please email us at: <a href="mailto:contact@talkloop.example.com">contact@talkloop.example.com</a></p>` }
-        };
+        const modalData = { terms: { title: 'Terms and Conditions', content: `<h3>Welcome to TalkLoop!</h3><p>This is placeholder text. Replace this with your own Terms and Conditions.</p><p>By using our service, you agree to not engage in any abusive, hateful, or illegal behavior. Users must be of legal age in their jurisdiction. We reserve the right to disconnect users at our discretion.</p>` }, privacy: { title: 'Privacy Policy', content: `<h3>Your Privacy at TalkLoop</h3><p>This is placeholder text. Replace this with your own Privacy Policy.</p><p>We do not store your conversations. Voice chat is transmitted peer-to-peer. We may collect anonymous analytical data to improve the service. We do not sell your data.</p>` }, contact: { title: 'Contact Us', content: `<h3>Get in Touch</h3><p>This is placeholder text. Replace this with your own contact information.</p><p>For questions or feedback, please email us at: <a href="mailto:contact@talkloop.example.com">contact@talkloop.example.com</a></p>` } };
         function openModal(type) { ui.modalTitle.textContent = modalData[type].title; ui.modalBody.innerHTML = modalData[type].content; ui.modalOverlay.classList.remove('opacity-0', 'pointer-events-none'); ui.modalContent.classList.remove('scale-95', 'opacity-0'); }
         function closeModal() { ui.modalOverlay.classList.add('opacity-0', 'pointer-events-none'); ui.modalContent.classList.add('scale-95', 'opacity-0'); }
         document.getElementById('terms-link').addEventListener('click', (e) => { e.preventDefault(); openModal('terms'); });
@@ -170,16 +158,20 @@
         ui.modalClose.addEventListener('click', closeModal);
         ui.modalOverlay.addEventListener('click', (e) => { if (e.target === ui.modalOverlay) closeModal(); });
 
-        // --- Core App Logic ---
         let timerInterval;
         const startTimer = () => { let startTime = Date.now(); ui.callTimer.style.display='block'; clearInterval(timerInterval); timerInterval = setInterval(() => { const elapsed = Math.floor((Date.now() - startTime) / 1000); const mins = String(Math.floor(elapsed / 60)).padStart(2, '0'); const secs = String(elapsed % 60).padStart(2, '0'); ui.callTimer.textContent = `${mins}:${secs}`;}, 1000);};
         const stopTimer = () => { clearInterval(timerInterval); ui.callTimer.style.display='none'; ui.callTimer.textContent = '00:00'; };
         const setupAudioVisualizer = () => { if (!localStream || !localStream.getAudioTracks().length > 0) return; audioContext = new (window.AudioContext || window.webkitAudioContext)(); analyser = audioContext.createAnalyser(); const source = audioContext.createMediaStreamSource(localStream); source.connect(analyser); analyser.fftSize = 32; const bufferLength = analyser.frequencyBinCount; const dataArray = new Uint8Array(bufferLength); const draw = () => { requestAnimationFrame(draw); analyser.getByteFrequencyData(dataArray); let sum = dataArray.reduce((a, b) => a + b, 0); let average = sum / bufferLength || 0; let normalized = average / 128; document.documentElement.style.setProperty('--audio-level', normalized); }; draw(); };
+        
         const updateUI = (state, data = {}) => {
             ui.muteButton.style.display = 'flex'; ui.speakerButton.style.display = 'flex';
             ui.endButton.style.display = 'flex'; ui.nextButton.style.display = 'flex';
+            
+            // Removed the '.is-active' class toggle
+
             if (state === 'idle') { ui.nicknameScreen.style.display = 'block'; ui.callScreen.style.display = 'none'; stopTimer(); return; }
             ui.nicknameScreen.style.display = 'none'; ui.callScreen.style.display = 'flex';
+            
             let statusMessage = '';
             switch(state) {
                 case 'searching': statusMessage = "Searching..."; ui.partnerNickname.textContent = "Stranger"; stopTimer(); break;
