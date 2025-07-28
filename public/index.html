@@ -1,51 +1,216 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Voice Chat</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TalkLoop</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root {
+            --bg: #111111;
+            --surface: #1e1e1e;
+            --text-primary: #f5f5f5;
+            --text-secondary: #a3a3a3;
+            --accent: #6366f1; /* Indigo */
+            --danger: #ef4444;
+            --border: rgba(255, 255, 255, 0.1);
+            --audio-level: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(circle at center, rgba(255, 255, 255, 0.03), transparent 60%);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            padding: 1rem;
+        }
+
+        .satin-card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        #nickname-container, #call-container {
+             width: 100%;
+             max-width: clamp(380px, 40vw, 520px); 
+             height: 90vh;
+             max-height: 880px;
+             border-radius: 40px; 
+        }
+        
+        .animate-in { animation: fade-in-up 0.8s cubic-bezier(0.25, 1, 0.5, 1) both; }
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .primary-button { background-color: var(--accent); box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3); transition: all 0.2s ease-out; }
+        .primary-button:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4); }
+        .phone-button { background-color: rgba(255, 255, 255, 0.05); transition: all 0.2s ease-out; }
+        .phone-button:hover { background-color: rgba(255, 255, 255, 0.1); transform: scale(1.05); }
+        .phone-button.active { background-color: var(--accent); box-shadow: 0 0 15px rgba(99, 102, 241, 0.5); }
+        .end-call-button { background-color: var(--danger); }
+        .end-call-button:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
+
+        .visualizer-ring {
+            border: 1px solid var(--accent);
+            transition: transform 0.15s cubic-bezier(0.5, 0, 0.5, 1), opacity 0.2s ease;
+            transform: scale(calc(0.5 + var(--audio-level) * 0.7));
+            opacity: calc(0.2 + var(--audio-level) * 0.8);
+        }
+        
+        /* Modal Styles */
+        #modal-overlay {
+            background-color: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            transition: opacity 0.3s ease-in-out;
+        }
+        #modal-content {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        #modal-body a {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+
+        @media (max-width: 640px) {
+            body { padding: 0; }
+            .satin-card {
+                max-width: none;
+                width: 100%; height: 100dvh; border-radius: 0; border: none;
+                background-color: #000;
+            }
+        }
+    </style>
 </head>
 <body>
 
-  <!-- ✨ Animated Background Blobs -->
-  <div class="blob blob1"></div>
-  <div class="blob blob2"></div>
-
-  <!-- 🔤 Nickname Entry Screen -->
-  <div class="screen active" id="nicknameScreen">
-    <h2>Enter Your Nickname</h2>
-    <input
-      type="text"
-      id="nicknameInput"
-      placeholder="e.g. CoolUser"
-      autocomplete="off"
-      aria-label="Enter your nickname"
-    />
-    <button id="startButton" class="start-btn">Start Chat</button>
-  </div>
-
-  <!-- 📞 Main Call Screen -->
-  <div class="screen" id="call-screen">
-    <div class="phone-container">
-      <div class="call-avatar">🎧</div>
-      <h2 class="caller-name" id="caller-name">Stranger</h2>
-      <p class="call-timer" id="call-timer">00:00</p>
-      <p class="status-message" id="status-message">🔁 Searching for a partner...</p>
-      <div class="button-row">
-        <button class="circle-btn" id="muteBtn" title="Mute / Unmute">🔇</button>
-        <button class="circle-btn end-call" id="endButton" title="End Call">📞</button>
-        <button class="circle-btn" id="nextButton" title="Next Partner">➡️</button>
-      </div>
+    <div id="nickname-screen" class="w-full">
+        <div id="nickname-container" class="satin-card p-8 rounded-2xl animate-in mx-auto flex flex-col justify-center">
+            <div class="flex-grow flex flex-col justify-center">
+                <h1 class="text-5xl font-bold mb-2 animate-in" style="animation-delay: 0.1s;">TalkLoop</h1>
+                <p class="text-[var(--text-secondary)] mb-8 animate-in" style="animation-delay: 0.2s;">Talk to a stranger.</p>
+                <form id="nickname-form" class="space-y-4 animate-in" style="animation-delay: 0.3s;">
+                    <input id="nickname-input" type="text" placeholder="Enter Your Nickname" class="w-full text-center bg-transparent border-2 border-[var(--border)] p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)] transition">
+                    <button id="start-button" type="submit" class="primary-button w-full p-3 text-lg font-semibold rounded-lg text-white">Start</button>
+                </form>
+            </div>
+            <footer class="text-center py-4 mt-6 flex-shrink-0">
+                <div class="flex justify-center space-x-4 text-sm text-[var(--text-secondary)]">
+                    <a href="#" id="terms-link" class="hover:text-white transition">Terms</a>
+                    <span>&bull;</span>
+                    <a href="#" id="privacy-link" class="hover:text-white transition">Privacy</a>
+                    <span>&bull;</span>
+                    <a href="#" id="contact-link" class="hover:text-white transition">Contact Us</a>
+                </div>
+            </footer>
+        </div>
     </div>
-  </div>
 
-  <!-- 🔊 Hidden audio element to play the remote stream -->
-  <audio id="remoteAudio" autoplay playsinline></audio>
+    <div id="call-screen" class="hidden absolute inset-0 flex items-center justify-center p-4">
+        <div id="call-container" class="satin-card flex flex-col p-8 sm:p-10">
+            <div class="text-center animate-in"><h2 id="partner-nickname" class="text-4xl font-semibold">Stranger</h2><p id="status-text" class="text-lg text-[var(--accent)] h-7">Searching...</p><p id="call-timer" class="font-mono text-xl text-gray-400 mt-2 hidden">00:00</p></div>
+            <div class="flex-grow flex items-center justify-center my-8 animate-in" style="animation-delay: 0.2s;"><div class="relative w-48 h-48"><div class="absolute inset-0 rounded-full visualizer-ring"></div><div class="absolute inset-[15px] rounded-full visualizer-ring" style="animation-delay: 0.1s"></div><div class="absolute inset-[30px] rounded-full visualizer-ring" style="animation-delay: 0.2s"></div></div></div>
+            <div class="w-full flex flex-col items-center space-y-6 flex-shrink-0 animate-in" style="animation-delay: 0.4s;"><div class="grid grid-cols-2 gap-6"><div class="flex flex-col items-center space-y-2"><button id="mute-button" class="phone-button w-20 h-20 rounded-full flex items-center justify-center"></button><span class="text-sm text-[var(--text-secondary)]">mute</span></div><div class="flex flex-col items-center space-y-2"><button id="speaker-button" class="phone-button w-20 h-20 rounded-full flex items-center justify-center"></button><span class="text-sm text-[var(--text-secondary)]">speaker</span></div><div class="flex flex-col items-center space-y-2"><button id="next-button" class="phone-button w-20 h-20 rounded-full flex items-center justify-center"></button><span class="text-sm text-[var(--text-secondary)]">next</span></div><div class="flex flex-col items-center space-y-2"><button id="end-button" class="end-call-button w-20 h-20 rounded-full flex items-center justify-center"></button><span class="text-sm text-[var(--text-secondary)]">end</span></div></div></div>
+        </div>
+    </div>
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="script.js"></script>
+    <div id="modal-overlay" class="fixed inset-0 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
+        <div id="modal-content" class="satin-card w-full max-w-2xl max-h-[80vh] p-8 rounded-2xl transform scale-95 opacity-0 flex flex-col">
+            <div class="flex justify-between items-center mb-4 flex-shrink-0"><h2 id="modal-title" class="text-2xl font-bold"></h2><button id="modal-close" class="text-gray-500 hover:text-white text-3xl">&times;</button></div>
+            <div id="modal-body" class="overflow-y-auto pr-4 text-[var(--text-secondary)]"></div>
+        </div>
+    </div>
+    
+    <audio id="remoteAudio" autoplay playsinline></audio>
+    <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let peer = null, localStream = null, isMuted = false, audioContext = null, analyser = null;
+        
+        const ui = {
+            nicknameScreen: document.getElementById('nickname-screen'), nicknameForm: document.getElementById('nickname-form'),
+            nicknameInput: document.getElementById('nickname-input'), callScreen: document.getElementById('call-screen'),
+            partnerNickname: document.getElementById('partner-nickname'), statusText: document.getElementById('status-text'),
+            callTimer: document.getElementById('call-timer'), muteButton: document.getElementById('mute-button'),
+            speakerButton: document.getElementById('speaker-button'), nextButton: document.getElementById('next-button'),
+            endButton: document.getElementById('end-button'), remoteAudio: document.getElementById('remoteAudio'),
+            modalOverlay: document.getElementById('modal-overlay'), modalContent: document.getElementById('modal-content'),
+            modalTitle: document.getElementById('modal-title'), modalBody: document.getElementById('modal-body'),
+            modalClose: document.getElementById('modal-close')
+        };
+        const addIcons = () => { ui.muteButton.innerHTML=`<svg class="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>`;ui.speakerButton.innerHTML=`<svg class="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>`;ui.nextButton.innerHTML=`<svg class="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>`;ui.endButton.innerHTML=`<svg class="w-10 h-10 transform rotate-[135deg]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10.707 3.293a1 1 0 010 1.414L6.414 9H16a1 1 0 110 2H6.414l4.293 4.293a1 1 0 01-1.414 1.414l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>`;};
+        addIcons();
+        
+        // --- Modal Logic ---
+        const modalData = {
+            terms: { title: 'Terms and Conditions', content: `<h3>Welcome to TalkLoop!</h3><p>This is placeholder text. Replace this with your own Terms and Conditions.</p><p>By using our service, you agree to not engage in any abusive, hateful, or illegal behavior. Users must be of legal age in their jurisdiction. We reserve the right to disconnect users at our discretion.</p>` },
+            privacy: { title: 'Privacy Policy', content: `<h3>Your Privacy at TalkLoop</h3><p>This is placeholder text. Replace this with your own Privacy Policy.</p><p>We do not store your conversations. Voice chat is transmitted peer-to-peer. We may collect anonymous analytical data to improve the service. We do not sell your data.</p>` },
+            contact: { title: 'Contact Us', content: `<h3>Get in Touch</h3><p>This is placeholder text. Replace this with your own contact information.</p><p>For questions or feedback, please email us at: <a href="mailto:contact@talkloop.example.com">contact@talkloop.example.com</a></p>` }
+        };
+        function openModal(type) { ui.modalTitle.textContent = modalData[type].title; ui.modalBody.innerHTML = modalData[type].content; ui.modalOverlay.classList.remove('opacity-0', 'pointer-events-none'); ui.modalContent.classList.remove('scale-95', 'opacity-0'); }
+        function closeModal() { ui.modalOverlay.classList.add('opacity-0', 'pointer-events-none'); ui.modalContent.classList.add('scale-95', 'opacity-0'); }
+        document.getElementById('terms-link').addEventListener('click', (e) => { e.preventDefault(); openModal('terms'); });
+        document.getElementById('privacy-link').addEventListener('click', (e) => { e.preventDefault(); openModal('privacy'); });
+        document.getElementById('contact-link').addEventListener('click', (e) => { e.preventDefault(); openModal('contact'); });
+        ui.modalClose.addEventListener('click', closeModal);
+        ui.modalOverlay.addEventListener('click', (e) => { if (e.target === ui.modalOverlay) closeModal(); });
+
+        // --- Core App Logic ---
+        let timerInterval;
+        const startTimer = () => { let startTime = Date.now(); ui.callTimer.style.display='block'; clearInterval(timerInterval); timerInterval = setInterval(() => { const elapsed = Math.floor((Date.now() - startTime) / 1000); const mins = String(Math.floor(elapsed / 60)).padStart(2, '0'); const secs = String(elapsed % 60).padStart(2, '0'); ui.callTimer.textContent = `${mins}:${secs}`;}, 1000);};
+        const stopTimer = () => { clearInterval(timerInterval); ui.callTimer.style.display='none'; ui.callTimer.textContent = '00:00'; };
+        const setupAudioVisualizer = () => { if (!localStream || !localStream.getAudioTracks().length > 0) return; audioContext = new (window.AudioContext || window.webkitAudioContext)(); analyser = audioContext.createAnalyser(); const source = audioContext.createMediaStreamSource(localStream); source.connect(analyser); analyser.fftSize = 32; const bufferLength = analyser.frequencyBinCount; const dataArray = new Uint8Array(bufferLength); const draw = () => { requestAnimationFrame(draw); analyser.getByteFrequencyData(dataArray); let sum = dataArray.reduce((a, b) => a + b, 0); let average = sum / bufferLength || 0; let normalized = average / 128; document.documentElement.style.setProperty('--audio-level', normalized); }; draw(); };
+        const updateUI = (state, data = {}) => {
+            ui.muteButton.style.display = 'flex'; ui.speakerButton.style.display = 'flex';
+            ui.endButton.style.display = 'flex'; ui.nextButton.style.display = 'flex';
+            if (state === 'idle') { ui.nicknameScreen.style.display = 'block'; ui.callScreen.style.display = 'none'; stopTimer(); return; }
+            ui.nicknameScreen.style.display = 'none'; ui.callScreen.style.display = 'flex';
+            let statusMessage = '';
+            switch(state) {
+                case 'searching': statusMessage = "Searching..."; ui.partnerNickname.textContent = "Stranger"; stopTimer(); break;
+                case 'connecting': statusMessage = "Connecting..."; ui.partnerNickname.textContent = data.nickname || "Stranger"; break;
+                case 'connected': statusMessage = "Connected"; startTimer(); break;
+                case 'disconnected': statusMessage = "Partner disconnected."; stopTimer(); break;
+                case 'call-ended': statusMessage = "Call Ended"; ui.muteButton.style.display = 'none'; ui.speakerButton.style.display = 'none'; ui.endButton.style.display = 'none'; break;
+            }
+            ui.statusText.textContent = statusMessage;
+        };
+        const cleanupPeer = () => { if (peer) { peer.destroy(); peer = null; } };
+        const handleUnexpectedDisconnect = () => { cleanupPeer(); updateUI('disconnected'); setTimeout(() => { socket.emit("find-partner"); updateUI('searching'); }, 2000); };
+        const createPeer = (initiator) => { cleanupPeer(); peer = new SimplePeer({ initiator, stream: localStream, trickle: false }); peer.on("signal", data => socket.emit("signal", data)); peer.on("connect", () => updateUI('connected')); peer.on("stream", stream => { ui.remoteAudio.srcObject = stream }); peer.on("close", () => handleUnexpectedDisconnect()); peer.on("error", () => handleUnexpectedDisconnect()); };
+        ui.nicknameForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                setupAudioVisualizer();
+                const nickname = ui.nicknameInput.value.trim() || "Anonymous";
+                socket.emit("set-nickname", nickname);
+                socket.emit("find-partner");
+                updateUI('searching');
+            } catch (err) { alert("Microphone access is required."); }
+        });
+        ui.muteButton.addEventListener('click', () => { if (!localStream) return; isMuted = !isMuted; localStream.getAudioTracks()[0].enabled = !isMuted; ui.muteButton.classList.toggle('active', isMuted); });
+        ui.speakerButton.addEventListener('click', () => { ui.speakerButton.classList.toggle('active'); });
+        ui.nextButton.addEventListener('click', () => { if (peer) { socket.emit("next"); } cleanupPeer(); socket.emit("find-partner"); updateUI('searching'); });
+        ui.endButton.addEventListener('click', () => { if (peer) { socket.emit("next"); } cleanupPeer(); stopTimer(); updateUI('call-ended'); });
+        socket.on("peer-connected", ({ initiator, strangerNickname }) => { updateUI('connecting', { nickname: strangerNickname }); createPeer(initiator); });
+        socket.on("signal", data => { if (peer) peer.signal(data); });
+        socket.on("disconnect-peer", () => handleUnexpectedDisconnect());
+    </script>
 </body>
 </html>
