@@ -12,49 +12,51 @@ http.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
 
-// In-memory store
-const users = new Map();  // socket.id → { socket, nickname, partnerId }
-const queue = [];         // sockets waiting for partner
+// --- Data Store ---
+const users = new Map(); // socket.id → { socket, nickname, gender, lookingFor, partnerId }
+let waitingPool = []; // Array of socket.ids waiting for a partner
 
-// === Helpers ===
-function removeFromQueue(id) {
-  const index = queue.indexOf(id);
-  if (index !== -1) queue.splice(index, 1);
-}
+// --- Matchmaking Logic ---
+function findMatch(newUserSocketId) {
+    const userA = users.get(newUserSocketId);
+    if (!userA || userA.partnerId) return; // Exit if user is invalid or already in a call
 
-function tryMatch() {
-  while (queue.length >= 2) {
-    const id1 = queue.shift();
-    const id2 = queue.shift();
+    // Find a compatible partner from the waiting pool
+    const partnerIndex = waitingPool.findIndex(id => {
+        if (id === newUserSocketId) return false; // Can't match with self
+        const userB = users.get(id);
+        if (!userB || userB.partnerId) return false; // Partner is invalid or already in a call
 
-    const u1 = users.get(id1);
-    const u2 = users.get(id2);
+        // Check for a two-way match
+        const aWantsB = userA.lookingFor === 'anyone' || userA.lookingFor === userB.gender;
+        const bWantsA = userB.lookingFor === 'anyone' || userB.lookingFor === userA.gender;
 
-    if (!u1 || !u2 || u1.partnerId || u2.partnerId) {
-      if (u1 && !u1.partnerId) queue.push(id1);
-      if (u2 && !u2.partnerId) queue.push(id2);
-      continue;
+        return aWantsB && bWantsA;
+    });
+
+    if (partnerIndex !== -1) {
+        // --- We have a match! ---
+        const userBSocketId = waitingPool[partnerIndex];
+        const userB = users.get(userBSocketId);
+        
+        userA.partnerId = userB.socket.id;
+        userB.partnerId = userA.socket.id;
+
+        // Remove both users from the waiting pool
+        waitingPool.splice(partnerIndex, 1); // Remove partner
+        const newUserIndex = waitingPool.indexOf(newUserSocketId);
+        if (newUserIndex !== -1) waitingPool.splice(newUserIndex, 1); // Remove new user
+        
+        console.log(`✅ Matched: ${userA.nickname} (${userA.gender}) <-> ${userB.nickname} (${userB.gender})`);
+
+        // Notify clients to connect via WebRTC
+        userA.socket.emit("peer-connected", { initiator: true, strangerNickname: userB.nickname });
+        userB.socket.emit("peer-connected", { initiator: false, strangerNickname: userA.nickname });
     }
-
-    // Pair them
-    u1.partnerId = id2;
-    u2.partnerId = id1;
-
-    console.log(`🔗 Paired: ${id1} <--> ${id2}`);
-
-    u1.socket.emit("peer-connected", {
-      initiator: true,
-      strangerNickname: u2.nickname
-    });
-
-    u2.socket.emit("peer-connected", {
-      initiator: false,
-      strangerNickname: u1.nickname
-    });
-  }
 }
 
-// === Socket.IO Events ===
+
+// --- Socket.IO Events ---
 io.on("connection", socket => {
   console.log("🟢 Connected:", socket.id);
   users.set(socket.id, { socket, nickname: "Stranger", partnerId: null });
@@ -64,62 +66,53 @@ io.on("connection", socket => {
     if (user) user.nickname = nickname;
   });
 
-  socket.on("find-partner", () => {
+  socket.on("find-partner", (preferences) => {
     const user = users.get(socket.id);
     if (!user || user.partnerId) return;
-    removeFromQueue(socket.id);
-    queue.push(socket.id);
-    console.log(`🕵️ Added to queue: ${socket.id}`);
-    tryMatch();
-  });
 
+    user.gender = preferences.gender;
+    user.lookingFor = preferences.lookingFor;
+    
+    if (!waitingPool.includes(socket.id)) {
+        waitingPool.push(socket.id);
+    }
+    
+    console.log(`🔎 ${user.nickname} (${user.gender}) is looking for ${user.lookingFor}. Pool size: ${waitingPool.length}`);
+    findMatch(socket.id);
+  });
+  
   socket.on("signal", data => {
     const user = users.get(socket.id);
     if (user?.partnerId) {
       const partner = users.get(user.partnerId);
-      if (partner) {
-        partner.socket.emit("signal", data);
+      if (partner) partner.socket.emit("signal", data);
+    }
+  });
+
+  const handleDisconnectOrNext = () => {
+      const user = users.get(socket.id);
+      if (!user) return;
+
+      // Remove user from waiting pool
+      const poolIndex = waitingPool.indexOf(socket.id);
+      if (poolIndex !== -1) waitingPool.splice(poolIndex, 1);
+
+      const partnerId = user.partnerId;
+      if (partnerId) {
+          const partner = users.get(partnerId);
+          if (partner) {
+              partner.partnerId = null;
+              partner.socket.emit("disconnect-peer");
+          }
       }
-    }
-  });
-
-  socket.on("next", () => {
-    const user = users.get(socket.id);
-    if (!user) return;
-
-    const partnerId = user.partnerId;
-    if (partnerId && users.has(partnerId)) {
-      const partner = users.get(partnerId);
-      partner.partnerId = null;
-      partner.socket.emit("disconnect-peer");
-      removeFromQueue(partnerId);
-      queue.push(partnerId);
-      console.log(`🔁 ${socket.id} skipped partner ${partnerId}`);
-    }
-
-    user.partnerId = null;
-    socket.emit("disconnect-peer");
-    removeFromQueue(socket.id);
-    queue.push(socket.id);
-    tryMatch();
-  });
+      user.partnerId = null;
+  };
+  
+  socket.on("next", handleDisconnectOrNext);
 
   socket.on("disconnect", () => {
     console.log("🔴 Disconnected:", socket.id);
-    const user = users.get(socket.id);
-    const partnerId = user?.partnerId;
-
-    if (partnerId && users.has(partnerId)) {
-      const partner = users.get(partnerId);
-      partner.partnerId = null;
-      partner.socket.emit("disconnect-peer");
-      removeFromQueue(partnerId);
-      queue.push(partnerId);
-      console.log(`⚠️ Partner ${partnerId} re-queued because ${socket.id} disconnected`);
-    }
-
-    removeFromQueue(socket.id);
+    handleDisconnectOrNext();
     users.delete(socket.id);
-    tryMatch();
   });
 });
