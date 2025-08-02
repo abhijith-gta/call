@@ -2,8 +2,15 @@ const express = require("express");
 const app = express();
 const http = require("http").createServer(app);
 const { Server } = require("socket.io");
-const io = new Server(http);
 const path = require("path");
+
+// ✨ FIX: Add CORS configuration for your hosting service (like Render)
+const io = new Server(http, {
+  cors: {
+    origin: "https://your-app-name.onrender.com", // 👈 IMPORTANT: Change this to your actual Render URL
+    methods: ["GET", "POST"]
+  }
+});
 
 const PORT = process.env.PORT || 5000;
 app.use(express.static(path.join(__dirname, "public")));
