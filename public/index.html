@@ -22,7 +22,6 @@
             --border: rgba(255, 255, 255, 0.1);
             --audio-level: 0;
         }
-
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg);
@@ -35,14 +34,7 @@
             overflow: hidden;
             padding: 1rem;
         }
-
-        .satin-card {
-            background-color: var(--surface);
-            border: 1px solid var(--border);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-        }
-        
+        .satin-card { background-color: var(--surface); border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); }
         #nickname-container, #call-container {
              width: 100%;
              max-width: clamp(380px, 40vw, 520px); 
@@ -50,15 +42,11 @@
              max-height: 880px;
              border-radius: 40px; 
         }
-        
-        /* Removed the animated border CSS */
-
         .animate-in { animation: fade-in-up 0.8s cubic-bezier(0.25, 1, 0.5, 1) both; }
         @keyframes fade-in-up {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         .primary-button { background-color: var(--accent); box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3); transition: all 0.2s ease-out; }
         .primary-button:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4); }
         .phone-button { background-color: rgba(255, 255, 255, 0.05); transition: all 0.2s ease-out; }
@@ -66,17 +54,20 @@
         .phone-button.active { background-color: var(--accent); box-shadow: 0 0 15px rgba(99, 102, 241, 0.5); }
         .end-call-button { background-color: var(--danger); }
         .end-call-button:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
-
-        .visualizer-ring {
-            border: 1px solid var(--accent);
-            transition: transform 0.15s cubic-bezier(0.5, 0, 0.5, 1), opacity 0.2s ease;
-            transform: scale(calc(0.5 + var(--audio-level) * 0.7));
-            opacity: calc(0.2 + var(--audio-level) * 0.8);
-        }
+        .visualizer-ring { border: 1px solid var(--accent); transition: transform 0.15s cubic-bezier(0.5, 0, 0.5, 1), opacity 0.2s ease; transform: scale(calc(0.5 + var(--audio-level) * 0.7)); opacity: calc(0.2 + var(--audio-level) * 0.8); }
         
-        #modal-overlay { background-color: rgba(0,0,0,0.7); backdrop-filter: blur(5px); transition: opacity 0.3s ease-in-out; }
-        #modal-content { transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out; }
+        #modal-overlay, #age-gate-overlay {
+            background-color: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            transition: opacity 0.3s ease-in-out;
+        }
+        #modal-content, #age-gate-content {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
         #modal-body a { color: var(--accent); text-decoration: underline; }
+        
+        .gender-btn { background-color: var(--surface); border: 1px solid var(--border); transition: all 0.2s ease; }
+        .gender-btn.active { background-color: var(--accent); border-color: var(--accent); color: var(--text-primary); }
 
         @media (max-width: 640px) {
             body { padding: 0; }
@@ -90,25 +81,31 @@
 </head>
 <body>
 
-    <div id="nickname-screen" class="w-full">
-        <div id="nickname-container" class="satin-card p-8 rounded-2xl animate-in mx-auto flex flex-col justify-center">
-            <div class="flex-grow flex flex-col justify-center">
-                <h1 class="text-5xl font-bold mb-2 animate-in" style="animation-delay: 0.1s;">TalkLoop</h1>
-                <p class="text-[var(--text-secondary)] mb-8 animate-in" style="animation-delay: 0.2s;">Talk to a stranger.</p>
-                <form id="nickname-form" class="space-y-4 animate-in" style="animation-delay: 0.3s;">
-                    <input id="nickname-input" type="text" placeholder="Enter Your Nickname" class="w-full text-center bg-transparent border-2 border-[var(--border)] p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)] transition">
-                    <button id="start-button" type="submit" class="primary-button w-full p-3 text-lg font-semibold rounded-lg text-white">Start</button>
-                </form>
-            </div>
-            <footer class="text-center py-4 mt-6 flex-shrink-0">
-                <div class="flex justify-center space-x-4 text-sm text-[var(--text-secondary)]">
-                    <a href="#" id="terms-link" class="hover:text-white transition">Terms</a>
-                    <span>&bull;</span>
-                    <a href="#" id="privacy-link" class="hover:text-white transition">Privacy</a>
-                    <span>&bull;</span>
-                    <a href="#" id="contact-link" class="hover:text-white transition">Contact Us</a>
+    <div id="main-content" class="hidden w-full">
+        <div id="nickname-screen" class="w-full">
+            <div id="nickname-container" class="satin-card p-8 rounded-2xl animate-in mx-auto flex flex-col justify-center">
+                <div class="flex-grow flex flex-col justify-center">
+                    <div class="text-center">
+                        <h1 class="text-5xl font-bold mb-2">TalkLoop</h1>
+                        <p class="text-[var(--text-secondary)] mb-6">Talk to a stranger.</p>
+                        <form id="nickname-form" class="space-y-6">
+                            <input id="nickname-input" type="text" placeholder="Enter Your Nickname" class="w-full text-center bg-transparent border-2 border-[var(--border)] p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)] transition">
+                            <div class="space-y-3 text-left"><label class="text-sm text-[var(--text-secondary)]">You are:</label><div id="my-gender-selector" class="grid grid-cols-2 gap-2"><button type="button" class="gender-btn p-2 rounded-lg" data-gender="male">Male</button><button type="button" class="gender-btn p-2 rounded-lg" data-gender="female">Female</button></div></div>
+                            <div class="space-y-3 text-left"><label class="text-sm text-[var(--text-secondary)]">Looking for:</label><div id="looking-for-selector" class="grid grid-cols-3 gap-2"><button type="button" class="gender-btn p-2 rounded-lg" data-gender="male">Male</button><button type="button" class="gender-btn p-2 rounded-lg" data-gender="female">Female</button><button type="button" class="gender-btn p-2 rounded-lg active" data-gender="anyone">Anyone</button></div></div>
+                            <button id="start-button" type="submit" class="primary-button w-full p-3 text-lg font-semibold rounded-lg text-white !mt-8">Start</button>
+                        </form>
+                    </div>
                 </div>
-            </footer>
+                <footer class="text-center py-4 mt-6 flex-shrink-0">
+                    <div class="flex justify-center space-x-4 text-sm text-[var(--text-secondary)]">
+                        <a href="#" id="terms-link" class="hover:text-white transition">Terms</a>
+                        <span>&bull;</span>
+                        <a href="#" id="privacy-link" class="hover:text-white transition">Privacy</a>
+                        <span>&bull;</span>
+                        <a href="#" id="contact-link" class="hover:text-white transition">Contact Us</a>
+                    </div>
+                </footer>
+            </div>
         </div>
     </div>
 
@@ -119,11 +116,22 @@
             <div class="w-full flex flex-col items-center space-y-6 flex-shrink-0 animate-in" style="animation-delay: 0.4s;"><div class="grid grid-cols-2 gap-6"><div class="flex flex-col items-center space-y-2"><button id="mute-button" class="phone-button w-20 h-20 rounded-full flex items-center justify-center"></button><span class="text-sm text-[var(--text-secondary)]">mute</span></div><div class="flex flex-col items-center space-y-2"><button id="speaker-button" class="phone-button w-20 h-20 rounded-full flex items-center justify-center"></button><span class="text-sm text-[var(--text-secondary)]">speaker</span></div><div class="flex flex-col items-center space-y-2"><button id="next-button" class="phone-button w-20 h-20 rounded-full flex items-center justify-center"></button><span class="text-sm text-[var(--text-secondary)]">next</span></div><div class="flex flex-col items-center space-y-2"><button id="end-button" class="end-call-button w-20 h-20 rounded-full flex items-center justify-center"></button><span class="text-sm text-[var(--text-secondary)]">end</span></div></div></div>
         </div>
     </div>
-
+    
     <div id="modal-overlay" class="fixed inset-0 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
         <div id="modal-content" class="satin-card w-full max-w-2xl max-h-[80vh] p-8 rounded-2xl transform scale-95 opacity-0 flex flex-col">
             <div class="flex justify-between items-center mb-4 flex-shrink-0"><h2 id="modal-title" class="text-2xl font-bold"></h2><button id="modal-close" class="text-gray-500 hover:text-white text-3xl">&times;</button></div>
             <div id="modal-body" class="overflow-y-auto pr-4 text-[var(--text-secondary)]"></div>
+        </div>
+    </div>
+
+    <div id="age-gate-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div id="age-gate-content" class="satin-card w-full max-w-sm p-8 rounded-2xl text-center">
+            <h2 class="text-2xl font-bold mb-4">Age Verification</h2>
+            <p class="text-[var(--text-secondary)] mb-6">You must be 18 years or older to use this service.</p>
+            <div class="flex gap-4">
+                <button id="age-confirm-no" class="flex-1 p-3 rounded-lg border border-[var(--border)] hover:bg-[var(--surface)] transition">No, Exit</button>
+                <button id="age-confirm-yes" class="primary-button flex-1 p-3 rounded-lg text-white">Yes, I am 18+</button>
+            </div>
         </div>
     </div>
     
@@ -132,24 +140,67 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        let peer = null, localStream = null, isMuted = false, audioContext = null, analyser = null;
-        
+        let peer = null, localStream = null, isMuted = false;
+
         const ui = {
-            nicknameScreen: document.getElementById('nickname-screen'), nicknameForm: document.getElementById('nickname-form'),
-            nicknameInput: document.getElementById('nickname-input'), callScreen: document.getElementById('call-screen'),
-            callContainer: document.getElementById('call-container'),
-            partnerNickname: document.getElementById('partner-nickname'), statusText: document.getElementById('status-text'),
-            callTimer: document.getElementById('call-timer'), muteButton: document.getElementById('mute-button'),
-            speakerButton: document.getElementById('speaker-button'), nextButton: document.getElementById('next-button'),
-            endButton: document.getElementById('end-button'), remoteAudio: document.getElementById('remoteAudio'),
-            modalOverlay: document.getElementById('modal-overlay'), modalContent: document.getElementById('modal-content'),
-            modalTitle: document.getElementById('modal-title'), modalBody: document.getElementById('modal-body'),
+            mainContent: document.getElementById('main-content'),
+            ageGateOverlay: document.getElementById('age-gate-overlay'),
+            ageConfirmYes: document.getElementById('age-confirm-yes'),
+            ageConfirmNo: document.getElementById('age-confirm-no'),
+            nicknameScreen: document.getElementById('nickname-screen'),
+            nicknameForm: document.getElementById('nickname-form'),
+            nicknameInput: document.getElementById('nickname-input'),
+            myGenderSelector: document.getElementById('my-gender-selector'),
+            lookingForSelector: document.getElementById('looking-for-selector'),
+            callScreen: document.getElementById('call-screen'),
+            partnerNickname: document.getElementById('partner-nickname'),
+            statusText: document.getElementById('status-text'),
+            callTimer: document.getElementById('call-timer'),
+            muteButton: document.getElementById('mute-button'),
+            speakerButton: document.getElementById('speaker-button'),
+            nextButton: document.getElementById('next-button'),
+            endButton: document.getElementById('end-button'),
+            remoteAudio: document.getElementById('remoteAudio'),
+            modalOverlay: document.getElementById('modal-overlay'),
+            modalContent: document.getElementById('modal-content'),
+            modalTitle: document.getElementById('modal-title'),
+            modalBody: document.getElementById('modal-body'),
             modalClose: document.getElementById('modal-close')
         };
-        const addIcons = () => { ui.muteButton.innerHTML=`<svg class="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>`;ui.speakerButton.innerHTML=`<svg class="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>`;ui.nextButton.innerHTML=`<svg class="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>`;ui.endButton.innerHTML=`<svg class="w-10 h-10 transform rotate-[135deg]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10.707 3.293a1 1 0 010 1.414L6.414 9H16a1 1 0 110 2H6.414l4.293 4.293a1 1 0 01-1.414 1.414l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>`;};
+
+        const addIcons = () => { /* ... same icon logic ... */ ui.muteButton.innerHTML=`<svg class="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>`;ui.speakerButton.innerHTML=`<svg class="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>`;ui.nextButton.innerHTML=`<svg class="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>`;ui.endButton.innerHTML=`<svg class="w-10 h-10 transform rotate-[135deg]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10.707 3.293a1 1 0 010 1.414L6.414 9H16a1 1 0 110 2H6.414l4.293 4.293a1 1 0 01-1.414 1.414l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>`;};
         addIcons();
         
-        const modalData = { terms: { title: 'Terms and Conditions', content: `<h3>Welcome to TalkLoop!</h3><p>This is placeholder text. Replace this with your own Terms and Conditions.</p><p>By using our service, you agree to not engage in any abusive, hateful, or illegal behavior. Users must be of legal age in their jurisdiction. We reserve the right to disconnect users at our discretion.</p>` }, privacy: { title: 'Privacy Policy', content: `<h3>Your Privacy at TalkLoop</h3><p>This is placeholder text. Replace this with your own Privacy Policy.</p><p>We do not store your conversations. Voice chat is transmitted peer-to-peer. We may collect anonymous analytical data to improve the service. We do not sell your data.</p>` }, contact: { title: 'Contact Us', content: `<h3>Get in Touch</h3><p>This is placeholder text. Replace this with your own contact information.</p><p>For questions or feedback, please email us at: <a href="mailto:contact@talkloop.example.com">contact@talkloop.example.com</a></p>` } };
+        let myGender, lookingFor;
+        const handleSelection = (selector, callback) => {
+            const buttons = selector.querySelectorAll('.gender-btn');
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    buttons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    callback(button.dataset.gender);
+                });
+            });
+        };
+        handleSelection(ui.myGenderSelector, selected => myGender = selected);
+        handleSelection(ui.lookingForSelector, selected => lookingFor = selected);
+        lookingFor = 'anyone';
+
+        // --- Age Gate Logic ---
+        ui.ageConfirmYes.addEventListener('click', () => {
+            ui.ageGateOverlay.style.display = 'none';
+            ui.mainContent.classList.remove('hidden');
+        });
+        ui.ageConfirmNo.addEventListener('click', () => {
+            window.location.href = 'https://youtu.be/ao39zp8ZdPQ?si=YYeVfzCO3i7KYto2';
+        });
+
+        // --- Modal Logic ---
+        const modalData = {
+            terms: { title: 'Terms and Conditions', content: `<h3>Welcome to TalkLoop!</h3><p>This is placeholder text. Replace this with your own Terms and Conditions.</p><p>By using our service, you agree to not engage in any abusive, hateful, or illegal behavior. Users must be of legal age in their jurisdiction. We reserve the right to disconnect users at our discretion.</p>` },
+            privacy: { title: 'Privacy Policy', content: `<h3>Your Privacy at TalkLoop</h3><p>This is placeholder text. Replace this with your own Privacy Policy.</p><p>We do not store your conversations. Voice chat is transmitted peer-to-peer. We may collect anonymous analytical data to improve the service. We do not sell your data.</p>` },
+            contact: { title: 'Contact Us', content: `<h3>Get in Touch</h3><p>This is placeholder text. Replace this with your own contact information.</p><p>For questions or feedback, please email us at: <a href="mailto:contact@talkloop.example.com">contact@talkloop.example.com</a></p>` }
+        };
         function openModal(type) { ui.modalTitle.textContent = modalData[type].title; ui.modalBody.innerHTML = modalData[type].content; ui.modalOverlay.classList.remove('opacity-0', 'pointer-events-none'); ui.modalContent.classList.remove('scale-95', 'opacity-0'); }
         function closeModal() { ui.modalOverlay.classList.add('opacity-0', 'pointer-events-none'); ui.modalContent.classList.add('scale-95', 'opacity-0'); }
         document.getElementById('terms-link').addEventListener('click', (e) => { e.preventDefault(); openModal('terms'); });
@@ -158,20 +209,16 @@
         ui.modalClose.addEventListener('click', closeModal);
         ui.modalOverlay.addEventListener('click', (e) => { if (e.target === ui.modalOverlay) closeModal(); });
 
-        let timerInterval;
+        // --- Core App Logic ---
+        let timerInterval, audioContext, analyser;
         const startTimer = () => { let startTime = Date.now(); ui.callTimer.style.display='block'; clearInterval(timerInterval); timerInterval = setInterval(() => { const elapsed = Math.floor((Date.now() - startTime) / 1000); const mins = String(Math.floor(elapsed / 60)).padStart(2, '0'); const secs = String(elapsed % 60).padStart(2, '0'); ui.callTimer.textContent = `${mins}:${secs}`;}, 1000);};
         const stopTimer = () => { clearInterval(timerInterval); ui.callTimer.style.display='none'; ui.callTimer.textContent = '00:00'; };
-        const setupAudioVisualizer = () => { if (!localStream || !localStream.getAudioTracks().length > 0) return; audioContext = new (window.AudioContext || window.webkitAudioContext)(); analyser = audioContext.createAnalyser(); const source = audioContext.createMediaStreamSource(localStream); source.connect(analyser); analyser.fftSize = 32; const bufferLength = analyser.frequencyBinCount; const dataArray = new Uint8Array(bufferLength); const draw = () => { requestAnimationFrame(draw); analyser.getByteFrequencyData(dataArray); let sum = dataArray.reduce((a, b) => a + b, 0); let average = sum / bufferLength || 0; let normalized = average / 128; document.documentElement.style.setProperty('--audio-level', normalized); }; draw(); };
-        
+        const setupAudioVisualizer = () => { if (!localStream) return; audioContext = new (window.AudioContext || window.webkitAudioContext)(); analyser = audioContext.createAnalyser(); const source = audioContext.createMediaStreamSource(localStream); source.connect(analyser); analyser.fftSize = 32; const bufferLength = analyser.frequencyBinCount; const dataArray = new Uint8Array(bufferLength); const draw = () => { requestAnimationFrame(draw); analyser.getByteFrequencyData(dataArray); let sum = dataArray.reduce((a, b) => a + b, 0); let average = sum / bufferLength || 0; let normalized = average / 128; document.documentElement.style.setProperty('--audio-level', normalized); }; draw(); };
         const updateUI = (state, data = {}) => {
             ui.muteButton.style.display = 'flex'; ui.speakerButton.style.display = 'flex';
             ui.endButton.style.display = 'flex'; ui.nextButton.style.display = 'flex';
-            
-            // Removed the '.is-active' class toggle
-
             if (state === 'idle') { ui.nicknameScreen.style.display = 'block'; ui.callScreen.style.display = 'none'; stopTimer(); return; }
             ui.nicknameScreen.style.display = 'none'; ui.callScreen.style.display = 'flex';
-            
             let statusMessage = '';
             switch(state) {
                 case 'searching': statusMessage = "Searching..."; ui.partnerNickname.textContent = "Stranger"; stopTimer(); break;
@@ -183,23 +230,30 @@
             ui.statusText.textContent = statusMessage;
         };
         const cleanupPeer = () => { if (peer) { peer.destroy(); peer = null; } };
-        const handleUnexpectedDisconnect = () => { cleanupPeer(); updateUI('disconnected'); setTimeout(() => { socket.emit("find-partner"); updateUI('searching'); }, 2000); };
-        const createPeer = (initiator) => { cleanupPeer(); peer = new SimplePeer({ initiator, stream: localStream, trickle: false }); peer.on("signal", data => socket.emit("signal", data)); peer.on("connect", () => updateUI('connected')); peer.on("stream", stream => { ui.remoteAudio.srcObject = stream }); peer.on("close", () => handleUnexpectedDisconnect()); peer.on("error", () => handleUnexpectedDisconnect()); };
+        const handleUnexpectedDisconnect = () => { cleanupPeer(); updateUI('disconnected'); setTimeout(() => { socket.emit("find-partner", { gender: myGender, lookingFor }); updateUI('searching'); }, 2000); };
+        const createPeer = (initiator) => { cleanupPeer(); peer = new SimplePeer({ initiator, stream: localStream }); peer.on("signal", data => socket.emit("signal", data)); peer.on("connect", () => updateUI('connected')); peer.on("stream", stream => { ui.remoteAudio.srcObject = stream }); peer.on("close", () => handleUnexpectedDisconnect()); peer.on("error", () => handleUnexpectedDisconnect()); };
+        
         ui.nicknameForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!myGender) {
+                alert('Please select your gender.');
+                return;
+            }
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 setupAudioVisualizer();
                 const nickname = ui.nicknameInput.value.trim() || "Anonymous";
                 socket.emit("set-nickname", nickname);
-                socket.emit("find-partner");
+                socket.emit("find-partner", { gender: myGender, lookingFor });
                 updateUI('searching');
             } catch (err) { alert("Microphone access is required."); }
         });
+
         ui.muteButton.addEventListener('click', () => { if (!localStream) return; isMuted = !isMuted; localStream.getAudioTracks()[0].enabled = !isMuted; ui.muteButton.classList.toggle('active', isMuted); });
         ui.speakerButton.addEventListener('click', () => { ui.speakerButton.classList.toggle('active'); });
-        ui.nextButton.addEventListener('click', () => { if (peer) { socket.emit("next"); } cleanupPeer(); socket.emit("find-partner"); updateUI('searching'); });
+        ui.nextButton.addEventListener('click', () => { if (peer) { socket.emit("next"); } cleanupPeer(); socket.emit("find-partner", { gender: myGender, lookingFor }); updateUI('searching'); });
         ui.endButton.addEventListener('click', () => { if (peer) { socket.emit("next"); } cleanupPeer(); stopTimer(); updateUI('call-ended'); });
+        
         socket.on("peer-connected", ({ initiator, strangerNickname }) => { updateUI('connecting', { nickname: strangerNickname }); createPeer(initiator); });
         socket.on("signal", data => { if (peer) peer.signal(data); });
         socket.on("disconnect-peer", () => handleUnexpectedDisconnect());
