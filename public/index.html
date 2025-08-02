@@ -56,6 +56,7 @@
         .end-call-button:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
         .visualizer-ring { border: 1px solid var(--accent); transition: transform 0.15s cubic-bezier(0.5, 0, 0.5, 1), opacity 0.2s ease; transform: scale(calc(0.5 + var(--audio-level) * 0.7)); opacity: calc(0.2 + var(--audio-level) * 0.8); }
         
+        /* Modal & Age Gate Styles */
         #modal-overlay, #age-gate-overlay {
             background-color: rgba(0,0,0,0.7);
             backdrop-filter: blur(5px);
@@ -99,9 +100,9 @@
                 <footer class="text-center py-4 mt-6 flex-shrink-0">
                     <div class="flex justify-center space-x-4 text-sm text-[var(--text-secondary)]">
                         <a href="#" id="terms-link" class="hover:text-white transition">Terms</a>
-                        <span>&bull;</span>
+                        <span>•</span>
                         <a href="#" id="privacy-link" class="hover:text-white transition">Privacy</a>
-                        <span>&bull;</span>
+                        <span>•</span>
                         <a href="#" id="contact-link" class="hover:text-white transition">Contact Us</a>
                     </div>
                 </footer>
@@ -119,7 +120,7 @@
     
     <div id="modal-overlay" class="fixed inset-0 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
         <div id="modal-content" class="satin-card w-full max-w-2xl max-h-[80vh] p-8 rounded-2xl transform scale-95 opacity-0 flex flex-col">
-            <div class="flex justify-between items-center mb-4 flex-shrink-0"><h2 id="modal-title" class="text-2xl font-bold"></h2><button id="modal-close" class="text-gray-500 hover:text-white text-3xl">&times;</button></div>
+            <div class="flex justify-between items-center mb-4 flex-shrink-0"><h2 id="modal-title" class="text-2xl font-bold"></h2><button id="modal-close" class="text-gray-500 hover:text-white text-3xl">×</button></div>
             <div id="modal-body" class="overflow-y-auto pr-4 text-[var(--text-secondary)]"></div>
         </div>
     </div>
