@@ -22,7 +22,7 @@ function findMatch(newUserSocketId) {
     if (!userA || userA.partnerId) return; // Exit if user is invalid or already in a call
 
     // Find a compatible partner from the waiting pool
-    const partnerIndex = waitingPool.findIndex(id => {
+    const partnerId = waitingPool.find(id => {
         if (id === newUserSocketId) return false; // Can't match with self
         const userB = users.get(id);
         if (!userB || userB.partnerId) return false; // Partner is invalid or already in a call
@@ -34,22 +34,18 @@ function findMatch(newUserSocketId) {
         return aWantsB && bWantsA;
     });
 
-    if (partnerIndex !== -1) {
+    if (partnerId) {
         // --- We have a match! ---
-        const userBSocketId = waitingPool[partnerIndex];
-        const userB = users.get(userBSocketId);
+        const userB = users.get(partnerId);
         
         userA.partnerId = userB.socket.id;
         userB.partnerId = userA.socket.id;
 
-        // Remove both users from the waiting pool
-        waitingPool.splice(partnerIndex, 1); // Remove partner
-        const newUserIndex = waitingPool.indexOf(newUserSocketId);
-        if (newUserIndex !== -1) waitingPool.splice(newUserIndex, 1); // Remove new user
+        // Correctly remove both users from the waiting pool
+        waitingPool = waitingPool.filter(id => id !== newUserSocketId && id !== partnerId);
         
         console.log(`✅ Matched: ${userA.nickname} (${userA.gender}) <-> ${userB.nickname} (${userB.gender})`);
 
-        // Notify clients to connect via WebRTC
         userA.socket.emit("peer-connected", { initiator: true, strangerNickname: userB.nickname });
         userB.socket.emit("peer-connected", { initiator: false, strangerNickname: userA.nickname });
     }
@@ -66,6 +62,7 @@ io.on("connection", socket => {
     if (user) user.nickname = nickname;
   });
 
+  // Updated to receive gender preferences
   socket.on("find-partner", (preferences) => {
     const user = users.get(socket.id);
     if (!user || user.partnerId) return;
@@ -93,9 +90,8 @@ io.on("connection", socket => {
       const user = users.get(socket.id);
       if (!user) return;
 
-      // Remove user from waiting pool
       const poolIndex = waitingPool.indexOf(socket.id);
-      if (poolIndex !== -1) waitingPool.splice(poolIndex, 1);
+      if (poolIndex > -1) waitingPool.splice(poolIndex, 1);
 
       const partnerId = user.partnerId;
       if (partnerId) {
