@@ -4,10 +4,9 @@ const http = require("http").createServer(app);
 const { Server } = require("socket.io");
 const path = require("path");
 
-// ✨ FIX: Add CORS configuration for your hosting service (like Render)
 const io = new Server(http, {
   cors: {
-    origin: "https://your-app-name.onrender.com", // 👈 IMPORTANT: Change this to your actual Render URL
+    origin: "*", // It's recommended to change this to your specific URL for production
     methods: ["GET", "POST"]
   }
 });
@@ -19,22 +18,23 @@ http.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
 
-// --- Data Store ---
-const users = new Map(); // socket.id → { socket, nickname, gender, lookingFor, partnerId }
-let waitingPool = []; // Array of socket.ids waiting for a partner
+const users = new Map();
+// ✨ NEW: Two separate waiting pools for chat and voice
+let textWaitingPool = [];
+let voiceWaitingPool = [];
 
-// --- Matchmaking Logic ---
 function findMatch(newUserSocketId) {
     const userA = users.get(newUserSocketId);
-    if (!userA || userA.partnerId) return; // Exit if user is invalid or already in a call
+    if (!userA || userA.partnerId) return;
 
-    // Find a compatible partner from the waiting pool
-    const partnerId = waitingPool.find(id => {
-        if (id === newUserSocketId) return false; // Can't match with self
+    // Determine which pool to search in based on the user's selected type
+    const pool = userA.type === 'text' ? textWaitingPool : voiceWaitingPool;
+
+    const partnerId = pool.find(id => {
+        if (id === newUserSocketId) return false;
         const userB = users.get(id);
-        if (!userB || userB.partnerId) return false; // Partner is invalid or already in a call
+        if (!userB || userB.partnerId) return false;
 
-        // Check for a two-way match
         const aWantsB = userA.lookingFor === 'anyone' || userA.lookingFor === userB.gender;
         const bWantsA = userB.lookingFor === 'anyone' || userB.lookingFor === userA.gender;
 
@@ -42,24 +42,26 @@ function findMatch(newUserSocketId) {
     });
 
     if (partnerId) {
-        // --- We have a match! ---
         const userB = users.get(partnerId);
         
         userA.partnerId = userB.socket.id;
         userB.partnerId = userA.socket.id;
 
-        // Correctly remove both users from the waiting pool
-        waitingPool = waitingPool.filter(id => id !== newUserSocketId && id !== partnerId);
+        // Remove both users from the correct waiting pool
+        if (userA.type === 'text') {
+            textWaitingPool = textWaitingPool.filter(id => id !== newUserSocketId && id !== partnerId);
+        } else {
+            voiceWaitingPool = voiceWaitingPool.filter(id => id !== newUserSocketId && id !== partnerId);
+        }
         
-        console.log(`✅ Matched: ${userA.nickname} (${userA.gender}) <-> ${userB.nickname} (${userB.gender})`);
+        console.log(`✅ Matched (${userA.type}): ${userA.nickname} <-> ${userB.nickname}`);
 
-        userA.socket.emit("peer-connected", { initiator: true, strangerNickname: userB.nickname });
-        userB.socket.emit("peer-connected", { initiator: false, strangerNickname: userA.nickname });
+        // Let both clients know a partner was found and what type of connection it is
+        userA.socket.emit("partner-found", { initiator: true, partnerNickname: userB.nickname, type: userA.type });
+        userB.socket.emit("partner-found", { initiator: false, partnerNickname: userA.nickname, type: userB.type });
     }
 }
 
-
-// --- Socket.IO Events ---
 io.on("connection", socket => {
   console.log("🟢 Connected:", socket.id);
   users.set(socket.id, { socket, nickname: "Stranger", partnerId: null });
@@ -69,22 +71,26 @@ io.on("connection", socket => {
     if (user) user.nickname = nickname;
   });
 
-  // Updated to receive gender preferences
   socket.on("find-partner", (preferences) => {
     const user = users.get(socket.id);
     if (!user || user.partnerId) return;
 
+    // Store user's preferences and the type of connection they want
     user.gender = preferences.gender;
     user.lookingFor = preferences.lookingFor;
-    
-    if (!waitingPool.includes(socket.id)) {
-        waitingPool.push(socket.id);
+    user.type = preferences.type; // 'text' or 'voice'
+
+    // Add user to the correct waiting pool
+    const pool = user.type === 'text' ? textWaitingPool : voiceWaitingPool;
+    if (!pool.includes(socket.id)) {
+        pool.push(socket.id);
     }
     
-    console.log(`🔎 ${user.nickname} (${user.gender}) is looking for ${user.lookingFor}. Pool size: ${waitingPool.length}`);
+    console.log(`🔎 ${user.nickname} is looking for a ${user.type} partner. Pools: Text[${textWaitingPool.length}], Voice[${voiceWaitingPool.length}]`);
     findMatch(socket.id);
   });
   
+  // For Voice Chat Signaling
   socket.on("signal", data => {
     const user = users.get(socket.id);
     if (user?.partnerId) {
@@ -93,19 +99,29 @@ io.on("connection", socket => {
     }
   });
 
+  // ✨ NEW: For Text Chat Messages
+  socket.on("send-message", ({ message }) => {
+    const user = users.get(socket.id);
+    if (user?.partnerId) {
+      const partner = users.get(user.partnerId);
+      if (partner) partner.socket.emit("receive-message", { message });
+    }
+  });
+
   const handleDisconnectOrNext = () => {
       const user = users.get(socket.id);
       if (!user) return;
 
-      const poolIndex = waitingPool.indexOf(socket.id);
-      if (poolIndex > -1) waitingPool.splice(poolIndex, 1);
+      // Remove user from both pools just in case
+      textWaitingPool = textWaitingPool.filter(id => id !== socket.id);
+      voiceWaitingPool = voiceWaitingPool.filter(id => id !== socket.id);
 
       const partnerId = user.partnerId;
       if (partnerId) {
           const partner = users.get(partnerId);
           if (partner) {
               partner.partnerId = null;
-              partner.socket.emit("disconnect-peer");
+              partner.socket.emit("partner-disconnected");
           }
       }
       user.partnerId = null;
