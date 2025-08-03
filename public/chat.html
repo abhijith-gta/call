@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TalkLoop - Text Chat</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --bg: #111111; --surface: #1e1e1e; --text-primary: #f5f5f5; --text-secondary: #a3a3a3; --accent: #6366f1; --danger: #ef4444; --border: rgba(255, 255, 255, 0.1); }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text-primary); }
+        .satin-card { background-color: var(--surface); border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); }
+        .main-container { width: 100%; max-width: clamp(380px, 40vw, 480px); height: 90vh; max-height: 850px; border-radius: 40px; }
+        .gender-btn { background-color: #333; border: 1px solid var(--border); transition: all 0.2s ease; }
+        .gender-btn.active { background-color: var(--accent); border-color: var(--accent); color: var(--text-primary); }
+        .chat-bubble { max-width: 80%; }
+        #messages-area { scrollbar-width: thin; scrollbar-color: var(--accent) transparent; }
+        @media (max-width: 640px) {
+            body { padding: 0; }
+            .main-container {
+                max-width: none; width: 100%; height: 100dvh; border-radius: 0; border: none;
+                background-color: #000;
+            }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+    <div id="nickname-screen-chat" class="w-full">
+        <div class="main-container satin-card p-8 mx-auto flex flex-col justify-center">
+            <div class="text-center">
+                <h1 class="text-5xl font-bold mb-2">Text Chat</h1>
+                <p class="text-[var(--text-secondary)] mb-6">Chat with a stranger.</p>
+                <form id="nickname-form-chat" class="space-y-6">
+                    <input id="nickname-input-chat" type="text" placeholder="Enter Your Nickname" class="w-full text-center bg-transparent border-2 border-[var(--border)] p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)] transition">
+                    <div class="space-y-3 text-left"><label class="text-sm text-[var(--text-secondary)]">You are:</label><div id="my-gender-selector-chat" class="grid grid-cols-2 gap-2"><button type="button" class="gender-btn p-2 rounded-lg" data-gender="male">Male</button><button type="button" class="gender-btn p-2 rounded-lg" data-gender="female">Female</button></div></div>
+                    <div class="space-y-3 text-left"><label class="text-sm text-[var(--text-secondary)]">Looking for:</label><div id="looking-for-selector-chat" class="grid grid-cols-3 gap-2"><button type="button" class="gender-btn p-2 rounded-lg" data-gender="male">Male</button><button type="button" class="gender-btn p-2 rounded-lg" data-gender="female">Female</button><button type="button" class="gender-btn p-2 rounded-lg active" data-gender="anyone">Anyone</button></div></div>
+                    <button id="start-button-chat" type="submit" class="bg-blue-600 hover:bg-blue-700 w-full p-3 text-lg font-semibold rounded-lg text-white !mt-8">Start</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="chat-screen" class="hidden absolute inset-0 flex items-center justify-center p-4">
+        <div class="main-container satin-card flex flex-col p-4 sm:p-6">
+            <div class="flex-shrink-0 text-center border-b border-[var(--border)] pb-3"><h2 id="partner-nickname-chat" class="text-2xl font-semibold">Stranger</h2><p id="status-text-chat" class="text-sm text-[var(--accent)] h-5">Searching...</p></div>
+            <div id="messages-area" class="flex-grow w-full flex flex-col gap-3 p-3 overflow-y-auto my-2"></div>
+            <div class="flex-shrink-0 flex flex-col space-y-4">
+                <form id="chat-form" class="w-full flex gap-2">
+                    <input id="chat-input" type="text" placeholder="Type a message..." autocomplete="off" class="flex-grow bg-transparent border-2 border-[var(--border)] p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)] transition">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">Send</button>
+                </form>
+                 <div class="flex justify-around">
+                    <button id="next-chat-button" class="text-gray-400 hover:text-white">Next Chat</button>
+                    <button id="end-chat-button" class="text-red-500 hover:text-red-400">End Chat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let myGender, lookingFor;
+        const ui = {
+            nicknameScreen: document.getElementById('nickname-screen-chat'), nicknameForm: document.getElementById('nickname-form-chat'),
+            nicknameInput: document.getElementById('nickname-input-chat'), myGenderSelector: document.getElementById('my-gender-selector-chat'),
+            lookingForSelector: document.getElementById('looking-for-selector-chat'), chatScreen: document.getElementById('chat-screen'),
+            partnerNicknameChat: document.getElementById('partner-nickname-chat'), statusTextChat: document.getElementById('status-text-chat'),
+            messagesArea: document.getElementById('messages-area'), chatForm: document.getElementById('chat-form'),
+            chatInput: document.getElementById('chat-input'), nextChatButton: document.getElementById('next-chat-button'),
+            endChatButton: document.getElementById('end-chat-button'),
+        };
+        const handleSelection = (selector, callback) => { const buttons = selector.querySelectorAll('.gender-btn'); buttons.forEach(button => { button.addEventListener('click', () => { buttons.forEach(btn => btn.classList.remove('active')); button.classList.add('active'); callback(button.dataset.gender); }); }); };
+        handleSelection(ui.myGenderSelector, selected => myGender = selected);
+        handleSelection(ui.lookingForSelector, selected => lookingFor = selected);
+        lookingFor = 'anyone';
+        const updateStatus = (state, data = {}) => {
+            const statusChat = ui.statusTextChat; const partnerChat = ui.partnerNicknameChat;
+            switch(state) {
+                case 'searching': statusChat.textContent = "Searching..."; partnerChat.textContent = "Stranger"; break;
+                case 'connecting': statusChat.textContent = "Connecting..."; partnerChat.textContent = data.nickname; break;
+                case 'connected': statusChat.textContent = "Connected"; break;
+                case 'disconnected': statusChat.textContent = "Partner disconnected."; break;
+                case 'ended': statusChat.textContent = "Chat Ended"; break;
+            }
+        };
+        const startSearch = () => {
+            if (!myGender) { alert('Please select your gender.'); return; }
+            const nickname = ui.nicknameInput.value.trim() || "Anonymous";
+            socket.emit("set-nickname", nickname);
+            socket.emit("find-partner", { gender: myGender, lookingFor, type: 'text' });
+            ui.nicknameScreen.style.display = 'none';
+            ui.chatScreen.style.display = 'flex';
+            updateStatus('searching');
+        };
+        ui.nicknameForm.addEventListener('submit', (e) => { e.preventDefault(); startSearch(); });
+        const cleanup = () => { ui.messagesArea.innerHTML = ''; };
+        const goHome = () => { socket.emit("next"); cleanup(); ui.chatScreen.style.display = 'none'; ui.nicknameScreen.style.display = 'flex'; updateStatus('ended'); };
+        const onNext = () => { socket.emit("next"); cleanup(); socket.emit("find-partner", { gender: myGender, lookingFor, type: 'text' }); updateStatus('searching'); };
+        ui.nextChatButton.addEventListener('click', onNext);
+        ui.endChatButton.addEventListener('click', goHome);
+        ui.chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = ui.chatInput.value.trim();
+            if (message) {
+                socket.emit('send-message', { message });
+                const bubble = document.createElement('div'); bubble.textContent = message;
+                bubble.className = 'chat-bubble p-3 rounded-lg text-white bg-blue-600 self-end';
+                ui.messagesArea.appendChild(bubble); ui.messagesArea.scrollTop = ui.messagesArea.scrollHeight;
+                ui.chatInput.value = '';
+            }
+        });
+        socket.on("partner-found", ({ partnerNickname }) => {
+            updateStatus('connecting', { nickname: partnerNickname });
+            updateStatus('connected');
+        });
+        socket.on("receive-message", ({ message }) => {
+            const bubble = document.createElement('div'); bubble.textContent = message;
+            bubble.className = 'chat-bubble p-3 rounded-lg text-white bg-gray-700 self-start';
+            ui.messagesArea.appendChild(bubble); ui.messagesArea.scrollTop = ui.messagesArea.scrollHeight;
+        });
+        socket.on("partner-disconnected", () => {
+            updateStatus('disconnected');
+            setTimeout(onNext, 2000);
+        });
+    </script>
+</body>
+</html>
