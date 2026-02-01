@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SwapLoop</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#111111">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            /* DARK MODE (Default) */
+            --bg: #111111;
+            --surface: #1e1e1e;
+            --text-primary: #f5f5f5;
+            --text-secondary: #a3a3a3;
+            --accent: #6366f1;
+            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            --border: rgba(255, 255, 255, 0.1);
+            --shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            --overlay: rgba(0,0,0,0.85);
+            --btn-hover: rgba(255, 255, 255, 0.03);
+            --input-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        /* LIGHT MODE VARIABLES */
+        [data-theme="light"] {
+            --bg: #f3f4f6;
+            --surface: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --accent: #4f46e5;
+            --accent-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            --border: rgba(0, 0, 0, 0.1);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --overlay: rgba(255,255,255,0.9);
+            --btn-hover: #f9fafb;
+            --input-bg: rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at top center, rgba(99, 102, 241, 0.08), transparent 70%);
+        }
+
+        .satin-card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+        }
+        .theme-toggle:hover { transform: scale(1.1); }
+
+        /* Interest Input */
+        .interest-input {
+            width: 100%;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border);
+            padding: 16px;
+            border-radius: 16px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        .interest-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Premium Buttons */
+        .choice-button {
+            background-color: var(--btn-hover);
+            border: 1px solid var(--border);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .choice-button:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.15);
+        }
+        
+        .primary-button {
+            background: var(--accent-gradient);
+            transition: opacity 0.2s ease, transform 0.2s;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+        .primary-button:active { transform: scale(0.98); }
+
+        /* Animation */
+        .animate-fade-up {
+            animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+        /* Modals */
+        #modal-overlay, #age-gate-overlay {
+            background-color: var(--overlay);
+            backdrop-filter: blur(8px);
+            transition: opacity 0.3s ease;
+        }
+        #modal-content, #age-gate-content { transition: transform 0.3s ease, opacity 0.3s ease; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <button id="theme-btn" class="theme-toggle" aria-label="Toggle Dark Mode">
+        <svg id="moon-icon" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        <svg id="sun-icon" class="hidden w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+    </button>
+
+    <div id="main-content" class="hidden w-full max-w-xl animate-fade-up">
+        <div class="satin-card p-8 md:p-10 rounded-3xl text-center flex flex-col">
+            <div>
+                <h1 class="text-5xl md:text-6xl font-bold mb-3 tracking-tight">SwapLoop</h1>
+                <p class="text-[var(--text-secondary)] mb-8 text-lg font-light">Random Calls, Real Connections</p>
+
+                <input type="text" id="interest-input" class="interest-input" placeholder="Add Interests (e.g. Anime, Music)..." autocomplete="off">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div onclick="navigateTo('/call.html')" class="choice-button p-8 rounded-2xl group">
+                        <div class="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">🎤</div>
+                        <h2 class="text-2xl font-bold text-[var(--text-primary)]">Voice Call</h2>
+                        <p class="text-[var(--text-secondary)] text-sm mt-2">Talk to a stranger live.</p>
+                    </div>
+
+                    <div onclick="navigateTo('/chat.html')" class="choice-button p-8 rounded-2xl group">
+                        <div class="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">💬</div>
+                        <h2 class="text-2xl font-bold text-[var(--text-primary)]">Text Chat</h2>
+                        <p class="text-[var(--text-secondary)] text-sm mt-2">Chat with a stranger.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <footer class="text-center pt-8 mt-8 border-t border-[var(--border)]">
+                <div class="flex justify-center space-x-6 text-sm text-[var(--text-secondary)]">
+                    <a href="#" id="terms-link" class="hover:text-[var(--accent)] transition">Terms</a>
+                    <a href="#" id="privacy-link" class="hover:text-[var(--accent)] transition">Privacy</a>
+                    <a href="#" id="contact-link" class="hover:text-[var(--accent)] transition">Contact</a>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <div id="age-gate-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div id="age-gate-content" class="satin-card w-full max-w-sm p-8 rounded-2xl text-center">
+            <div class="text-4xl mb-4">🔞</div>
+            <h2 class="text-2xl font-bold mb-4">Age Verification</h2>
+            <p class="text-[var(--text-secondary)] mb-8 leading-relaxed">You must be 18 years or older to use this service.</p>
+            <div class="flex flex-col gap-3">
+                <button id="age-confirm-yes" class="primary-button w-full p-4 rounded-xl text-white font-semibold text-lg">Yes, I am 18+</button>
+                <button id="age-confirm-no" class="w-full p-4 rounded-xl border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--btn-hover)] transition">No, Exit</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-overlay" class="fixed inset-0 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
+        <div id="modal-content" class="satin-card w-full max-w-2xl max-h-[80vh] p-8 rounded-2xl transform scale-95 opacity-0 flex flex-col">
+            <div class="flex justify-between items-center mb-6 flex-shrink-0">
+                <h2 id="modal-title" class="text-2xl font-bold"></h2>
+                <button id="modal-close" class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-3xl transition">&times;</button>
+            </div>
+            <div id="modal-body" class="overflow-y-auto pr-4 text-[var(--text-secondary)] leading-7"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- Theme Logic ---
+        const themeBtn = document.getElementById('theme-btn');
+        const moonIcon = document.getElementById('moon-icon');
+        const sunIcon = document.getElementById('sun-icon');
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        updateIcons(savedTheme);
+
+        themeBtn.addEventListener('click', () => {
+            playClickSound();
+            const current = document.documentElement.getAttribute('data-theme');
+            const newTheme = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateIcons(newTheme);
+        });
+
+        function updateIcons(theme) {
+            if (theme === 'dark') {
+                moonIcon.classList.remove('hidden');
+                sunIcon.classList.add('hidden');
+            } else {
+                moonIcon.classList.add('hidden');
+                sunIcon.classList.remove('hidden');
+            }
+        }
+
+        // --- Sound Effect Logic ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playClickSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        // --- Navigation Logic (Saves Interests) ---
+        function navigateTo(url) {
+            playClickSound();
+            const interests = document.getElementById('interest-input').value;
+            sessionStorage.setItem('swaploop_interests', interests);
+            setTimeout(() => { window.location.href = url; }, 150);
+        }
+
+        // --- Main UI Logic ---
+        const ui = {
+            mainContent: document.getElementById('main-content'),
+            ageGateOverlay: document.getElementById('age-gate-overlay'),
+            ageConfirmYes: document.getElementById('age-confirm-yes'),
+            ageConfirmNo: document.getElementById('age-confirm-no'),
+            modalOverlay: document.getElementById('modal-overlay'),
+            modalContent: document.getElementById('modal-content'),
+            modalTitle: document.getElementById('modal-title'),
+            modalBody: document.getElementById('modal-body'),
+            modalClose: document.getElementById('modal-close')
+        };
+
+        if (sessionStorage.getItem('isAgeVerified') === 'true') {
+            ui.ageGateOverlay.style.display = 'none';
+            ui.mainContent.classList.remove('hidden');
+        }
+
+        ui.ageConfirmYes.addEventListener('click', () => {
+            playClickSound();
+            sessionStorage.setItem('isAgeVerified', 'true');
+            ui.ageGateOverlay.style.opacity = '0';
+            setTimeout(() => {
+                ui.ageGateOverlay.style.display = 'none';
+                ui.mainContent.classList.remove('hidden');
+            }, 300);
+        });
+
+        ui.ageConfirmNo.addEventListener('click', () => {
+            window.location.href = 'https://google.com';
+        });
+
+        const modalData = {
+            terms: { title: 'Terms and Conditions', content: `<h3>Welcome to SwapLoop!</h3><p>By using our service, you agree to not engage in any abusive, hateful, or illegal behavior.</p>` },
+            privacy: { title: 'Privacy Policy', content: `<h3>Your Privacy</h3><p>We do not store your conversations. Voice chat is transmitted peer-to-peer.</p>` },
+            contact: { title: 'Contact Us', content: `<h3>Get in Touch</h3><p>Email: support@swaploop.com</p>` }
+        };
+
+        function openModal(type) {
+            playClickSound();
+            ui.modalTitle.textContent = modalData[type].title;
+            ui.modalBody.innerHTML = modalData[type].content;
+            ui.modalOverlay.classList.remove('opacity-0', 'pointer-events-none');
+            ui.modalContent.classList.remove('scale-95', 'opacity-0');
+        }
+
+        function closeModal() {
+            playClickSound();
+            ui.modalOverlay.classList.add('opacity-0', 'pointer-events-none');
+            ui.modalContent.classList.add('scale-95', 'opacity-0');
+        }
+
+        document.getElementById('terms-link').addEventListener('click', (e) => { e.preventDefault(); openModal('terms'); });
+        document.getElementById('privacy-link').addEventListener('click', (e) => { e.preventDefault(); openModal('privacy'); });
+        document.getElementById('contact-link').addEventListener('click', (e) => { e.preventDefault(); openModal('contact'); });
+        ui.modalClose.addEventListener('click', closeModal);
+        ui.modalOverlay.addEventListener('click', (e) => { if (e.target === ui.modalOverlay) closeModal(); });
+
+        // --- PWA Service Worker Registration ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('SW Registered'))
+                    .catch(err => console.log('SW Error', err));
+            });
+        }
+    </script>
+</body>
+</html>
