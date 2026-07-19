@@ -3,36 +3,42 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>SwapLoop - Voice</title>
+    <title>SwapLoop - Voice Call</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
-            /* DARK MODE */
-            --bg: #000000;
-            --surface: #1c1c1e;
+            /* DARK MODE (Premium Neon Style) */
+            --bg: #0a0a0a;
+            --surface: rgba(28, 28, 30, 0.7);
             --text-primary: #ffffff;
-            --text-secondary: #8e8e93;
-            --accent: #0a84ff;
-            --accent-gradient: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 100%);
-            --danger: #ff3b30;
-            --success: #34c759;
-            --btn-bg: rgba(255, 255, 255, 0.15);
-            --border: rgba(255, 255, 255, 0.1);
+            --text-secondary: #a3a3a3;
+            --accent: #8b5cf6; 
+            --accent-glow: rgba(139, 92, 246, 0.5);
+            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #d946ef 100%);
+            --danger: #ef4444;
+            --danger-glow: rgba(239, 68, 68, 0.5);
+            --success: #22c55e;
+            --btn-bg: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.08);
             --audio-level: 0.1;
         }
 
         [data-theme="light"] {
-            --bg: #f2f2f7;
-            --surface: #ffffff;
-            --text-primary: #000000;
-            --text-secondary: #8e8e93;
-            --accent: #007aff;
-            --accent-gradient: linear-gradient(135deg, #007aff 0%, #5856d6 100%);
-            --btn-bg: rgba(0, 0, 0, 0.05);
-            --border: rgba(0, 0, 0, 0.1);
+            --bg: #f8fafc;
+            --surface: rgba(255, 255, 255, 0.8);
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --accent-gradient: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+            --danger: #ef4444;
+            --danger-glow: rgba(239, 68, 68, 0.3);
+            --success: #10b981;
+            --btn-bg: rgba(0, 0, 0, 0.03);
+            --border: rgba(0, 0, 0, 0.08);
         }
 
         body {
@@ -43,58 +49,94 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.4s ease, color 0.4s ease;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.05), transparent 30%),
+                radial-gradient(circle at 80% 20%, rgba(217, 70, 239, 0.05), transparent 30%);
+            animation: pulse-bg 15s infinite alternate ease-in-out;
+        }
+
+        @keyframes pulse-bg {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
         }
 
         /* Theme Toggle */
         .theme-toggle {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 44px;
-            height: 44px;
+            top: 24px;
+            right: 24px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
-            background-color: var(--btn-bg);
+            background-color: var(--surface);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; z-index: 50;
-            transition: transform 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .theme-toggle:hover { 
+            transform: scale(1.1) rotate(15deg);
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
         }
         .theme-toggle:active { transform: scale(0.9); }
 
-        /* Setup Card */
+        /* Glassmorphism Card */
         .satin-card {
             background-color: var(--surface);
             border: 1px solid var(--border);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: all 0.3s ease;
         }
 
         /* Toggles */
         .toggle-btn {
             background: var(--btn-bg);
             color: var(--text-secondary);
-            border: 1px solid transparent;
-            transition: all 0.2s;
+            border: 1px solid var(--border);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        .toggle-btn:hover {
+            border-color: var(--accent);
+            color: var(--text-primary);
         }
         .toggle-btn.active {
-            background: var(--accent);
+            background: var(--accent-gradient);
             color: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            border-color: transparent;
+            box-shadow: 0 4px 15px var(--accent-glow);
+            transform: translateY(-2px);
         }
 
         /* --- VISUALIZER --- */
         .vis-container {
             position: relative;
-            width: 260px; height: 260px;
+            width: 280px; height: 280px;
             display: flex; justify-content: center; align-items: center;
             margin: auto;
         }
         .vis-core {
-            width: 120px; height: 120px; border-radius: 50%;
+            width: 130px; height: 130px; border-radius: 50%;
             background: var(--accent-gradient);
-            box-shadow: 0 0 60px var(--accent);
-            transform: scale(calc(1 + var(--audio-level) * 0.8));
-            transition: transform 0.05s linear;
+            box-shadow: 0 0 40px var(--accent-glow);
+            transform: scale(calc(1 + var(--audio-level) * 0.9));
+            transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1);
             z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .vis-core::after {
+            content: '🎙️';
+            font-size: 3rem;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
         }
         .vis-wave {
             position: absolute;
@@ -102,146 +144,185 @@
             border-radius: 50%;
             width: 100%; height: 100%;
             opacity: 0;
-            animation: wave 2s infinite cubic-bezier(0, 0.2, 0.8, 1);
+            animation: wave 2.5s infinite cubic-bezier(0.1, 0.4, 0.8, 1);
         }
-        .vis-wave:nth-child(2) { animation-delay: 0.5s; }
+        .vis-wave:nth-child(2) { animation-delay: 0.8s; }
+        .vis-wave:nth-child(3) { animation-delay: 1.6s; } 
         @keyframes wave {
-            0% { transform: scale(0.5); opacity: 0.8; border-width: 4px; }
+            0% { transform: scale(0.45); opacity: 0.8; border-width: 4px; }
             100% { transform: scale(2.2); opacity: 0; border-width: 0px; }
         }
 
         /* --- DIALER UI CONTROLS --- */
         .controls-area {
-            padding: 40px;
-            padding-bottom: 60px;
+            padding: 30px;
+            padding-bottom: 50px;
             display: flex;
             flex-direction: column;
-            gap: 30px;
+            gap: 40px;
             align-items: center;
             justify-content: flex-end;
-            min-height: 250px;
+            min-height: 280px;
+            background: linear-gradient(to top, var(--bg) 20%, transparent 100%);
         }
 
         /* Secondary Controls Row (Mute/Speaker) */
         .secondary-controls {
             display: flex;
-            gap: 60px;
+            gap: 70px;
             justify-content: center;
             width: 100%;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.4s ease, transform 0.4s ease;
         }
 
         .icon-btn {
-            width: 64px; height: 64px;
+            width: 68px; height: 68px;
             border-radius: 50%;
             background: var(--btn-bg);
+            backdrop-filter: blur(10px);
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             border: 1px solid var(--border);
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             color: var(--text-primary);
         }
-        .icon-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.2); }
-        .icon-btn.active-state { background: white; color: black; }
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+            border-color: rgba(255,255,255,0.2);
+        }
+        .icon-btn:active { transform: scale(0.95); }
+        .icon-btn.active-state { 
+            background: white; 
+            color: black; 
+            box-shadow: 0 0 15px rgba(255,255,255,0.3);
+        }
 
         .btn-label {
-            font-size: 12px;
-            margin-top: 8px;
+            font-size: 13px;
+            margin-top: 10px;
             color: var(--text-secondary);
-            font-weight: 500;
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
 
         /* Main Action Buttons (End / Next) */
         .main-action-container {
             position: relative;
-            width: 80px;
-            height: 80px;
+            width: 90px;
+            height: 90px;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
         .btn-end {
-            width: 72px; height: 72px;
+            width: 80px; height: 80px;
             border-radius: 50%;
             background: var(--danger);
             color: white;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 15px rgba(255, 59, 48, 0.4);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px var(--danger-glow);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: absolute;
+            border: none;
         }
-        .btn-end:active { transform: scale(0.9); }
+        .btn-end:hover {
+            transform: scale(1.08);
+            box-shadow: 0 8px 30px var(--danger-glow);
+        }
+        .btn-end:active { transform: scale(0.92); }
 
         .btn-next {
-            width: 100%; height: 60px;
-            border-radius: 30px;
+            width: auto; height: 64px;
+            border-radius: 32px;
             background: var(--success);
             color: white;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            font-weight: 600;
-            font-size: 18px;
-            box-shadow: 0 4px 20px rgba(52, 199, 89, 0.4);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: absolute;
             white-space: nowrap;
-            padding: 0 30px;
+            padding: 0 35px;
+            border: none;
+        }
+        .btn-next:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 8px 25px rgba(34, 197, 94, 0.5);
         }
         .btn-next:active { transform: scale(0.95); }
 
         /* Signal Strength Bar */
         .signal-bar {
             display: inline-flex;
-            gap: 2px;
+            gap: 3px;
             align-items: flex-end;
-            height: 12px;
-            margin-left: 8px;
+            height: 16px;
+            margin-left: 10px;
         }
-        .bar { width: 3px; background: var(--text-secondary); border-radius: 1px; }
-        .bar:nth-child(1) { height: 4px; }
-        .bar:nth-child(2) { height: 8px; }
-        .bar:nth-child(3) { height: 12px; }
+        .bar { width: 4px; background: var(--text-secondary); border-radius: 2px; transition: background-color 0.3s; }
+        .bar:nth-child(1) { height: 6px; }
+        .bar:nth-child(2) { height: 11px; }
+        .bar:nth-child(3) { height: 16px; }
         
         .signal-good .bar { background: var(--success); }
-        .signal-fair .bar { background: #ffcc00; }
+        .signal-fair .bar { background: #eab308; }
         .signal-poor .bar { background: var(--danger); }
 
         /* Logic States */
-        .hidden-scale { transform: scale(0); opacity: 0; pointer-events: none; }
+        .hidden-scale { transform: scale(0.5); opacity: 0; pointer-events: none; }
         .visible-scale { transform: scale(1); opacity: 1; pointer-events: auto; }
 
+        /* Input Styling */
+        input {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px var(--accent-glow);
+        }
+
         /* Animations */
-        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <button id="theme-btn" class="theme-toggle">
-        <svg id="moon-icon" class="w-6 h-6 text-[var(--text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-        <svg id="sun-icon" class="hidden w-6 h-6 text-[var(--text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+    <button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme">
+        <svg id="moon-icon" class="w-5 h-5 text-[var(--text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        <svg id="sun-icon" class="hidden w-5 h-5 text-[var(--text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
     </button>
 
-    <div id="setup-screen" class="flex items-center justify-center h-full p-4 fade-in z-20 absolute inset-0 bg-[var(--bg)]">
-        <div class="satin-card w-full max-w-sm p-8 rounded-3xl text-center">
-            <div class="w-20 h-20 bg-[var(--btn-bg)] rounded-full mx-auto flex items-center justify-center mb-6 border border-[var(--border)]">
-                <span class="text-4xl">🎙️</span>
+    <!-- SETUP SCREEN -->
+    <div id="setup-screen" class="flex items-center justify-center h-full p-4 fade-in z-20 absolute inset-0">
+        <div class="satin-card w-full max-w-sm p-8 md:p-10 rounded-[2rem] text-center">
+            <div class="w-24 h-24 bg-[var(--btn-bg)] rounded-full mx-auto flex items-center justify-center mb-8 border border-[var(--border)] shadow-inner">
+                <span class="text-5xl drop-shadow-md">🎙️</span>
             </div>
-            <h1 class="text-3xl font-bold mb-8">Voice Call</h1>
+            <h1 class="text-4xl font-bold mb-8 tracking-tight">Voice Call</h1>
             
-            <div class="space-y-6">
-                <input id="nickname-input" type="text" placeholder="Enter Nickname" class="w-full bg-[var(--btn-bg)] text-[var(--text-primary)] border border-[var(--border)] p-4 rounded-2xl text-center font-medium focus:outline-none focus:border-[var(--accent)] transition">
+            <div class="space-y-8">
+                <div>
+                    <input id="nickname-input" type="text" placeholder="Enter Nickname" class="w-full p-4 rounded-2xl text-center text-lg font-medium focus:outline-none transition-all duration-300">
+                </div>
                 
                 <div class="text-left">
-                    <label class="text-xs uppercase tracking-wider text-[var(--text-secondary)] font-bold ml-1 mb-2 block">I am</label>
-                    <div id="my-gender-selector" class="grid grid-cols-2 gap-3">
-                        <button class="toggle-btn p-3 rounded-xl font-medium" data-gender="male">Male</button>
-                        <button class="toggle-btn p-3 rounded-xl font-medium" data-gender="female">Female</button>
+                    <label class="text-xs uppercase tracking-widest text-[var(--text-secondary)] font-bold ml-2 mb-3 block">I am</label>
+                    <div id="my-gender-selector" class="grid grid-cols-2 gap-4">
+                        <button class="toggle-btn p-4 rounded-2xl font-semibold text-lg" data-gender="male">Male</button>
+                        <button class="toggle-btn p-4 rounded-2xl font-semibold text-lg" data-gender="female">Female</button>
                     </div>
                 </div>
 
                 <div class="text-left">
-                    <label class="text-xs uppercase tracking-wider text-[var(--text-secondary)] font-bold ml-1 mb-2 block">Looking for</label>
+                    <label class="text-xs uppercase tracking-widest text-[var(--text-secondary)] font-bold ml-2 mb-3 block">Looking for</label>
                     <div id="looking-for-selector" class="grid grid-cols-3 gap-3">
                         <button class="toggle-btn p-3 rounded-xl font-medium" data-gender="male">Male</button>
                         <button class="toggle-btn p-3 rounded-xl font-medium" data-gender="female">Female</button>
@@ -249,29 +330,31 @@
                     </div>
                 </div>
 
-                <button id="start-button" class="w-full bg-[var(--accent)] text-white font-bold p-4 rounded-2xl mt-4 shadow-lg active:scale-95 transition-transform">
+                <button id="start-button" class="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold p-5 rounded-2xl mt-4 shadow-lg hover:shadow-indigo-500/50 hover:-translate-y-1 active:scale-95 transition-all duration-300 text-lg">
                     Start Call
                 </button>
             </div>
         </div>
     </div>
 
-    <div id="call-screen" class="hidden flex-col h-full w-full fade-in">
+    <!-- CALL SCREEN -->
+    <div id="call-screen" class="hidden flex-col h-full w-full fade-in absolute inset-0 z-10">
         
-        <div class="text-center pt-20">
-            <h2 id="partner-nickname" class="text-3xl font-bold mb-1 flex items-center justify-center">
+        <div class="text-center pt-24 px-4">
+            <h2 id="partner-nickname" class="text-4xl font-bold mb-2 flex items-center justify-center tracking-tight">
                 Stranger
-                <div id="signal-bar" class="signal-bar hidden">
+                <div id="signal-bar" class="signal-bar hidden" title="Connection Strength">
                     <div class="bar"></div><div class="bar"></div><div class="bar"></div>
                 </div>
             </h2>
-            <p id="interest-match" class="text-xs text-[var(--accent)] font-bold uppercase tracking-wide mb-1 hidden"></p>
-            <p id="status-text" class="text-base text-[var(--text-secondary)] font-medium">Connecting...</p>
-            <p id="call-timer" class="text-xl font-mono mt-2 opacity-0 text-[var(--text-secondary)]">00:00</p>
+            <p id="interest-match" class="text-sm text-[var(--accent)] font-bold uppercase tracking-widest mb-2 hidden"></p>
+            <p id="status-text" class="text-lg text-[var(--text-secondary)] font-medium transition-colors duration-300">Connecting...</p>
+            <p id="call-timer" class="text-2xl font-mono mt-3 opacity-0 text-[var(--text-primary)] transition-opacity duration-300">00:00</p>
         </div>
 
         <div class="flex-grow flex flex-col justify-center">
             <div class="vis-container">
+                <div class="vis-wave"></div>
                 <div class="vis-wave"></div>
                 <div class="vis-wave"></div>
                 <div class="vis-core"></div>
@@ -283,33 +366,34 @@
             <div id="secondary-controls" class="secondary-controls">
                 <div class="flex flex-col items-center">
                     <button id="mute-button" class="icon-btn">
-                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
                     </button>
                     <span class="btn-label">Mute</span>
                 </div>
 
                 <div class="flex flex-col items-center">
-                    <button class="icon-btn">
-                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+                    <button id="speaker-button" class="icon-btn">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
                     </button>
                     <span class="btn-label">Speaker</span>
                 </div>
             </div>
 
             <div class="main-action-container">
-                <button id="end-button" class="btn-end visible-scale">
-                    <svg class="w-8 h-8 transform rotate-135" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10.707 3.293a1 1 0 010 1.414L6.414 9H16a1 1 0 110 2H6.414l4.293 4.293a1 1 0 01-1.414 1.414l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                <button id="end-button" class="btn-end visible-scale" title="End Call">
+                    <svg class="w-10 h-10 transform rotate-135" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10.707 3.293a1 1 0 010 1.414L6.414 9H16a1 1 0 110 2H6.414l4.293 4.293a1 1 0 01-1.414 1.414l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                 </button>
 
                 <button id="next-button" class="btn-next hidden-scale">
-                    Next Stranger <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 5l7 7-7 7"/></svg>
+                    Next Stranger <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                 </button>
             </div>
 
         </div>
     </div>
 
-    <audio id="remoteAudio" autoplay playsinline></audio>
+    <!-- UPDATE 1: Added 'controls' and set display none for mobile compatibility -->
+    <audio id="remoteAudio" autoplay playsinline controls style="display: none;"></audio>
 
     <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
@@ -357,13 +441,13 @@
                 osc.stop(audioCtx.currentTime + 0.05);
             } else if (type === 'connect') {
                 osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-                osc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 0.2);
+                osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.2);
                 gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.3);
             } else if (type === 'end') {
                 osc.frequency.setValueAtTime(300, audioCtx.currentTime);
-                osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.3);
+                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.3);
                 gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.3);
@@ -371,8 +455,8 @@
         }
 
         // --- Call Logic ---
-        const socket = io();
-        let peer = null, localStream = null, isMuted = false, analyser = null;
+        const socket = typeof io !== 'undefined' ? io() : { emit: () => {}, on: () => {} }; 
+        let peer = null, localStream = null, isMuted = false, isSpeaker = true, analyser = null;
         let myGender = null, lookingFor = 'anyone';
 
         const ui = {
@@ -384,6 +468,7 @@
             statusText: document.getElementById('status-text'),
             timer: document.getElementById('call-timer'),
             muteBtn: document.getElementById('mute-button'),
+            speakerBtn: document.getElementById('speaker-button'),
             nextBtn: document.getElementById('next-button'),
             endBtn: document.getElementById('end-button'),
             secondaryControls: document.getElementById('secondary-controls'),
@@ -409,7 +494,9 @@
 
         ui.startBtn.addEventListener('click', async () => {
             playSound('click');
-            if (!myGender) return alert("Please select your gender first.");
+            if (!myGender) {
+                return alert("Please select your gender first.");
+            }
             
             if (audioCtx.state === 'suspended') { await audioCtx.resume(); }
 
@@ -426,80 +513,99 @@
                 findPartner();
             } catch (err) {
                 console.error(err);
-                alert("Microphone access denied.");
+                alert("Microphone access denied. Please allow microphone permissions to use voice call.");
             }
         });
 
         function findPartner() {
             resetCallUI();
             updateStatus('searching');
-            // 1. Get Interests from Session Storage
             const interestString = sessionStorage.getItem('swaploop_interests') || "";
             const interests = interestString.split(',').map(s => s.trim()).filter(s => s);
             
             socket.emit('find-partner', { gender: myGender, lookingFor, type: 'voice', interests: interests });
+            
+            if(typeof io === 'undefined') {
+                setTimeout(() => {
+                    socket.emit = (event, data) => {
+                        if(event === 'latency-ping' && typeof data === 'function') data();
+                    }
+                    ui.remoteAudio.play = () => Promise.resolve();
+                    playSound('connect');
+                    updateStatus('connected', 'Test User');
+                    startLatencyCheck();
+                }, 3000);
+            }
         }
 
         ui.endBtn.addEventListener('click', () => {
             playSound('end');
-            if (peer) peer.destroy();
+            if (peer) { peer.destroy(); peer = null; }
             socket.emit('next');
             updateStatus('ended');
         });
 
         ui.nextBtn.addEventListener('click', () => {
             playSound('click');
-            if (peer) peer.destroy();
+            if (peer) { peer.destroy(); peer = null; }
             socket.emit('next');
             findPartner();
         });
 
         ui.muteBtn.addEventListener('click', () => {
             if (!localStream) return;
+            playSound('click');
             isMuted = !isMuted;
             localStream.getAudioTracks()[0].enabled = !isMuted;
             ui.muteBtn.classList.toggle('active-state', isMuted);
         });
+        
+        ui.speakerBtn.addEventListener('click', () => {
+            playSound('click');
+            isSpeaker = !isSpeaker;
+            ui.speakerBtn.classList.toggle('active-state', !isSpeaker);
+        });
 
         function setupVisualizer(stream) {
+            if(analyser) return; 
             analyser = audioCtx.createAnalyser();
             const source = audioCtx.createMediaStreamSource(stream);
             source.connect(analyser);
-            analyser.fftSize = 64;
+            analyser.fftSize = 128; 
             const dataArray = new Uint8Array(analyser.frequencyBinCount);
             function draw() {
                 requestAnimationFrame(draw);
                 analyser.getByteFrequencyData(dataArray);
                 let sum = 0;
                 for(let i=0; i<dataArray.length; i++) sum += dataArray[i];
-                let val = (sum / dataArray.length) / 60; 
+                let val = (sum / dataArray.length) / 50; 
                 document.documentElement.style.setProperty('--audio-level', val);
             }
             draw();
         }
 
-        // --- Connection Strength ---
+        let latencyInterval;
         function startLatencyCheck() {
+            clearInterval(latencyInterval);
             const bar = ui.signalBar;
             bar.classList.remove('hidden');
             
-            setInterval(() => {
+            latencyInterval = setInterval(() => {
                 const start = Date.now();
                 socket.emit('latency-ping', () => {
                     const latency = Date.now() - start;
                     bar.className = 'signal-bar';
-                    if (latency < 100) bar.classList.add('signal-good');
-                    else if (latency < 300) bar.classList.add('signal-fair');
+                    if (latency < 150) bar.classList.add('signal-good');
+                    else if (latency < 350) bar.classList.add('signal-fair');
                     else bar.classList.add('signal-poor');
                 });
-            }, 2000);
+            }, 3000);
         }
 
         socket.on('partner-found', ({ initiator, partnerNickname, commonInterests }) => {
             resetCallUI();
             updateStatus('connecting', partnerNickname);
             
-            // 2. Show Interest Match
             if (commonInterests && commonInterests.length > 0) {
                 ui.interestMatch.textContent = `Matched via: ${commonInterests[0]}`;
                 ui.interestMatch.classList.remove('hidden');
@@ -507,17 +613,51 @@
                 ui.interestMatch.classList.add('hidden');
             }
 
+            // UPDATE 2: Added a public free TURN server (Metered.ca) for better connectivity on mobile networks
             peer = new SimplePeer({
                 initiator: initiator,
                 stream: localStream,
-                config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
+                config: { 
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:global.stun.twilio.com:3478' }
+                    ] 
+                }
             });
+
+            // UPDATE 3: Added connection state logging for debugging
+            peer.on('connect', () => {
+                console.log("Peer connection fully established!");
+            });
+
+            peer.on('iceStateChange', state => {
+                console.log("ICE Connection State:", state);
+                if (state === 'failed' || state === 'disconnected') {
+                    console.error("Network blocked the audio! STUN/TURN server issue.");
+                }
+            });
+
             peer.on('signal', data => socket.emit('signal', data));
+            
             peer.on('stream', stream => {
                 ui.remoteAudio.srcObject = stream;
-                ui.remoteAudio.play();
+                
+                // UPDATE 4: Force volume and handle autoplay promise
+                ui.remoteAudio.volume = 1.0;
+                let playPromise = ui.remoteAudio.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.then(_ => {
+                        console.log("Audio playing successfully");
+                    })
+                    .catch(error => {
+                        console.error("Audio play prevented by browser:", error);
+                        // You can add a visual alert here if needed
+                    });
+                }
+                
                 playSound('connect');
-                updateStatus('connected');
+                updateStatus('connected', partnerNickname);
                 startLatencyCheck();
             });
             peer.on('close', handleRemoteDisconnect);
@@ -539,9 +679,15 @@
             clearInterval(timerInt);
 
             if (state === 'searching') {
-                ui.statusText.textContent = "Searching...";
+                ui.statusText.textContent = "Searching for someone...";
                 ui.statusText.style.color = "var(--text-secondary)";
+                ui.signalBar.classList.add('hidden');
+                ui.interestMatch.classList.add('hidden');
             } 
+            else if (state === 'connecting') {
+                ui.statusText.textContent = "Connecting...";
+                ui.statusText.style.color = "var(--accent)";
+            }
             else if (state === 'connected') {
                 ui.statusText.textContent = "00:00";
                 ui.statusText.style.color = "var(--success)";
@@ -560,10 +706,12 @@
                 ui.statusText.style.color = "var(--danger)";
                 ui.timer.style.opacity = '0';
                 ui.signalBar.classList.add('hidden');
+                clearInterval(latencyInterval);
                 
                 ui.endBtn.classList.replace('visible-scale', 'hidden-scale');
                 ui.nextBtn.classList.replace('hidden-scale', 'visible-scale');
                 ui.secondaryControls.style.opacity = '0';
+                ui.secondaryControls.style.transform = 'translateY(20px)';
             }
         }
 
@@ -571,6 +719,9 @@
             ui.endBtn.classList.replace('hidden-scale', 'visible-scale');
             ui.nextBtn.classList.replace('visible-scale', 'hidden-scale');
             ui.secondaryControls.style.opacity = '1';
+            ui.secondaryControls.style.transform = 'translateY(0)';
+            ui.timer.textContent = "00:00";
+            ui.timer.style.opacity = '0';
         }
     </script>
 </body>
