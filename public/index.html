@@ -3,66 +3,77 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>SwapLoop</title>
+    <title>SwapLoop - Random Calls, Real Connections</title>
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#111111">
+    <meta name="theme-color" content="#0a0a0a">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
-            /* DARK MODE (Default) */
-            --bg: #111111;
-            --surface: #1e1e1e;
-            --text-primary: #f5f5f5;
+            /* DARK MODE (Premium Neon) */
+            --bg: #0a0a0a;
+            --surface: #121212;
+            --text-primary: #ffffff;
             --text-secondary: #a3a3a3;
-            --accent: #6366f1;
-            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            --border: rgba(255, 255, 255, 0.1);
-            --shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-            --overlay: rgba(0,0,0,0.85);
-            --btn-hover: rgba(255, 255, 255, 0.03);
-            --input-bg: rgba(255, 255, 255, 0.05);
+            --accent: #8b5cf6; /* Vibrant Purple */
+            --accent-glow: rgba(139, 92, 246, 0.6);
+            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #d946ef 100%);
+            --border: rgba(255, 255, 255, 0.08);
+            --shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            --overlay: rgba(0,0,0,0.9);
+            --btn-hover: rgba(255, 255, 255, 0.02);
+            --input-bg: rgba(255, 255, 255, 0.03);
         }
 
         /* LIGHT MODE VARIABLES */
         [data-theme="light"] {
-            --bg: #f3f4f6;
+            --bg: #f8fafc;
             --surface: #ffffff;
-            --text-primary: #111827;
-            --text-secondary: #6b7280;
-            --accent: #4f46e5;
-            --accent-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            --border: rgba(0, 0, 0, 0.1);
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            --overlay: rgba(255,255,255,0.9);
-            --btn-hover: #f9fafb;
-            --input-bg: rgba(0, 0, 0, 0.05);
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --accent-gradient: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+            --border: rgba(0, 0, 0, 0.08);
+            --shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+            --overlay: rgba(255,255,255,0.95);
+            --btn-hover: #f1f5f9;
+            --input-bg: rgba(0, 0, 0, 0.02);
         }
 
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg);
             color: var(--text-primary);
-            transition: background-color 0.3s ease, color 0.3s ease;
+            transition: background-color 0.4s ease, color 0.4s ease;
             overflow-x: hidden;
-            background-image: radial-gradient(circle at top center, rgba(99, 102, 241, 0.08), transparent 70%);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.05), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(217, 70, 239, 0.05), transparent 25%);
+            animation: backgroundBreathe 10s ease-in-out infinite alternate;
+        }
+
+        @keyframes backgroundBreathe {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
         }
 
         .satin-card {
             background-color: var(--surface);
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
-            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(10px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         /* Theme Toggle Button */
         .theme-toggle {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 24px;
+            right: 24px;
             width: 48px;
             height: 48px;
             border-radius: 50%;
@@ -77,125 +88,167 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 100;
         }
-        .theme-toggle:hover { transform: scale(1.1); }
+        .theme-toggle:hover { 
+            transform: scale(1.1) rotate(15deg);
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        /* Title Styling */
+        .neon-text {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
 
         /* Interest Input */
         .interest-input {
             width: 100%;
             background-color: var(--input-bg);
             border: 1px solid var(--border);
-            padding: 16px;
+            padding: 18px;
             border-radius: 16px;
             color: var(--text-primary);
-            font-size: 1rem;
-            margin-bottom: 24px;
+            font-size: 1.05rem;
+            margin-bottom: 32px;
             transition: all 0.3s ease;
             text-align: center;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
         }
         .interest-input:focus {
             outline: none;
             border-color: var(--accent);
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+            background-color: var(--surface);
+            box-shadow: 0 0 0 2px var(--accent-glow), inset 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        /* Premium Buttons */
+        /* Premium Buttons with Neon Hover */
         .choice-button {
             background-color: var(--btn-hover);
             border: 1px solid var(--border);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             overflow: hidden;
             cursor: pointer;
+            z-index: 1;
+        }
+        .choice-button::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--accent-gradient);
+            opacity: 0;
+            z-index: -1;
+            transition: opacity 0.4s ease;
         }
         .choice-button:hover {
-            border-color: var(--accent);
-            transform: translateY(-4px);
-            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.15);
+            border-color: transparent;
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 35px var(--accent-glow);
+        }
+        .choice-button:hover::before {
+            opacity: 0.1;
+        }
+        .choice-button:hover h2 {
+            color: var(--accent);
+            text-shadow: 0 0 10px var(--accent-glow);
         }
         
         .primary-button {
             background: var(--accent-gradient);
-            transition: opacity 0.2s ease, transform 0.2s;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--accent-glow);
+            position: relative;
+            overflow: hidden;
         }
-        .primary-button:active { transform: scale(0.98); }
+        .primary-button:hover {
+            box-shadow: 0 8px 25px var(--accent-glow);
+            transform: translateY(-2px);
+        }
+        .primary-button:active { transform: scale(0.97); }
 
         /* Animation */
         .animate-fade-up {
             animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(30px);
         }
         @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
 
         /* Modals */
         #modal-overlay, #age-gate-overlay {
             background-color: var(--overlay);
-            backdrop-filter: blur(8px);
-            transition: opacity 0.3s ease;
+            backdrop-filter: blur(12px);
+            transition: opacity 0.4s ease;
         }
-        #modal-content, #age-gate-content { transition: transform 0.3s ease, opacity 0.3s ease; }
+        #modal-content, #age-gate-content { 
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease; 
+        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
 
     <button id="theme-btn" class="theme-toggle" aria-label="Toggle Dark Mode">
-        <svg id="moon-icon" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-        <svg id="sun-icon" class="hidden w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        <svg id="moon-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        <svg id="sun-icon" class="hidden w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
     </button>
 
     <div id="main-content" class="hidden w-full max-w-xl animate-fade-up">
-        <div class="satin-card p-8 md:p-10 rounded-3xl text-center flex flex-col">
+        <div class="satin-card p-8 md:p-12 rounded-[2rem] text-center flex flex-col">
             <div>
-                <h1 class="text-5xl md:text-6xl font-bold mb-3 tracking-tight">SwapLoop</h1>
-                <p class="text-[var(--text-secondary)] mb-8 text-lg font-light">Random Calls, Real Connections</p>
+                <h1 class="text-5xl md:text-6xl font-bold mb-4 tracking-tight neon-text">SwapLoop</h1>
+                <p class="text-[var(--text-secondary)] mb-10 text-lg font-light tracking-wide uppercase text-sm">Random Calls, Real Connections</p>
 
-                <input type="text" id="interest-input" class="interest-input" placeholder="Add Interests (e.g. Anime, Music)..." autocomplete="off">
+                <input type="text" id="interest-input" class="interest-input" placeholder="Add Interests (e.g. Anime, Music, Gaming)..." autocomplete="off">
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div onclick="navigateTo('/call.html')" class="choice-button p-8 rounded-2xl group">
-                        <div class="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">🎤</div>
-                        <h2 class="text-2xl font-bold text-[var(--text-primary)]">Voice Call</h2>
-                        <p class="text-[var(--text-secondary)] text-sm mt-2">Talk to a stranger live.</p>
+                    <div onclick="navigateTo('/call.html')" class="choice-button p-8 rounded-3xl group">
+                        <div class="text-5xl mb-5 group-hover:scale-110 group-hover:-translate-y-2 transition-transform duration-300 drop-shadow-lg">🎤</div>
+                        <h2 class="text-2xl font-bold text-[var(--text-primary)] transition-colors duration-300">Voice Call</h2>
+                        <p class="text-[var(--text-secondary)] text-sm mt-3 font-medium">Talk to a stranger live.</p>
                     </div>
 
-                    <div onclick="navigateTo('/chat.html')" class="choice-button p-8 rounded-2xl group">
-                        <div class="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">💬</div>
-                        <h2 class="text-2xl font-bold text-[var(--text-primary)]">Text Chat</h2>
-                        <p class="text-[var(--text-secondary)] text-sm mt-2">Chat with a stranger.</p>
+                    <div onclick="navigateTo('/chat.html')" class="choice-button p-8 rounded-3xl group">
+                        <div class="text-5xl mb-5 group-hover:scale-110 group-hover:-translate-y-2 transition-transform duration-300 drop-shadow-lg">💬</div>
+                        <h2 class="text-2xl font-bold text-[var(--text-primary)] transition-colors duration-300">Text Chat</h2>
+                        <p class="text-[var(--text-secondary)] text-sm mt-3 font-medium">Chat with a stranger.</p>
                     </div>
                 </div>
             </div>
             
-            <footer class="text-center pt-8 mt-8 border-t border-[var(--border)]">
-                <div class="flex justify-center space-x-6 text-sm text-[var(--text-secondary)]">
-                    <a href="#" id="terms-link" class="hover:text-[var(--accent)] transition">Terms</a>
-                    <a href="#" id="privacy-link" class="hover:text-[var(--accent)] transition">Privacy</a>
-                    <a href="#" id="contact-link" class="hover:text-[var(--accent)] transition">Contact</a>
+            <footer class="text-center pt-8 mt-10 border-t border-[var(--border)]">
+                <div class="flex justify-center space-x-8 text-sm text-[var(--text-secondary)] font-medium">
+                    <a href="#" id="terms-link" class="hover:text-[var(--accent)] transition-colors duration-300">Terms</a>
+                    <a href="#" id="privacy-link" class="hover:text-[var(--accent)] transition-colors duration-300">Privacy</a>
+                    <a href="#" id="contact-link" class="hover:text-[var(--accent)] transition-colors duration-300">Contact</a>
                 </div>
             </footer>
         </div>
     </div>
 
+    <!-- Age Gate Modal -->
     <div id="age-gate-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div id="age-gate-content" class="satin-card w-full max-w-sm p-8 rounded-2xl text-center">
-            <div class="text-4xl mb-4">🔞</div>
+        <div id="age-gate-content" class="satin-card w-full max-w-sm p-8 rounded-3xl text-center">
+            <div class="text-5xl mb-6 drop-shadow-md">🔞</div>
             <h2 class="text-2xl font-bold mb-4">Age Verification</h2>
-            <p class="text-[var(--text-secondary)] mb-8 leading-relaxed">You must be 18 years or older to use this service.</p>
-            <div class="flex flex-col gap-3">
-                <button id="age-confirm-yes" class="primary-button w-full p-4 rounded-xl text-white font-semibold text-lg">Yes, I am 18+</button>
-                <button id="age-confirm-no" class="w-full p-4 rounded-xl border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--btn-hover)] transition">No, Exit</button>
+            <p class="text-[var(--text-secondary)] mb-8 leading-relaxed">You must be 18 years or older to use SwapLoop.</p>
+            <div class="flex flex-col gap-4">
+                <button id="age-confirm-yes" class="primary-button w-full p-4 rounded-2xl text-white font-semibold text-lg tracking-wide">Yes, I am 18+</button>
+                <button id="age-confirm-no" class="w-full p-4 rounded-2xl border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--btn-hover)] hover:text-[var(--text-primary)] transition-all duration-300">No, Exit</button>
             </div>
         </div>
     </div>
 
+    <!-- Info Modal -->
     <div id="modal-overlay" class="fixed inset-0 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
-        <div id="modal-content" class="satin-card w-full max-w-2xl max-h-[80vh] p-8 rounded-2xl transform scale-95 opacity-0 flex flex-col">
+        <div id="modal-content" class="satin-card w-full max-w-2xl max-h-[80vh] p-8 rounded-3xl transform scale-95 opacity-0 flex flex-col">
             <div class="flex justify-between items-center mb-6 flex-shrink-0">
-                <h2 id="modal-title" class="text-2xl font-bold"></h2>
-                <button id="modal-close" class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-3xl transition">&times;</button>
+                <h2 id="modal-title" class="text-3xl font-bold neon-text"></h2>
+                <button id="modal-close" class="text-[var(--text-secondary)] hover:text-[var(--accent)] text-4xl transition-colors duration-300 leading-none">&times;</button>
             </div>
-            <div id="modal-body" class="overflow-y-auto pr-4 text-[var(--text-secondary)] leading-7"></div>
+            <div id="modal-body" class="overflow-y-auto pr-4 text-[var(--text-secondary)] leading-relaxed text-lg"></div>
         </div>
     </div>
 
@@ -235,12 +288,12 @@
             const gain = audioCtx.createGain();
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(450, audioCtx.currentTime); // Slightly tweaked frequency for better sound
             osc.type = 'sine';
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
             osc.start();
-            osc.stop(audioCtx.currentTime + 0.1);
+            osc.stop(audioCtx.currentTime + 0.15);
         }
 
         // --- Navigation Logic (Saves Interests) ---
@@ -248,7 +301,8 @@
             playClickSound();
             const interests = document.getElementById('interest-input').value;
             sessionStorage.setItem('swaploop_interests', interests);
-            setTimeout(() => { window.location.href = url; }, 150);
+            // Slight delay for hover animation and sound to play
+            setTimeout(() => { window.location.href = url; }, 300);
         }
 
         // --- Main UI Logic ---
@@ -273,10 +327,12 @@
             playClickSound();
             sessionStorage.setItem('isAgeVerified', 'true');
             ui.ageGateOverlay.style.opacity = '0';
+            ui.ageGateContent = document.getElementById('age-gate-content');
+            ui.ageGateContent.style.transform = 'scale(0.95)';
             setTimeout(() => {
                 ui.ageGateOverlay.style.display = 'none';
                 ui.mainContent.classList.remove('hidden');
-            }, 300);
+            }, 400);
         });
 
         ui.ageConfirmNo.addEventListener('click', () => {
@@ -284,9 +340,9 @@
         });
 
         const modalData = {
-            terms: { title: 'Terms and Conditions', content: `<h3>Welcome to SwapLoop!</h3><p>By using our service, you agree to not engage in any abusive, hateful, or illegal behavior.</p>` },
-            privacy: { title: 'Privacy Policy', content: `<h3>Your Privacy</h3><p>We do not store your conversations. Voice chat is transmitted peer-to-peer.</p>` },
-            contact: { title: 'Contact Us', content: `<h3>Get in Touch</h3><p>Email: support@swaploop.com</p>` }
+            terms: { title: 'Terms & Conditions', content: `<p class="mb-4">Welcome to SwapLoop!</p><p>By using our service, you agree to not engage in any abusive, hateful, or illegal behavior. Keep it friendly and respect other users.</p>` },
+            privacy: { title: 'Privacy Policy', content: `<p class="mb-4">Your Privacy Matters.</p><p>We do not store your conversations. Voice chat and text messages are transmitted securely. We only use your data to connect you with others.</p>` },
+            contact: { title: 'Contact Us', content: `<p>Have questions or feedback?</p><p class="mt-4 font-semibold text-[var(--accent)]">Email: abhijithabhi2026@gmail.com</p>` }
         };
 
         function openModal(type) {
