@@ -195,19 +195,27 @@
         <svg id="sun-icon" class="hidden w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
     </button>
 
-    <div id="main-content" class="hidden w-full max-w-xl animate-fade-up">
+    <div id="main-content" class="hidden w-full max-w-4xl animate-fade-up">
         <div class="satin-card p-8 md:p-12 rounded-[2rem] text-center flex flex-col">
             <div>
                 <h1 class="text-5xl md:text-6xl font-bold mb-4 tracking-tight neon-text">SwapLoop</h1>
                 <p class="text-[var(--text-secondary)] mb-10 text-lg font-light tracking-wide uppercase text-sm">Random Calls, Real Connections</p>
 
-                <input type="text" id="interest-input" class="interest-input" placeholder="Add Interests (e.g. Anime, Music, Gaming)..." autocomplete="off">
+                <input type="text" id="interest-input" class="interest-input max-w-xl mx-auto block" placeholder="Add Interests (e.g. Anime, Music, Gaming)..." autocomplete="off">
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- 3 Options Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
                     <div onclick="navigateTo('/call.html')" class="choice-button p-8 rounded-3xl group">
                         <div class="text-5xl mb-5 group-hover:scale-110 group-hover:-translate-y-2 transition-transform duration-300 drop-shadow-lg">🎤</div>
                         <h2 class="text-2xl font-bold text-[var(--text-primary)] transition-colors duration-300">Voice Call</h2>
                         <p class="text-[var(--text-secondary)] text-sm mt-3 font-medium">Talk to a stranger live.</p>
+                    </div>
+
+                    <!-- New Video Call Option -->
+                    <div onclick="navigateTo('/video.html')" class="choice-button p-8 rounded-3xl group">
+                        <div class="text-5xl mb-5 group-hover:scale-110 group-hover:-translate-y-2 transition-transform duration-300 drop-shadow-lg">📹</div>
+                        <h2 class="text-2xl font-bold text-[var(--text-primary)] transition-colors duration-300">Video Call</h2>
+                        <p class="text-[var(--text-secondary)] text-sm mt-3 font-medium">Face to face chat.</p>
                     </div>
 
                     <div onclick="navigateTo('/chat.html')" class="choice-button p-8 rounded-3xl group">
@@ -288,7 +296,7 @@
             const gain = audioCtx.createGain();
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-            osc.frequency.setValueAtTime(450, audioCtx.currentTime); // Slightly tweaked frequency for better sound
+            osc.frequency.setValueAtTime(450, audioCtx.currentTime); 
             osc.type = 'sine';
             gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
@@ -301,7 +309,6 @@
             playClickSound();
             const interests = document.getElementById('interest-input').value;
             sessionStorage.setItem('swaploop_interests', interests);
-            // Slight delay for hover animation and sound to play
             setTimeout(() => { window.location.href = url; }, 300);
         }
 
