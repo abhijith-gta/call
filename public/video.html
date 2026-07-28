@@ -10,7 +10,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
-            /* DARK MODE (Premium Neon Style) */
+            /* DARK MODE */
             --bg: #0a0a0a;
             --surface: rgba(28, 28, 30, 0.75);
             --header-bg: rgba(28, 28, 30, 0.85);
@@ -21,7 +21,10 @@
             --accent-gradient: linear-gradient(135deg, #6366f1 0%, #d946ef 100%);
             --border: rgba(255, 255, 255, 0.08);
             --input-bg: rgba(255, 255, 255, 0.05);
-            --btn-hover: rgba(255, 255, 255, 0.1);
+            
+            /* Chat Bubbles */
+            --msg-sent: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --msg-received: rgba(255, 255, 255, 0.15);
         }
 
         [data-theme="light"] {
@@ -35,7 +38,9 @@
             --accent-gradient: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
             --border: rgba(0, 0, 0, 0.08);
             --input-bg: rgba(0, 0, 0, 0.04);
-            --btn-hover: rgba(0, 0, 0, 0.08);
+            
+            --msg-sent: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            --msg-received: rgba(0, 0, 0, 0.08);
         }
 
         body {
@@ -46,73 +51,32 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            transition: background-color 0.4s ease, color 0.4s ease;
-            background-image: 
-                radial-gradient(circle at 80% 20%, rgba(99, 102, 241, 0.03), transparent 40%),
-                radial-gradient(circle at 20% 80%, rgba(217, 70, 239, 0.03), transparent 40%);
+            transition: all 0.4s ease;
         }
 
-        /* Theme Toggle */
-        .theme-toggle {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background-color: var(--input-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            z-index: 50;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .theme-toggle:hover { 
-            transform: scale(1.1) rotate(15deg); 
-            border-color: var(--accent);
-        }
-
-        /* Setup Card */
         .satin-card {
             background-color: var(--surface);
             border: 1px solid var(--border);
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            transition: all 0.3s ease;
         }
 
-        /* Toggles */
         .toggle-btn {
             background: var(--input-bg);
             color: var(--text-secondary);
             border: 1px solid var(--border);
             transition: all 0.3s ease;
         }
-        .toggle-btn:hover {
-            border-color: var(--accent);
-            color: var(--text-primary);
-        }
         .toggle-btn.active {
             background: var(--accent-gradient);
             color: white;
             border-color: transparent;
-            box-shadow: 0 4px 15px var(--accent-glow);
-        }
-
-        /* Call UI */
-        .chat-header {
-            background: var(--header-bg);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-bottom: 1px solid var(--border);
         }
 
         /* Video Area */
         #video-area {
             position: relative;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.6);
             flex-grow: 1;
             overflow: hidden;
             display: flex;
@@ -127,128 +91,160 @@
             opacity: 0;
             transition: opacity 0.5s ease;
         }
-        #remote-video.active {
-            opacity: 1;
-        }
+        #remote-video.active { opacity: 1; }
 
         #local-video {
             position: absolute;
             bottom: 20px;
             right: 20px;
-            width: 110px;
-            height: 160px;
+            width: 100px;
+            height: 140px;
             object-fit: cover;
-            border-radius: 16px;
+            border-radius: 12px;
             border: 2px solid var(--accent);
             box-shadow: 0 8px 25px var(--accent-glow);
             z-index: 20;
             background: #000;
-            transform: scaleX(-1); /* Mirror effect */
+            transform: scaleX(-1);
+            transition: all 0.3s ease;
+        }
+        /* Move local video up when chat is open on mobile */
+        .chat-open #local-video {
+            bottom: 340px; 
+            width: 80px;
+            height: 110px;
         }
 
-        /* Bottom Controls (Glassmorphism) */
+        /* Controls */
         .control-area {
             background: var(--surface);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             border-top: 1px solid var(--border);
             padding: 16px;
             padding-bottom: max(16px, env(safe-area-inset-bottom));
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 15px;
+            z-index: 30;
         }
 
         .btn-control {
             background: var(--input-bg);
             color: var(--text-primary);
             border-radius: 50%;
-            width: 56px; height: 56px;
+            width: 50px; height: 50px;
             display: flex; align-items: center; justify-content: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid var(--border);
             cursor: pointer;
-        }
-        .btn-control:hover {
-            border-color: var(--accent);
-            transform: translateY(-4px);
-            box-shadow: 0 4px 15px var(--accent-glow);
+            position: relative;
         }
         .btn-control.off {
             background: rgba(239, 68, 68, 0.2);
             color: #ef4444;
             border-color: #ef4444;
         }
-        
         .btn-skip {
             background: var(--accent-gradient);
             color: white;
             border-radius: 50%;
-            width: 56px; height: 56px;
+            width: 50px; height: 50px;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 15px var(--accent-glow);
             border: none;
-            transition: all 0.3s;
-        }
-        .btn-skip:hover {
-            transform: translateY(-4px) scale(1.05);
-            box-shadow: 0 6px 20px var(--accent-glow);
         }
 
+        /* Chat Overlay UI */
+        #chat-overlay {
+            position: absolute;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            width: 90%;
+            max-width: 350px;
+            height: 320px;
+            background: var(--surface);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            z-index: 40;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+        }
+        #chat-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .chat-bubble {
+            max-width: 85%;
+            padding: 8px 14px;
+            border-radius: 18px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            word-wrap: break-word;
+            margin-bottom: 6px;
+            animation: popIn 0.3s ease forwards;
+        }
+        .sent {
+            background: var(--msg-sent);
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+            color: white;
+        }
+        .received {
+            background: var(--msg-received);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            color: var(--text-primary);
+        }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.9) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+        #chat-badge {
+            position: absolute;
+            top: -2px; right: -2px;
+            width: 14px; height: 14px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid var(--surface);
+            display: none;
+        }
+        
         .glass-input {
             background: var(--input-bg);
             border: 1px solid var(--border);
             color: var(--text-primary);
-            transition: all 0.3s ease;
         }
-        .glass-input:focus { 
-            outline: none; 
-            border-color: var(--accent); 
-            background: rgba(0,0,0,0.2); 
-            box-shadow: 0 0 0 2px var(--accent-glow);
-        }
-
-        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .glass-input:focus { outline: none; border-color: var(--accent); }
     </style>
 </head>
 <body>
 
-    <button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme">
-        <svg id="moon-icon" class="w-5 h-5 text-[var(--text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-        <svg id="sun-icon" class="hidden w-5 h-5 text-[var(--text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-    </button>
-
     <!-- SETUP SCREEN -->
-    <div id="setup-screen" class="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md">
-        <div class="satin-card w-full max-w-sm p-8 md:p-10 rounded-[2rem] text-center fade-in">
-            <div class="w-20 h-20 bg-[var(--input-bg)] border border-[var(--border)] rounded-full mx-auto flex items-center justify-center mb-6 shadow-inner">
-                <span class="text-4xl drop-shadow-md">📹</span>
-            </div>
-            <h1 class="text-4xl font-bold mb-8 tracking-tight">Video Call</h1>
-            
-            <div class="space-y-7">
-                <input id="nickname-input" type="text" placeholder="Enter Nickname" class="glass-input w-full p-4 rounded-2xl text-center text-lg font-medium">
+    <div id="setup-screen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+        <div class="satin-card w-full max-w-sm p-8 rounded-[2rem] text-center">
+            <div class="text-4xl mb-6">📹</div>
+            <h1 class="text-3xl font-bold mb-6">Video Call</h1>
+            <div class="space-y-5">
+                <input id="nickname-input" type="text" placeholder="Enter Nickname" class="glass-input w-full p-4 rounded-2xl text-center font-medium">
                 
-                <div class="text-left">
-                    <label class="text-xs uppercase tracking-widest text-[var(--text-secondary)] font-bold ml-2 mb-3 block">I am</label>
-                    <div id="my-gender-selector" class="grid grid-cols-2 gap-4">
-                        <button class="toggle-btn p-4 rounded-2xl font-semibold" data-gender="male">Male</button>
-                        <button class="toggle-btn p-4 rounded-2xl font-semibold" data-gender="female">Female</button>
-                    </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <button class="toggle-btn p-3 rounded-xl font-semibold" data-group="gender" data-val="male">Male</button>
+                    <button class="toggle-btn p-3 rounded-xl font-semibold" data-group="gender" data-val="female">Female</button>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-3">
+                    <button class="toggle-btn p-2 rounded-lg text-sm" data-group="looking" data-val="male">Male</button>
+                    <button class="toggle-btn p-2 rounded-lg text-sm" data-group="looking" data-val="female">Female</button>
+                    <button class="toggle-btn active p-2 rounded-lg text-sm" data-group="looking" data-val="anyone">Anyone</button>
                 </div>
 
-                <div class="text-left">
-                    <label class="text-xs uppercase tracking-widest text-[var(--text-secondary)] font-bold ml-2 mb-3 block">Looking for</label>
-                    <div id="looking-for-selector" class="grid grid-cols-3 gap-3">
-                        <button class="toggle-btn p-3 rounded-xl font-medium" data-gender="male">Male</button>
-                        <button class="toggle-btn p-3 rounded-xl font-medium" data-gender="female">Female</button>
-                        <button class="toggle-btn active p-3 rounded-xl font-medium" data-gender="anyone">Anyone</button>
-                    </div>
-                </div>
-
-                <button id="start-button" class="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold p-5 rounded-2xl mt-4 shadow-lg hover:shadow-indigo-500/50 hover:-translate-y-1 active:scale-95 transition-all duration-300 text-lg">
-                    Turn on Camera & Start
+                <button id="start-button" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold p-4 rounded-2xl mt-4 shadow-lg">
+                    Start Camera
                 </button>
             </div>
         </div>
@@ -257,83 +253,63 @@
     <!-- CALL UI -->
     <div id="chat-ui" class="flex flex-col h-full hidden absolute inset-0">
         
-        <div class="chat-header h-16 flex items-center justify-between px-5 shrink-0 z-10 shadow-sm">
+        <div class="h-16 flex items-center justify-between px-5 shrink-0 z-10" style="background: var(--header-bg); border-bottom: 1px solid var(--border);">
             <div>
-                <h2 id="partner-nickname" class="text-lg font-bold leading-tight tracking-tight">Stranger</h2>
+                <h2 id="partner-nickname" class="text-lg font-bold">Stranger</h2>
                 <div class="flex items-center gap-2 mt-0.5">
-                    <span id="status-dot" class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.6)]"></span>
-                    <p id="status-text" class="text-xs font-semibold text-yellow-500 tracking-wide uppercase">Searching...</p>
+                    <span id="status-dot" class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span>
+                    <p id="status-text" class="text-xs font-semibold text-yellow-500 uppercase">Searching...</p>
                 </div>
             </div>
         </div>
 
-        <!-- Video Area Container -->
         <div id="video-area">
-            <!-- Stranger's Video -->
             <video id="remote-video" autoplay playsinline></video>
             
-            <!-- Waiting State -->
-            <div id="waiting-indicator" class="absolute inset-0 flex flex-col items-center justify-center text-[var(--text-secondary)]">
-                <span class="text-5xl mb-4 animate-bounce">🌍</span>
-                <p class="text-lg font-medium tracking-wide">Finding someone...</p>
+            <div id="waiting-indicator" class="absolute inset-0 flex flex-col items-center justify-center text-white/50">
+                <span class="text-5xl mb-4 animate-pulse">🌍</span>
+                <p>Finding someone...</p>
             </div>
 
-            <!-- Local Video (Your Camera) -->
             <video id="local-video" autoplay muted playsinline></video>
+
+            <!-- ✨ NEW: CHAT OVERLAY IN VIDEO ✨ -->
+            <div id="chat-overlay">
+                <div class="flex justify-between items-center p-3 border-b border-[var(--border)]">
+                    <h3 class="font-semibold text-sm">Live Chat</h3>
+                    <button id="close-chat" class="text-[var(--text-secondary)] hover:text-white text-xl leading-none">&times;</button>
+                </div>
+                <div id="messages-area" class="flex-grow p-3 overflow-y-auto flex flex-col scroll-smooth">
+                    <!-- Messages appear here -->
+                </div>
+                <form id="chat-form" class="p-2 border-t border-[var(--border)] flex gap-2 shrink-0">
+                    <input id="chat-input" type="text" placeholder="Type a message..." class="glass-input flex-grow rounded-full px-4 py-2 text-sm" autocomplete="off" disabled>
+                    <button type="submit" id="send-btn" class="bg-[var(--accent)] text-white rounded-full w-9 h-9 flex items-center justify-center disabled:opacity-50" disabled>
+                        <svg class="w-4 h-4 ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                    </button>
+                </form>
+            </div>
         </div>
 
-        <!-- Video Call Controls -->
+        <!-- Controls -->
         <div class="control-area shrink-0">
-            <!-- Mic Toggle -->
-            <button type="button" id="mic-toggle" class="btn-control" title="Mute/Unmute">
-                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+            <button id="mic-toggle" class="btn-control"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg></button>
+            <button id="cam-toggle" class="btn-control"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button>
+            
+            <!-- ✨ NEW: CHAT TOGGLE BUTTON ✨ -->
+            <button id="chat-toggle" class="btn-control">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                <div id="chat-badge"></div>
             </button>
 
-            <!-- Camera Toggle -->
-            <button type="button" id="cam-toggle" class="btn-control" title="Camera On/Off">
-                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-            </button>
-
-            <!-- Next Stranger -->
-            <button type="button" id="next-button" class="btn-skip" title="Next Stranger">
-                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
-            </button>
+            <button id="next-button" class="btn-skip"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg></button>
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        // --- Theme Logic ---
-        const themeBtn = document.getElementById('theme-btn');
-        const moonIcon = document.getElementById('moon-icon');
-        const sunIcon = document.getElementById('sun-icon');
-        
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        updateIcons(savedTheme);
-
-        themeBtn.addEventListener('click', () => {
-            const current = document.documentElement.getAttribute('data-theme');
-            const newTheme = current === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateIcons(newTheme);
-        });
-
-        function updateIcons(theme) {
-            if (theme === 'dark') {
-                moonIcon.classList.remove('hidden');
-                sunIcon.classList.add('hidden');
-            } else {
-                moonIcon.classList.add('hidden');
-                sunIcon.classList.remove('hidden');
-            }
-        }
-
-        // --- Video Call Logic ---
         const socket = typeof io !== 'undefined' ? io() : { emit: () => {}, on: () => {} };
-        let myGender = null, lookingFor = 'anyone';
-        let localStream = null;
+        let myGender = null, lookingFor = 'anyone', localStream = null, isChatOpen = false;
 
         const ui = {
             setupScreen: document.getElementById('setup-screen'),
@@ -346,43 +322,39 @@
             localVideo: document.getElementById('local-video'),
             remoteVideo: document.getElementById('remote-video'),
             waitingInd: document.getElementById('waiting-indicator'),
-            micToggle: document.getElementById('mic-toggle'),
-            camToggle: document.getElementById('cam-toggle'),
-            nextBtn: document.getElementById('next-button')
+            chatOverlay: document.getElementById('chat-overlay'),
+            chatToggle: document.getElementById('chat-toggle'),
+            chatBadge: document.getElementById('chat-badge'),
+            closeChat: document.getElementById('close-chat'),
+            msgArea: document.getElementById('messages-area'),
+            chatForm: document.getElementById('chat-form'),
+            chatInput: document.getElementById('chat-input'),
+            sendBtn: document.getElementById('send-btn'),
+            videoArea: document.getElementById('video-area')
         };
 
-        function setupSelectors(id, callback) {
-            const container = document.getElementById(id);
-            const btns = container.querySelectorAll('.toggle-btn');
-            btns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    btns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    callback(btn.dataset.gender);
-                });
+        // Selectors logic
+        document.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const group = btn.dataset.group;
+                document.querySelectorAll(`.toggle-btn[data-group="${group}"]`).forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                if(group === 'gender') myGender = btn.dataset.val;
+                if(group === 'looking') lookingFor = btn.dataset.val;
             });
-        }
-        setupSelectors('my-gender-selector', val => myGender = val);
-        setupSelectors('looking-for-selector', val => lookingFor = val);
+        });
 
         ui.startBtn.addEventListener('click', async () => {
             if (!myGender) return alert("Please select your gender.");
-            
-            // Try to access camera and microphone
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 ui.localVideo.srcObject = localStream;
             } catch (err) {
-                alert("Camera & Microphone access is required for Video Call!");
-                return;
+                alert("Camera/Mic access required!"); return;
             }
-
-            const nick = ui.nickInput.value.trim() || "Anonymous";
-            socket.emit("set-nickname", nick);
-            
+            socket.emit("set-nickname", ui.nickInput.value.trim() || "Anonymous");
             ui.setupScreen.classList.add('hidden');
             ui.chatUI.classList.remove('hidden');
-            
             findPartner();
         });
 
@@ -391,43 +363,71 @@
             ui.remoteVideo.classList.remove('active');
             ui.remoteVideo.srcObject = null;
             ui.waitingInd.style.display = 'flex';
+            ui.msgArea.innerHTML = ''; // clear chat
             
-            const interestString = sessionStorage.getItem('swaploop_interests') || "";
-            const interests = interestString.split(',').map(s => s.trim()).filter(s => s);
-            
-            socket.emit("find-partner", { gender: myGender, lookingFor, type: 'video', interests: interests });
-            
-            // For Demo/Testing
-            if(typeof io === 'undefined') {
-                setTimeout(() => {
-                    updateStatus('connected', 'Test User');
-                    ui.waitingInd.style.display = 'none';
-                }, 2000);
-            }
+            const interests = (sessionStorage.getItem('swaploop_interests') || "").split(',').map(s=>s.trim()).filter(Boolean);
+            socket.emit("find-partner", { gender: myGender, lookingFor, type: 'video', interests });
         }
 
-        ui.nextBtn.addEventListener('click', () => {
-            socket.emit("next");
-            findPartner();
+        document.getElementById('next-button').addEventListener('click', () => {
+            socket.emit("next"); findPartner();
         });
 
-        // Toggle Mic
-        let isMicOn = true;
-        ui.micToggle.addEventListener('click', () => {
+        // Toggles
+        document.getElementById('mic-toggle').addEventListener('click', function() {
             if(localStream) {
-                isMicOn = !isMicOn;
-                localStream.getAudioTracks()[0].enabled = isMicOn;
-                ui.micToggle.classList.toggle('off', !isMicOn);
+                let enabled = localStream.getAudioTracks()[0].enabled;
+                localStream.getAudioTracks()[0].enabled = !enabled;
+                this.classList.toggle('off', enabled);
+            }
+        });
+        document.getElementById('cam-toggle').addEventListener('click', function() {
+            if(localStream) {
+                let enabled = localStream.getVideoTracks()[0].enabled;
+                localStream.getVideoTracks()[0].enabled = !enabled;
+                this.classList.toggle('off', enabled);
             }
         });
 
-        // Toggle Camera
-        let isCamOn = true;
-        ui.camToggle.addEventListener('click', () => {
-            if(localStream) {
-                isCamOn = !isCamOn;
-                localStream.getVideoTracks()[0].enabled = isCamOn;
-                ui.camToggle.classList.toggle('off', !isCamOn);
+        // ✨ CHAT LOGIC ✨
+        function toggleChat() {
+            isChatOpen = !isChatOpen;
+            ui.chatOverlay.classList.toggle('active', isChatOpen);
+            ui.videoArea.classList.toggle('chat-open', isChatOpen);
+            if(isChatOpen) {
+                ui.chatBadge.style.display = 'none';
+                setTimeout(() => ui.chatInput.focus(), 300);
+            }
+        }
+        ui.chatToggle.addEventListener('click', toggleChat);
+        ui.closeChat.addEventListener('click', toggleChat);
+
+        ui.chatInput.addEventListener('input', () => ui.sendBtn.disabled = !ui.chatInput.value.trim());
+
+        ui.chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const msg = ui.chatInput.value.trim();
+            if(msg) {
+                socket.emit('send-message', { message: msg });
+                appendMsg(msg, 'sent');
+                ui.chatInput.value = '';
+                ui.sendBtn.disabled = true;
+            }
+        });
+
+        function appendMsg(text, type) {
+            const div = document.createElement('div');
+            div.className = `chat-bubble ${type}`;
+            div.textContent = text;
+            ui.msgArea.appendChild(div);
+            ui.msgArea.scrollTop = ui.msgArea.scrollHeight;
+        }
+
+        socket.on('receive-message', ({ message }) => {
+            appendMsg(message, 'received');
+            if(!isChatOpen) {
+                ui.chatBadge.style.display = 'block';
+                // optional: play sound here
             }
         });
 
@@ -435,35 +435,31 @@
             updateStatus('connected', partnerNickname);
             ui.waitingInd.style.display = 'none';
             ui.remoteVideo.classList.add('active');
-            // WebRTC Logic goes here to attach stream to ui.remoteVideo.srcObject
+            ui.chatInput.disabled = false;
+            // WebRTC Logic goes here...
         });
 
         socket.on('partner-disconnected', () => {
             updateStatus('disconnected');
             ui.remoteVideo.classList.remove('active');
-            ui.remoteVideo.srcObject = null;
-            
-            setTimeout(() => {
-                socket.emit('next');
-                findPartner();
-            }, 2000); 
+            ui.chatInput.disabled = true;
+            setTimeout(() => { socket.emit('next'); findPartner(); }, 2000); 
         });
 
         function updateStatus(state, name="Stranger") {
             ui.partnerName.textContent = name;
-
             if (state === 'searching') {
                 ui.statusText.textContent = "Searching...";
                 ui.statusText.style.color = "#eab308";
-                ui.statusDot.className = "w-2 h-2 rounded-full bg-yellow-500 animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.6)]";
+                ui.statusDot.className = "w-2 h-2 rounded-full bg-yellow-500 animate-pulse";
             } else if (state === 'connected') {
                 ui.statusText.textContent = "Online";
                 ui.statusText.style.color = "#22c55e";
-                ui.statusDot.className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]";
-            } else if (state === 'disconnected') {
+                ui.statusDot.className = "w-2 h-2 rounded-full bg-green-500";
+            } else {
                 ui.statusText.textContent = "Disconnected";
                 ui.statusText.style.color = "#ef4444";
-                ui.statusDot.className = "w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]";
+                ui.statusDot.className = "w-2 h-2 rounded-full bg-red-500";
             }
         }
     </script>
