@@ -137,12 +137,15 @@
             border: 1px solid var(--border);
             cursor: pointer;
             position: relative;
+            transition: all 0.3s;
         }
         .btn-control.off {
             background: rgba(239, 68, 68, 0.2);
             color: #ef4444;
             border-color: #ef4444;
         }
+        .btn-control:hover { transform: translateY(-2px); border-color: var(--accent); }
+        
         .btn-skip {
             background: var(--accent-gradient);
             color: white;
@@ -150,7 +153,9 @@
             width: 50px; height: 50px;
             display: flex; align-items: center; justify-content: center;
             border: none;
+            transition: all 0.3s;
         }
+        .btn-skip:hover { transform: scale(1.05); }
 
         /* Chat Overlay UI */
         #chat-overlay {
@@ -273,7 +278,7 @@
 
             <video id="local-video" autoplay muted playsinline></video>
 
-            <!-- ✨ NEW: CHAT OVERLAY IN VIDEO ✨ -->
+            <!-- CHAT OVERLAY IN VIDEO -->
             <div id="chat-overlay">
                 <div class="flex justify-between items-center p-3 border-b border-[var(--border)]">
                     <h3 class="font-semibold text-sm">Live Chat</h3>
@@ -296,7 +301,6 @@
             <button id="mic-toggle" class="btn-control"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg></button>
             <button id="cam-toggle" class="btn-control"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button>
             
-            <!-- ✨ NEW: CHAT TOGGLE BUTTON ✨ -->
             <button id="chat-toggle" class="btn-control">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
                 <div id="chat-badge"></div>
@@ -306,10 +310,13 @@
         </div>
     </div>
 
+    <!-- WebRTC SimplePeer Library -->
+    <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = typeof io !== 'undefined' ? io() : { emit: () => {}, on: () => {} };
         let myGender = null, lookingFor = 'anyone', localStream = null, isChatOpen = false;
+        let peer = null; // WebRTC Peer
 
         const ui = {
             setupScreen: document.getElementById('setup-screen'),
@@ -363,14 +370,16 @@
             ui.remoteVideo.classList.remove('active');
             ui.remoteVideo.srcObject = null;
             ui.waitingInd.style.display = 'flex';
-            ui.msgArea.innerHTML = ''; // clear chat
+            ui.msgArea.innerHTML = ''; 
             
             const interests = (sessionStorage.getItem('swaploop_interests') || "").split(',').map(s=>s.trim()).filter(Boolean);
             socket.emit("find-partner", { gender: myGender, lookingFor, type: 'video', interests });
         }
 
         document.getElementById('next-button').addEventListener('click', () => {
-            socket.emit("next"); findPartner();
+            if (peer) { peer.destroy(); peer = null; }
+            socket.emit("next"); 
+            findPartner();
         });
 
         // Toggles
@@ -389,7 +398,7 @@
             }
         });
 
-        // ✨ CHAT LOGIC ✨
+        // CHAT LOGIC 
         function toggleChat() {
             isChatOpen = !isChatOpen;
             ui.chatOverlay.classList.toggle('active', isChatOpen);
@@ -427,24 +436,48 @@
             appendMsg(message, 'received');
             if(!isChatOpen) {
                 ui.chatBadge.style.display = 'block';
-                // optional: play sound here
             }
         });
 
-        socket.on('partner-found', ({ partnerNickname }) => {
+        // FULL WEBRTC LOGIC 
+        socket.on('partner-found', ({ initiator, partnerNickname }) => {
             updateStatus('connected', partnerNickname);
             ui.waitingInd.style.display = 'none';
-            ui.remoteVideo.classList.add('active');
             ui.chatInput.disabled = false;
-            // WebRTC Logic goes here...
+
+            peer = new SimplePeer({
+                initiator: initiator,
+                stream: localStream,
+                config: { 
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:global.stun.twilio.com:3478' }
+                    ] 
+                }
+            });
+
+            peer.on('signal', data => socket.emit('signal', data));
+            
+            peer.on('stream', stream => {
+                ui.remoteVideo.srcObject = stream;
+                ui.remoteVideo.classList.add('active');
+            });
+
+            peer.on('close', handleRemoteDisconnect);
+            peer.on('error', handleRemoteDisconnect);
         });
 
-        socket.on('partner-disconnected', () => {
+        socket.on('signal', data => { if(peer) peer.signal(data); });
+        socket.on('partner-disconnected', handleRemoteDisconnect);
+
+        function handleRemoteDisconnect() {
+            if (peer) { peer.destroy(); peer = null; }
             updateStatus('disconnected');
             ui.remoteVideo.classList.remove('active');
+            ui.remoteVideo.srcObject = null;
             ui.chatInput.disabled = true;
             setTimeout(() => { socket.emit('next'); findPartner(); }, 2000); 
-        });
+        }
 
         function updateStatus(state, name="Stranger") {
             ui.partnerName.textContent = name;
