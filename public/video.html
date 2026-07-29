@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>SwapLoop - Video Call</title>
+    <title>SwapLoop - Split Screen Video Call</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -73,46 +73,59 @@
             border-color: transparent;
         }
 
-        /* Video Area */
+        /* ✨ SPLIT SCREEN VIDEO AREA ✨ */
         #video-area {
             position: relative;
-            background: rgba(0, 0, 0, 0.6);
+            background: #000;
             flex-grow: 1;
             overflow: hidden;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column; /* Mobile: മുകളിലും താഴെയുമായി */
+        }
+        
+        @media (min-width: 768px) {
+            #video-area {
+                flex-direction: row; /* PC: ഇടത്തും വലത്തുമായി */
+            }
         }
 
-        #remote-video {
+        .video-wrapper {
+            position: relative;
+            flex: 1; /* 50-50 Ratio */
+            width: 100%;
+            height: 100%;
+            background: #0a0a0a;
+            border-bottom: 2px solid var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        @media (min-width: 768px) {
+            .video-wrapper {
+                border-bottom: none;
+                border-right: 2px solid var(--accent);
+            }
+            .video-wrapper:last-child {
+                border-right: none;
+            }
+        }
+
+        #remote-video, #local-video {
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+
+        #remote-video {
             opacity: 0;
             transition: opacity 0.5s ease;
         }
         #remote-video.active { opacity: 1; }
 
         #local-video {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            width: 100px;
-            height: 140px;
-            object-fit: cover;
-            border-radius: 12px;
-            border: 2px solid var(--accent);
-            box-shadow: 0 8px 25px var(--accent-glow);
-            z-index: 20;
-            background: #000;
             transform: scaleX(-1);
-            transition: all 0.3s ease;
-        }
-        /* Move local video up when chat is open on mobile */
-        .chat-open #local-video {
-            bottom: 340px; 
-            width: 80px;
-            height: 110px;
         }
 
         /* Controls */
@@ -225,15 +238,36 @@
             color: var(--text-primary);
         }
         .glass-input:focus { outline: none; border-color: var(--accent); }
+
+        /* ✨ AI Warning Banner ✨ */
+        #ai-warning {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            z-index: 100;
+            display: none;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.5);
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
     <!-- SETUP SCREEN -->
-    <div id="setup-screen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+    <div id="setup-screen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">                 
         <div class="satin-card w-full max-w-sm p-8 rounded-[2rem] text-center">
             <div class="text-4xl mb-6">📹</div>
-            <h1 class="text-3xl font-bold mb-6">Video Call</h1>
+            <h1 class="text-3xl font-bold mb-2">Video Call</h1>
+            
+            <p id="ai-loading-text" class="text-xs text-[var(--accent)] font-semibold mb-6 animate-pulse">Loading AI Safety Module...</p>
+            
             <div class="space-y-5">
                 <input id="nickname-input" type="text" placeholder="Enter Nickname" class="glass-input w-full p-4 rounded-2xl text-center font-medium">
                 
@@ -248,7 +282,7 @@
                     <button class="toggle-btn active p-2 rounded-lg text-sm" data-group="looking" data-val="anyone">Anyone</button>
                 </div>
 
-                <button id="start-button" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold p-4 rounded-2xl mt-4 shadow-lg">
+                <button id="start-button" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold p-4 rounded-2xl mt-4 shadow-lg disabled:opacity-50" disabled>
                     Start Camera
                 </button>
             </div>
@@ -269,14 +303,21 @@
         </div>
 
         <div id="video-area">
-            <video id="remote-video" autoplay playsinline></video>
-            
-            <div id="waiting-indicator" class="absolute inset-0 flex flex-col items-center justify-center text-white/50">
-                <span class="text-5xl mb-4 animate-pulse">🌍</span>
-                <p>Finding someone...</p>
+            <div id="ai-warning">⚠️ Inappropriate Content Detected. Auto-Skipping...</div>
+
+            <!-- ✨ Remote Video Section (Stranger) ✨ -->
+            <div class="video-wrapper">
+                <video id="remote-video" autoplay playsinline></video>
+                <div id="waiting-indicator" class="absolute inset-0 flex flex-col items-center justify-center text-white/50 z-10">
+                    <span class="text-5xl mb-4 animate-pulse">🌍</span>
+                    <p class="font-medium mt-2">Finding someone...</p>
+                </div>
             </div>
 
-            <video id="local-video" autoplay muted playsinline></video>
+            <!-- ✨ Local Video Section (You) ✨ -->
+            <div class="video-wrapper">
+                <video id="local-video" autoplay muted playsinline crossorigin="anonymous"></video>
+            </div>
 
             <!-- CHAT OVERLAY IN VIDEO -->
             <div id="chat-overlay">
@@ -284,9 +325,7 @@
                     <h3 class="font-semibold text-sm">Live Chat</h3>
                     <button id="close-chat" class="text-[var(--text-secondary)] hover:text-white text-xl leading-none">&times;</button>
                 </div>
-                <div id="messages-area" class="flex-grow p-3 overflow-y-auto flex flex-col scroll-smooth">
-                    <!-- Messages appear here -->
-                </div>
+                <div id="messages-area" class="flex-grow p-3 overflow-y-auto flex flex-col scroll-smooth"></div>
                 <form id="chat-form" class="p-2 border-t border-[var(--border)] flex gap-2 shrink-0">
                     <input id="chat-input" type="text" placeholder="Type a message..." class="glass-input flex-grow rounded-full px-4 py-2 text-sm" autocomplete="off" disabled>
                     <button type="submit" id="send-btn" class="bg-[var(--accent)] text-white rounded-full w-9 h-9 flex items-center justify-center disabled:opacity-50" disabled>
@@ -310,18 +349,29 @@
         </div>
     </div>
 
-    <!-- WebRTC SimplePeer Library -->
+    <!-- WebRTC SimplePeer -->
     <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
+    
+    <!-- ✨ HIGHLY RELIABLE CDNS FOR AI MODERATION ✨ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/2.8.5/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nsfwjs@2.4.1/dist/nsfwjs.min.js"></script>
+
     <script>
         const socket = typeof io !== 'undefined' ? io() : { emit: () => {}, on: () => {} };
         let myGender = null, lookingFor = 'anyone', localStream = null, isChatOpen = false;
-        let peer = null; // WebRTC Peer
+        let peer = null; 
+        
+        // AI Variables
+        let nsfwModel = null;
+        let aiScanInterval = null;
 
         const ui = {
             setupScreen: document.getElementById('setup-screen'),
             chatUI: document.getElementById('chat-ui'),
             startBtn: document.getElementById('start-button'),
+            aiLoadingText: document.getElementById('ai-loading-text'),
+            aiWarning: document.getElementById('ai-warning'),
             nickInput: document.getElementById('nickname-input'),
             partnerName: document.getElementById('partner-nickname'),
             statusText: document.getElementById('status-text'),
@@ -340,6 +390,22 @@
             videoArea: document.getElementById('video-area')
         };
 
+        // ✨ LOCAL MODEL URL ✨
+        const modelUrl = '/model/';
+        
+        nsfwjs.load(modelUrl).then(model => {
+            nsfwModel = model;
+            ui.aiLoadingText.textContent = "✅ AI Safety Module Active";
+            ui.aiLoadingText.classList.remove('animate-pulse');
+            ui.aiLoadingText.style.color = "#22c55e"; // Green
+            ui.startBtn.disabled = false; // Enable Start button
+        }).catch(err => {
+            console.error("AI Fetch Error:", err);
+            ui.aiLoadingText.textContent = "⚠️ Error: Model loading failed.";
+            ui.aiLoadingText.style.color = "#ef4444"; // Red
+            ui.startBtn.disabled = false; // Unblock UI anyway
+        });
+
         // Selectors logic
         document.querySelectorAll('.toggle-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -356,6 +422,12 @@
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 ui.localVideo.srcObject = localStream;
+                
+                // Start AI Scanning every 2.5 seconds
+                if (nsfwModel) {
+                    aiScanInterval = setInterval(checkVideoForNSFW, 2500);
+                }
+
             } catch (err) {
                 alert("Camera/Mic access required!"); return;
             }
@@ -364,6 +436,32 @@
             ui.chatUI.classList.remove('hidden');
             findPartner();
         });
+
+        // AI Video Scanning Function
+        async function checkVideoForNSFW() {
+            if (!nsfwModel || !ui.localVideo || ui.localVideo.paused || ui.localVideo.ended) return;
+            
+            try {
+                const predictions = await nsfwModel.classify(ui.localVideo);
+                const badContent = predictions.find(p => (p.className === 'Porn' || p.className === 'Hentai') && p.probability > 0.6);
+                
+                if (badContent) {
+                    console.warn("🚫 NSFW Content Detected! Probability:", badContent.probability);
+                    
+                    ui.aiWarning.style.display = 'block';
+                    
+                    if (peer) { peer.destroy(); peer = null; }
+                    socket.emit("next");
+                    
+                    setTimeout(() => {
+                        ui.aiWarning.style.display = 'none';
+                        findPartner();
+                    }, 3000); 
+                }
+            } catch (e) {
+                console.error("AI Scan Error:", e);
+            }
+        }
 
         function findPartner() {
             updateStatus('searching');
