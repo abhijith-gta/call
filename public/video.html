@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -111,13 +111,13 @@
         .btn-control.off { background: rgba(239, 68, 68, 0.2); color: #ef4444; border-color: #ef4444; }
         .btn-control:hover:not(.stop) { transform: translateY(-2px); border-color: var(--accent); }
 
-        /* Stop Button CSS */
         .btn-control.stop { background: rgba(239, 68, 68, 0.15); color: #ef4444; border-color: #ef4444; }
         .btn-control.stop:hover { background: #ef4444; color: white; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(239,68,68,0.4); }
         
         .btn-skip {
             background: var(--accent-gradient); color: white; border-radius: 50%; width: 50px; height: 50px;
             display: flex; align-items: center; justify-content: center; border: none; transition: all 0.3s;
+            cursor: pointer;
         }
         .btn-skip:hover { transform: scale(1.05); box-shadow: 0 4px 15px var(--accent-glow); }
         .btn-skip:active { transform: scale(0.95); }
@@ -237,8 +237,8 @@
                 </div>
                 <div id="messages-area" class="flex-grow p-3 overflow-y-auto flex flex-col scroll-smooth"></div>
                 <form id="chat-form" class="p-2 border-t border-[var(--border)] flex gap-2 shrink-0">
-                    <input id="chat-input" type="text" placeholder="Type a message..." class="glass-input flex-grow rounded-full px-4 py-2 text-sm" autocomplete="off" disabled>
-                    <button type="submit" id="send-btn" class="bg-[var(--accent)] text-white rounded-full w-9 h-9 flex items-center justify-center disabled:opacity-50" disabled>
+                    <input id="chat-input" type="text" placeholder="Type a message..." class="glass-input flex-grow rounded-full px-4 py-2 text-sm" autocomplete="off">
+                    <button type="submit" id="send-btn" class="bg-[var(--accent)] text-white rounded-full w-9 h-9 flex items-center justify-center transition-all hover:bg-purple-500">
                         <svg class="w-4 h-4 ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
                     </button>
                 </form>
@@ -270,14 +270,15 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface"></script>
 
     <script>
-        if (localStorage.getItem('swaploop_ban_v3')) {
-            const banExpiry = parseInt(localStorage.getItem('swaploop_ban_v3'));
+        // Changed to 'swaploop_ban_v5' to clear old bans
+        if (localStorage.getItem('swaploop_ban_v5')) {
+            const banExpiry = parseInt(localStorage.getItem('swaploop_ban_v5'));
             if (Date.now() < banExpiry) {
                 document.getElementById('ban-screen').classList.remove('hidden');
                 document.getElementById('setup-screen').classList.add('hidden');
                 throw new Error("User is currently banned.");
             } else {
-                localStorage.removeItem('swaploop_ban_v3');
+                localStorage.removeItem('swaploop_ban_v5');
             }
         }
 
@@ -318,7 +319,6 @@
             sendBtn: document.getElementById('send-btn') 
         };
 
-        // Fallback Loading: Tries /models/ -> /model/ -> Online CDN
         Promise.all([
             nsfwjs.load('/models/')
                 .catch(() => nsfwjs.load('/model/'))
@@ -376,35 +376,14 @@
             isScanning = true;
 
             try {
-                // 1. Explicit NSFW Check with 3-Strike System
-                const predictions = await nsfwModel.classify(ui.localVideo);
+                // 1. SAFETY GUARD: Face undel maathrame AI scan cheyyu (Prevents false motion bans)
+                const faces = await faceModel.estimateFaces(ui.localVideo, false);
                 
-                const badContent = predictions.find(p => 
-                    (p.className === 'Porn' && p.probability > 0.75) || 
-                    (p.className === 'Hentai' && p.probability > 0.75) ||
-                    (p.className === 'Sexy' && p.probability > 0.85) 
-                );
-                
-                if (badContent) {
-                    nsfwStrikeCount++; 
-                    if (nsfwStrikeCount >= 3) {
-                        if (peer) { peer.destroy(); peer = null; }
-                        socket.emit("next");
-                        localStorage.setItem('swaploop_ban_v3', Date.now() + 24 * 60 * 60 * 1000); 
-                        location.reload();
-                        return;
-                    }
-                } else {
-                    nsfwStrikeCount = 0; 
-                }
-
-                // 2. 15s Face Check Timer
-                if (peer && connectedTime > 0) {
-                    const faces = await faceModel.estimateFaces(ui.localVideo, false);
-                    if (faces.length === 0) {
+                if (faces.length === 0) {
+                    // Face illaankil 15s timer handle cheyyuka
+                    if (peer && connectedTime > 0) {
                         noFaceTime++;
                         let timeLeft = 15 - noFaceTime;
-                        
                         if (timeLeft > 0) {
                             ui.aiWarning.textContent = `⚠️ Show your face! Disconnecting in ${timeLeft}s`;
                             ui.aiWarning.style.display = 'block';
@@ -415,14 +394,35 @@
                             noFaceTime = 0;
                             handleRemoteDisconnect();
                         }
-                    } else {
-                        noFaceTime = 0;
-                        ui.aiWarning.style.display = 'none';
                     }
+                    isScanning = false;
+                    return; // Face illenkil NSFW check skip cheyyum (Prevents false ban when stepping away)
                 } else {
                     noFaceTime = 0;
                     ui.aiWarning.style.display = 'none';
                 }
+
+                // 2. Explicit NSFW Check (Only runs when face is detected on camera)
+                const predictions = await nsfwModel.classify(ui.localVideo);
+                const badContent = predictions.find(p => 
+                    (p.className === 'Porn' && p.probability > 0.65) || 
+                    (p.className === 'Hentai' && p.probability > 0.65) ||
+                    (p.className === 'Sexy' && p.probability > 0.75) 
+                );
+                
+                if (badContent) {
+                    nsfwStrikeCount++; 
+                    if (nsfwStrikeCount >= 3) { // 3 continuous checks required with a face present
+                        if (peer) { peer.destroy(); peer = null; }
+                        socket.emit("next");
+                        localStorage.setItem('swaploop_ban_v5', Date.now() + 24 * 60 * 60 * 1000); 
+                        location.reload();
+                        return;
+                    }
+                } else {
+                    if(nsfwStrikeCount > 0) nsfwStrikeCount--; 
+                }
+
             } catch (e) { 
                 console.error("AI Scan Error:", e); 
             } finally {
@@ -460,7 +460,7 @@
             connectedTime = 0;
             ui.remoteVideo.classList.remove('active');
             ui.remoteVideo.srcObject = null;
-            ui.chatInput.disabled = true;
+            ui.chatInput.disabled = false;
             ui.waitingInd.classList.add('hidden'); 
         });
 
@@ -479,11 +479,16 @@
         }
         ui.chatToggle.addEventListener('click', toggleChat);
         ui.closeChat.addEventListener('click', toggleChat);
-        ui.chatInput.addEventListener('input', () => ui.sendBtn.disabled = !ui.chatInput.value.trim());
 
         ui.chatForm.addEventListener('submit', (e) => {
-            e.preventDefault(); const msg = ui.chatInput.value.trim();
-            if(msg) { socket.emit('send-message', { message: msg }); appendMsg(msg, 'sent'); ui.chatInput.value = ''; ui.sendBtn.disabled = true; }
+            e.preventDefault(); 
+            const msg = ui.chatInput.value.trim();
+            if(msg) { 
+                socket.emit('send-message', { message: msg }); 
+                appendMsg(msg, 'sent'); 
+                ui.chatInput.value = ''; 
+                ui.chatInput.focus(); 
+            }
         });
 
         function appendMsg(text, type) {
@@ -497,7 +502,6 @@
             updateStatus('connected', partnerNickname);
             connectedTime = Date.now(); 
             ui.waitingInd.classList.add('hidden');
-            ui.chatInput.disabled = false;
 
             peer = new SimplePeer({
                 initiator: initiator, stream: localStream,
@@ -518,7 +522,6 @@
             connectedTime = 0;
             ui.remoteVideo.classList.remove('active');
             ui.remoteVideo.srcObject = null;
-            ui.chatInput.disabled = true;
             ui.waitingInd.classList.add('hidden');
             socket.emit("next");
         }
