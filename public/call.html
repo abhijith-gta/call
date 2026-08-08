@@ -24,10 +24,6 @@
             --btn-bg: rgba(255, 255, 255, 0.05);
             --border: rgba(255, 255, 255, 0.08);
             --audio-level: 0.1;
-            
-            /* Chat Bubbles */
-            --msg-sent: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            --msg-received: rgba(255, 255, 255, 0.15);
         }
 
         [data-theme="light"] {
@@ -43,9 +39,6 @@
             --success: #10b981;
             --btn-bg: rgba(0, 0, 0, 0.03);
             --border: rgba(0, 0, 0, 0.08);
-            
-            --msg-sent: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            --msg-received: rgba(0, 0, 0, 0.08);
         }
 
         body {
@@ -158,31 +151,32 @@
         @keyframes wave {
             0% { transform: scale(0.45); opacity: 0.8; border-width: 4px; }
             100% { transform: scale(2.2); opacity: 0; border-width: 0px; }
-        }                                                                     
+        }
+
         /* --- DIALER UI CONTROLS --- */
         .controls-area {
-            padding: 20px;
-            padding-bottom: max(30px, env(safe-area-inset-bottom));
+            padding: 30px;
+            padding-bottom: 50px;
             display: flex;
             flex-direction: column;
-            gap: 30px;
+            gap: 40px;
             align-items: center;
             justify-content: flex-end;
-            min-height: 250px;
+            min-height: 280px;
             background: linear-gradient(to top, var(--bg) 20%, transparent 100%);
         }
 
-        /* Secondary Controls Row */
+        /* Secondary Controls Row (Mute/Speaker) */
         .secondary-controls {
             display: flex;
-            gap: 30px;
+            gap: 70px;
             justify-content: center;
             width: 100%;
             transition: opacity 0.4s ease, transform 0.4s ease;
         }
 
         .icon-btn {
-            width: 60px; height: 60px;
+            width: 68px; height: 68px;
             border-radius: 50%;
             background: var(--btn-bg);
             backdrop-filter: blur(10px);
@@ -205,8 +199,8 @@
         }
 
         .btn-label {
-            font-size: 12px;
-            margin-top: 8px;
+            font-size: 13px;
+            margin-top: 10px;
             color: var(--text-secondary);
             font-weight: 600;
             letter-spacing: 0.5px;
@@ -215,15 +209,15 @@
         /* Main Action Buttons (End / Next) */
         .main-action-container {
             position: relative;
-            width: 80px;
-            height: 80px;
+            width: 90px;
+            height: 90px;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
         .btn-end {
-            width: 70px; height: 70px;
+            width: 80px; height: 80px;
             border-radius: 50%;
             background: var(--danger);
             color: white;
@@ -240,18 +234,18 @@
         .btn-end:active { transform: scale(0.92); }
 
         .btn-next {
-            width: auto; height: 60px;
-            border-radius: 30px;
+            width: auto; height: 64px;
+            border-radius: 32px;
             background: var(--success);
             color: white;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 1.1rem;
             box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4);
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: absolute;
             white-space: nowrap;
-            padding: 0 30px;
+            padding: 0 35px;
             border: none;
         }
         .btn-next:hover {
@@ -277,82 +271,22 @@
         .signal-fair .bar { background: #eab308; }
         .signal-poor .bar { background: var(--danger); }
 
-        /* --- CHAT OVERLAY --- */
-        #chat-overlay {
-            position: absolute;
-            bottom: 110px;
-            left: 50%;
-            transform: translateX(-50%) translateY(20px);
-            width: 90%;
-            max-width: 350px;
-            height: 320px;
-            background: var(--surface);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            z-index: 40;
-            display: flex;
-            flex-direction: column;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-        }
-        #chat-overlay.active {
-            opacity: 1;
-            pointer-events: all;
-            transform: translateX(-50%) translateY(0);
-        }
-
-        .chat-bubble {
-            max-width: 85%;
-            padding: 8px 14px;
-            border-radius: 18px;
-            font-size: 0.85rem;
-            line-height: 1.4;
-            word-wrap: break-word;
-            margin-bottom: 6px;
-            animation: popIn 0.3s ease forwards;
-        }
-        .sent {
-            background: var(--msg-sent);
-            align-self: flex-end;
-            border-bottom-right-radius: 4px;
-            color: white;
-        }
-        .received {
-            background: var(--msg-received);
-            align-self: flex-start;
-            border-bottom-left-radius: 4px;
-            color: var(--text-primary);
-        }
-        @keyframes popIn { from { opacity: 0; transform: scale(0.9) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-
-        #chat-badge {
-            position: absolute;
-            top: -2px; right: -2px;
-            width: 14px; height: 14px;
-            background: #ef4444;
-            border-radius: 50%;
-            border: 2px solid var(--bg);
-            display: none;
-        }
-        
-        .chat-input-field {
-            background: var(--btn-bg);
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-            flex-grow: 1;
-            border-radius: 999px;
-            padding: 8px 16px;
-            font-size: 14px;
-        }
-        .chat-input-field:focus { outline: none; border-color: var(--accent); }
-
         /* Logic States */
         .hidden-scale { transform: scale(0.5); opacity: 0; pointer-events: none; }
         .visible-scale { transform: scale(1); opacity: 1; pointer-events: auto; }
+
+        /* Input Styling */
+        input {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px var(--accent-glow);
+        }
 
         /* Animations */
         .fade-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -376,7 +310,7 @@
             
             <div class="space-y-8">
                 <div>
-                    <input id="nickname-input" type="text" placeholder="Enter Nickname" class="w-full p-4 rounded-2xl text-center text-lg font-medium focus:outline-none transition-all duration-300" style="background: var(--btn-bg); border: 1px solid var(--border);">
+                    <input id="nickname-input" type="text" placeholder="Enter Nickname" class="w-full p-4 rounded-2xl text-center text-lg font-medium focus:outline-none transition-all duration-300">
                 </div>
                 
                 <div class="text-left">
@@ -406,14 +340,7 @@
     <!-- CALL SCREEN -->
     <div id="call-screen" class="hidden flex-col h-full w-full fade-in absolute inset-0 z-10">
         
-        <!-- ✨ TOP CENTER LOGO ✨ -->
-        <div class="absolute top-0 w-full h-20 flex items-center justify-center z-20 pointer-events-none">
-            <span class="text-xl font-extrabold tracking-widest lowercase" style="color: var(--accent); text-shadow: 0 0 15px var(--accent-glow);">
-                swaploop.in
-            </span>
-        </div>
-
-        <div class="text-center pt-24 px-4 relative z-10">
+        <div class="text-center pt-24 px-4">
             <h2 id="partner-nickname" class="text-4xl font-bold mb-2 flex items-center justify-center tracking-tight">
                 Stranger
                 <div id="signal-bar" class="signal-bar hidden" title="Connection Strength">
@@ -434,47 +361,19 @@
             </div>
         </div>
 
-        <!-- ✨ CHAT OVERLAY ✨ -->
-        <div id="chat-overlay">
-            <div class="flex justify-between items-center p-3 border-b border-[var(--border)]">
-                <h3 class="font-semibold text-sm">Live Chat</h3>
-                <button id="close-chat" class="text-[var(--text-secondary)] hover:text-white text-xl leading-none">&times;</button>
-            </div>
-            <div id="messages-area" class="flex-grow p-3 overflow-y-auto flex flex-col scroll-smooth">
-                <!-- Messages appear here -->
-            </div>
-            <form id="chat-form" class="p-2 border-t border-[var(--border)] flex gap-2 shrink-0">
-                <input id="chat-input" type="text" placeholder="Type a message..." class="chat-input-field" autocomplete="off" disabled>
-                <button type="submit" id="send-btn" class="bg-[var(--accent)] text-white rounded-full w-10 h-10 flex items-center justify-center disabled:opacity-50" disabled>
-                    <svg class="w-4 h-4 ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
-                </button>
-            </form>
-        </div>
-
-        <div class="controls-area relative z-10">
+        <div class="controls-area">
             
             <div id="secondary-controls" class="secondary-controls">
-                <!-- Mute -->
                 <div class="flex flex-col items-center">
                     <button id="mute-button" class="icon-btn">
-                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
                     </button>
                     <span class="btn-label">Mute</span>
                 </div>
 
-                <!-- Chat Button -->
-                <div class="flex flex-col items-center">
-                    <button id="chat-toggle" class="icon-btn relative">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
-                        <div id="chat-badge"></div>
-                    </button>
-                    <span class="btn-label">Chat</span>
-                </div>
-
-                <!-- Speaker -->
                 <div class="flex flex-col items-center">
                     <button id="speaker-button" class="icon-btn">
-                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
                     </button>
                     <span class="btn-label">Speaker</span>
                 </div>
@@ -486,12 +385,14 @@
                 </button>
 
                 <button id="next-button" class="btn-next hidden-scale">
-                    Next Stranger <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                    Next Stranger <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                 </button>
             </div>
 
         </div>
-    </div>                                                   
+    </div>
+
+    <!-- UPDATE 1: Added 'controls' and set display none for mobile compatibility -->
     <audio id="remoteAudio" autoplay playsinline controls style="display: none;"></audio>
 
     <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
@@ -550,18 +451,12 @@
                 gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.3);
-            } else if (type === 'msg') {
-                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(500, audioCtx.currentTime + 0.1);
-                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.1);
             }
         }
 
-        // --- Call & Chat Logic ---
+        // --- Call Logic ---
         const socket = typeof io !== 'undefined' ? io() : { emit: () => {}, on: () => {} }; 
-        let peer = null, localStream = null, isMuted = false, isSpeaker = true, analyser = null, isChatOpen = false;
+        let peer = null, localStream = null, isMuted = false, isSpeaker = true, analyser = null;
         let myGender = null, lookingFor = 'anyone';
 
         const ui = {
@@ -579,16 +474,7 @@
             secondaryControls: document.getElementById('secondary-controls'),
             remoteAudio: document.getElementById('remoteAudio'),
             interestMatch: document.getElementById('interest-match'),
-            signalBar: document.getElementById('signal-bar'),
-            // Chat UI
-            chatOverlay: document.getElementById('chat-overlay'),
-            chatToggle: document.getElementById('chat-toggle'),
-            chatBadge: document.getElementById('chat-badge'),
-            closeChat: document.getElementById('close-chat'),
-            msgArea: document.getElementById('messages-area'),
-            chatForm: document.getElementById('chat-form'),
-            chatInput: document.getElementById('chat-input'),
-            sendBtn: document.getElementById('send-btn')
+            signalBar: document.getElementById('signal-bar')
         };
 
         function setupSelectors(id, callback) {
@@ -611,6 +497,7 @@
             if (!myGender) {
                 return alert("Please select your gender first.");
             }
+            
             if (audioCtx.state === 'suspended') { await audioCtx.resume(); }
 
             try {
@@ -633,12 +520,22 @@
         function findPartner() {
             resetCallUI();
             updateStatus('searching');
-            ui.msgArea.innerHTML = ''; // clear chat
-            
             const interestString = sessionStorage.getItem('swaploop_interests') || "";
             const interests = interestString.split(',').map(s => s.trim()).filter(s => s);
             
             socket.emit('find-partner', { gender: myGender, lookingFor, type: 'voice', interests: interests });
+            
+            if(typeof io === 'undefined') {
+                setTimeout(() => {
+                    socket.emit = (event, data) => {
+                        if(event === 'latency-ping' && typeof data === 'function') data();
+                    }
+                    ui.remoteAudio.play = () => Promise.resolve();
+                    playSound('connect');
+                    updateStatus('connected', 'Test User');
+                    startLatencyCheck();
+                }, 3000);
+            }
         }
 
         ui.endBtn.addEventListener('click', () => {
@@ -667,47 +564,6 @@
             playSound('click');
             isSpeaker = !isSpeaker;
             ui.speakerBtn.classList.toggle('active-state', !isSpeaker);
-        });
-
-        // ✨ CHAT LOGIC ✨
-        function toggleChat() {
-            isChatOpen = !isChatOpen;
-            ui.chatOverlay.classList.toggle('active', isChatOpen);
-            if(isChatOpen) {
-                ui.chatBadge.style.display = 'none';
-                setTimeout(() => ui.chatInput.focus(), 300);
-            }
-        }
-        ui.chatToggle.addEventListener('click', () => { playSound('click'); toggleChat(); });
-        ui.closeChat.addEventListener('click', toggleChat);
-
-        ui.chatInput.addEventListener('input', () => ui.sendBtn.disabled = !ui.chatInput.value.trim());
-
-        ui.chatForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const msg = ui.chatInput.value.trim();
-            if(msg) {
-                socket.emit('send-message', { message: msg });
-                appendMsg(msg, 'sent');
-                ui.chatInput.value = '';
-                ui.sendBtn.disabled = true;
-            }
-        });
-
-        function appendMsg(text, type) {
-            const div = document.createElement('div');
-            div.className = `chat-bubble ${type}`;
-            div.textContent = text;
-            ui.msgArea.appendChild(div);
-            ui.msgArea.scrollTop = ui.msgArea.scrollHeight;
-        }
-
-        socket.on('receive-message', ({ message }) => {
-            appendMsg(message, 'received');
-            if(!isChatOpen) {
-                ui.chatBadge.style.display = 'block';
-                playSound('msg');
-            }
         });
 
         function setupVisualizer(stream) {
@@ -757,6 +613,7 @@
                 ui.interestMatch.classList.add('hidden');
             }
 
+            // UPDATE 2: Added a public free TURN server (Metered.ca) for better connectivity on mobile networks
             peer = new SimplePeer({
                 initiator: initiator,
                 stream: localStream,
@@ -768,13 +625,36 @@
                 }
             });
 
+            // UPDATE 3: Added connection state logging for debugging
+            peer.on('connect', () => {
+                console.log("Peer connection fully established!");
+            });
+
+            peer.on('iceStateChange', state => {
+                console.log("ICE Connection State:", state);
+                if (state === 'failed' || state === 'disconnected') {
+                    console.error("Network blocked the audio! STUN/TURN server issue.");
+                }
+            });
+
             peer.on('signal', data => socket.emit('signal', data));
             
             peer.on('stream', stream => {
                 ui.remoteAudio.srcObject = stream;
+                
+                // UPDATE 4: Force volume and handle autoplay promise
                 ui.remoteAudio.volume = 1.0;
                 let playPromise = ui.remoteAudio.play();
-                if (playPromise !== undefined) { playPromise.catch(e => console.log(e)); }
+                
+                if (playPromise !== undefined) {
+                    playPromise.then(_ => {
+                        console.log("Audio playing successfully");
+                    })
+                    .catch(error => {
+                        console.error("Audio play prevented by browser:", error);
+                        // You can add a visual alert here if needed
+                    });
+                }
                 
                 playSound('connect');
                 updateStatus('connected', partnerNickname);
@@ -783,7 +663,7 @@
             peer.on('close', handleRemoteDisconnect);
             peer.on('error', handleRemoteDisconnect);
         });
-        
+
         socket.on('signal', data => { if(peer) peer.signal(data); });
         socket.on('partner-disconnected', handleRemoteDisconnect);
 
@@ -812,7 +692,6 @@
                 ui.statusText.textContent = "00:00";
                 ui.statusText.style.color = "var(--success)";
                 ui.timer.style.opacity = '1';
-                ui.chatInput.disabled = false;
                 
                 let sec = 0;
                 timerInt = setInterval(() => {
@@ -828,14 +707,11 @@
                 ui.timer.style.opacity = '0';
                 ui.signalBar.classList.add('hidden');
                 clearInterval(latencyInterval);
-                ui.chatInput.disabled = true;
                 
                 ui.endBtn.classList.replace('visible-scale', 'hidden-scale');
                 ui.nextBtn.classList.replace('hidden-scale', 'visible-scale');
                 ui.secondaryControls.style.opacity = '0';
                 ui.secondaryControls.style.transform = 'translateY(20px)';
-                
-                if (isChatOpen) toggleChat();
             }
         }
 
