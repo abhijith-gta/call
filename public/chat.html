@@ -10,21 +10,21 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
-            /* DARK MODE (Premium Neon Style) */
-            --bg: #0a0a0a;
-            --surface: rgba(28, 28, 30, 0.75);
-            --header-bg: rgba(28, 28, 30, 0.85);
+            /* DARK MODE (Premium SwapLoop Identity) */
+            --bg: #0a0a0c;
+            --surface: rgba(24, 24, 28, 0.7);
+            --header-bg: rgba(15, 15, 18, 0.9);
             --text-primary: #ffffff;
-            --text-secondary: #a3a3a3;
+            --text-secondary: #9ca3af;
             --accent: #8b5cf6;
-            --accent-glow: rgba(139, 92, 246, 0.4);
-            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #d946ef 100%);
+            --accent-glow: rgba(139, 92, 246, 0.5);
+            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
             --border: rgba(255, 255, 255, 0.08);
             
-            /* Chat Bubble Colors */
+            /* Custom Chat Bubbles */
             --msg-sent: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             --msg-sent-shadow: rgba(139, 92, 246, 0.25);
-            --msg-received: rgba(255, 255, 255, 0.08);
+            --msg-received: rgba(255, 255, 255, 0.06);
             
             --input-bg: rgba(255, 255, 255, 0.05);
             --btn-hover: rgba(255, 255, 255, 0.1);
@@ -41,11 +41,11 @@
             --accent-gradient: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
             --border: rgba(0, 0, 0, 0.08);
             
-            --msg-sent: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            --msg-sent-shadow: rgba(99, 102, 241, 0.2);
-            --msg-received: #f1f5f9;
+            --msg-sent: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 100%);
+            --msg-sent-shadow: rgba(99, 102, 241, 0.25);
+            --msg-received: #ffffff;
             
-            --input-bg: rgba(0, 0, 0, 0.04);
+            --input-bg: rgba(0, 0, 0, 0.03);
             --btn-hover: rgba(0, 0, 0, 0.08);
         }
 
@@ -53,39 +53,17 @@
             font-family: 'Inter', sans-serif;
             background-color: var(--bg);
             color: var(--text-primary);
-            height: 100dvh; /* Dynamic Height for Mobile Keyboards */
+            height: 100dvh; 
             overflow: hidden;
             display: flex;
             flex-direction: column;
             transition: background-color 0.4s ease, color 0.4s ease;
             background-image: 
-                radial-gradient(circle at 80% 20%, rgba(99, 102, 241, 0.03), transparent 40%),
-                radial-gradient(circle at 20% 80%, rgba(217, 70, 239, 0.03), transparent 40%);
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.04), transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(217, 70, 239, 0.04), transparent 40%);
         }
 
-        /* Theme Toggle */
-        .theme-toggle {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background-color: var(--input-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            z-index: 50;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .theme-toggle:hover { 
-            transform: scale(1.1) rotate(15deg); 
-            border-color: var(--accent);
-        }
-        .theme-toggle:active { transform: scale(0.9); }
-
-        /* Setup Card (Glassmorphism) */
+        /* Setup Card */
         .satin-card {
             background-color: var(--surface);
             border: 1px solid var(--border);
@@ -95,27 +73,17 @@
             transition: all 0.3s ease;
         }
 
-        /* Toggles */
         .toggle-btn {
             background: var(--input-bg);
             color: var(--text-secondary);
             border: 1px solid var(--border);
             transition: all 0.3s ease;
         }
-        .toggle-btn:hover {
-            border-color: var(--accent);
-            color: var(--text-primary);
-        }
+        .toggle-btn:hover { border-color: var(--accent); color: var(--text-primary); }
         .toggle-btn.active {
             background: var(--accent-gradient);
-            color: white;
-            border-color: transparent;
+            color: white; border-color: transparent;
             box-shadow: 0 4px 15px var(--accent-glow);
-        }
-
-        /* Chat UI Container */
-        #chat-ui {
-            background: var(--bg);
         }
 
         /* Header */
@@ -124,151 +92,175 @@
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border-bottom: 1px solid var(--border);
+            height: 70px;
         }
+
+        /* Theme Toggle Button (Inside Header) */
+        .header-theme-btn {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .header-theme-btn:hover { border-color: var(--accent); transform: rotate(15deg) scale(1.05); }
+        .header-theme-btn:active { transform: scale(0.95); }
 
         /* Message Bubbles */
         .chat-bubble {
-            max-width: 82%;
+            max-width: 80%;
             padding: 12px 18px;
-            border-radius: 22px;
+            border-radius: 20px;
             font-size: 0.98rem;
             line-height: 1.45;
             position: relative;
             animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
             opacity: 0;
             transform: scale(0.9) translateY(10px);
-            transform-origin: bottom center;
             word-wrap: break-word;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
         .sent {
             background: var(--msg-sent);
             align-self: flex-end;
-            border-bottom-right-radius: 6px;
+            border-bottom-right-radius: 4px;
             color: white;
             box-shadow: 0 4px 15px var(--msg-sent-shadow);
-            transform-origin: bottom right;
         }
 
         .received {
             background: var(--msg-received);
             align-self: flex-start;
-            border-bottom-left-radius: 6px;
+            border-bottom-left-radius: 4px;
             color: var(--text-primary);
             border: 1px solid var(--border);
-            transform-origin: bottom left;
+            backdrop-filter: blur(10px);
         }
 
-        @keyframes popIn { 
-            to { opacity: 1; transform: scale(1) translateY(0); } 
-        }
+        @keyframes popIn { to { opacity: 1; transform: scale(1) translateY(0); } }
 
-        /* Bottom Input Bar (Glassmorphism) */
-        .input-area {
-            background: var(--surface);
+        /* Easy Access Bottom Control Bar */
+        .bottom-control-bar {
+            background: var(--header-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-top: 1px solid var(--border);
             padding: 12px 16px;
-            /* Ensure padding accounts for mobile safe areas */
             padding-bottom: max(12px, env(safe-area-inset-bottom));
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 20;
         }
 
-        .glass-input {
-            background: var(--input-bg);
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-            transition: all 0.3s ease;
-        }
-        .glass-input:focus { 
-            outline: none; 
-            border-color: var(--accent); 
-            background: rgba(0,0,0,0.2); 
-            box-shadow: 0 0 0 2px var(--accent-glow);
-        }
-
-        /* Action Buttons */
+        /* Next/Skip Button (Left side of input) */
         .btn-skip {
             background: var(--input-bg);
-            color: var(--text-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
             border-radius: 50%;
-            width: 46px; height: 46px;
+            width: 48px; height: 48px;
             display: flex; align-items: center; justify-content: center;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid var(--border);
             flex-shrink: 0;
+            cursor: pointer;
         }
         .btn-skip:hover {
-            color: var(--text-primary);
-            border-color: var(--text-secondary);
-            transform: translateY(-2px);
+            border-color: var(--accent);
+            background: var(--btn-hover);
+            transform: scale(1.05);
         }
-        .btn-skip:active { transform: scale(0.9); }
+        .btn-skip:active { transform: scale(0.95); }
 
+        /* Text Input */
+        .chat-input-wrapper {
+            flex-grow: 1;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            padding: 4px 16px;
+            transition: all 0.3s ease;
+        }
+        .chat-input-wrapper:focus-within {
+            border-color: var(--accent);
+            background: var(--surface);
+            box-shadow: 0 0 0 2px var(--accent-glow);
+        }
+        .glass-input {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            width: 100%;
+            padding: 10px 0;
+            font-size: 1rem;
+        }
+        .glass-input:focus { outline: none; }
+
+        /* Send Button */
         .btn-send {
             background: var(--accent-gradient);
             color: white;
             border-radius: 50%;
-            width: 46px; height: 46px;
+            width: 48px; height: 48px;
             display: flex; align-items: center; justify-content: center;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 4px 15px var(--accent-glow);
             flex-shrink: 0;
             border: none;
+            cursor: pointer;
         }
-        .btn-send:hover {
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 6px 20px var(--accent-glow);
-        }
+        .btn-send:hover { transform: scale(1.05); box-shadow: 0 6px 20px var(--accent-glow); }
         .btn-send:active { transform: scale(0.95); }
         .btn-send:disabled {
             background: var(--input-bg);
             color: var(--text-secondary);
             box-shadow: none;
             cursor: not-allowed;
+            border: 1px solid var(--border);
             transform: none;
         }
 
         /* Typing Indicator Animation */
+        .typing-bubble {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 12px 18px;
+        }
         .typing-dot {
-            width: 4px; height: 4px;
-            background-color: var(--accent);
+            width: 5px; height: 5px;
+            background-color: var(--text-secondary);
             border-radius: 50%;
-            display: inline-block;
             animation: bounce 1.4s infinite ease-in-out both;
         }
         .typing-dot:nth-child(1) { animation-delay: -0.32s; }
         .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-        
         @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1.5); }
+            0%, 80%, 100% { transform: scale(0); opacity: 0.4; }
+            40% { transform: scale(1.2); opacity: 1; background-color: var(--accent); }
         }
 
         /* Scrollbar */
         #messages-area::-webkit-scrollbar { width: 5px; }
         #messages-area::-webkit-scrollbar-track { background: transparent; }
-        #messages-area::-webkit-scrollbar-thumb { 
-            background: rgba(139, 92, 246, 0.3); 
-            border-radius: 10px; 
-        }
+        #messages-area::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3); border-radius: 10px; }
         #messages-area::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.5); }
         
-        /* Animations */
         .fade-in { animation: fadeIn 0.5s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme">
-        <svg id="moon-icon" class="w-5 h-5 text-[var(--text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-        <svg id="sun-icon" class="hidden w-5 h-5 text-[var(--text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-    </button>
-
     <!-- SETUP SCREEN -->
-    <div id="setup-screen" class="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md">
+    <div id="setup-screen" class="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/50 backdrop-blur-md">
         <div class="satin-card w-full max-w-sm p-8 md:p-10 rounded-[2rem] text-center fade-in">
             <div class="w-20 h-20 bg-[var(--input-bg)] border border-[var(--border)] rounded-full mx-auto flex items-center justify-center mb-6 shadow-inner">
                 <span class="text-4xl drop-shadow-md">💬</span>
@@ -276,7 +268,7 @@
             <h1 class="text-4xl font-bold mb-8 tracking-tight">Text Chat</h1>
             
             <div class="space-y-7">
-                <input id="nickname-input" type="text" placeholder="Enter Nickname" class="glass-input w-full p-4 rounded-2xl text-center text-lg font-medium">
+                <input id="nickname-input" type="text" placeholder="Enter Nickname" class="w-full p-4 rounded-2xl text-center text-lg font-medium transition-all" style="background: var(--input-bg); border: 1px solid var(--border); color: var(--text-primary); outline: none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
                 
                 <div class="text-left">
                     <label class="text-xs uppercase tracking-widest text-[var(--text-secondary)] font-bold ml-2 mb-3 block">I am</label>
@@ -305,44 +297,64 @@
     <!-- CHAT UI -->
     <div id="chat-ui" class="flex flex-col h-full hidden absolute inset-0">
         
-        <div class="chat-header h-16 flex items-center justify-between px-5 shrink-0 z-10 shadow-sm">
-            <div>
+        <!-- HEADER -->
+        <div class="chat-header flex items-center px-5 shrink-0 z-20 shadow-sm relative justify-between">
+            <!-- Left Side: Stranger Info -->
+            <div class="flex-1 flex flex-col justify-center">
                 <h2 id="partner-nickname" class="text-lg font-bold leading-tight tracking-tight">Stranger</h2>
                 <div class="flex items-center gap-2 mt-0.5">
                     <span id="status-dot" class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.6)]"></span>
                     <p id="status-text" class="text-xs font-semibold text-yellow-500 tracking-wide uppercase">Searching...</p>
                 </div>
             </div>
-            
-            <div id="typing-indicator" class="hidden">
-                <div class="flex items-center gap-1 bg-[var(--input-bg)] px-3 py-1.5 rounded-full border border-[var(--border)]">
-                    <span class="text-xs text-[var(--accent)] font-semibold mr-1">typing</span>
-                    <span class="typing-dot"></span>
-                    <span class="typing-dot"></span>
-                    <span class="typing-dot"></span>
-                </div>
+
+            <!-- Center: Domain Name -->
+            <div class="absolute left-1/2 transform -translate-x-1/2 text-xl font-extrabold tracking-widest cursor-default" style="color: var(--accent); text-shadow: 0 0 15px var(--accent-glow);">
+                swaploop.in
+            </div>
+
+            <!-- Right Side: Theme Toggle -->
+            <div class="flex-1 flex justify-end items-center">
+                <button id="theme-btn" class="header-theme-btn" aria-label="Toggle Theme">
+                    <svg id="moon-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    <svg id="sun-icon" class="hidden w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                </button>
             </div>
         </div>
 
-        <div id="messages-area" class="flex-grow flex flex-col gap-1.5 p-4 overflow-y-auto scroll-smooth">
-            <div class="text-center text-xs text-[var(--text-secondary)] mt-6 mb-10 uppercase tracking-widest opacity-70 font-semibold border-b border-[var(--border)] pb-4 mx-8">Conversation Started</div>
-            <!-- Messages will appear here -->
+        <!-- MESSAGES AREA -->
+        <div id="messages-area" class="flex-grow flex flex-col gap-2 px-4 pt-6 pb-4 overflow-y-auto scroll-smooth">
+            <div class="text-center text-xs text-[var(--text-secondary)] mt-2 mb-6 uppercase tracking-widest opacity-70 font-semibold bg-[var(--surface)] backdrop-blur-md border border-[var(--border)] py-2 px-4 rounded-full mx-auto shadow-sm">End-to-end encrypted</div>
+            
+            <!-- Typing Indicator (Hidden by default) -->
+            <div id="typing-indicator" class="chat-bubble received typing-bubble hidden">
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+            </div>
         </div>
 
-        <form id="chat-form" class="input-area flex gap-3 items-center shrink-0">
+        <!-- ACCESSIBLE BOTTOM CONTROL BAR -->
+        <form id="chat-form" class="bottom-control-bar">
+            
+            <!-- Next / Skip Button -->
             <button type="button" id="next-button" class="btn-skip" title="Next Stranger">
-                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
             </button>
 
-            <input id="chat-input" type="text" placeholder="Type a message..." autocomplete="off" class="glass-input flex-grow py-3 px-5 rounded-full text-[0.95rem]" disabled>
+            <!-- Input Box -->
+            <div class="chat-input-wrapper">
+                <input id="chat-input" type="text" placeholder="Type a message..." autocomplete="off" class="glass-input" disabled>
+            </div>
 
+            <!-- Send Button -->
             <button type="submit" id="send-button" class="btn-send" disabled>
                 <svg class="w-5 h-5 translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
             </button>
+            
         </form>
     </div>
 
-    <!-- Ensure Socket.io handles failures gracefully if server is down -->
     <script src="/socket.io/socket.io.js"></script>
     <script>
         // --- Theme Logic ---
@@ -371,6 +383,9 @@
                 osc.frequency.setValueAtTime(800, audioCtx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(500, audioCtx.currentTime + 0.1);
                 gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            } else if (type === 'click') {
+                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
             }
             
             osc.start();
@@ -378,6 +393,7 @@
         }
 
         themeBtn.addEventListener('click', () => {
+            playSound('click');
             const current = document.documentElement.getAttribute('data-theme');
             const newTheme = current === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', newTheme);
@@ -420,6 +436,7 @@
             const btns = container.querySelectorAll('.toggle-btn');
             btns.forEach(btn => {
                 btn.addEventListener('click', () => {
+                    playSound('click');
                     btns.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     callback(btn.dataset.gender);
@@ -430,6 +447,7 @@
         setupSelectors('looking-for-selector', val => lookingFor = val);
 
         ui.startBtn.addEventListener('click', () => {
+            playSound('click');
             if (!myGender) return alert("Please select your gender.");
             const nick = ui.nickInput.value.trim() || "Anonymous";
             socket.emit("set-nickname", nick);
@@ -442,26 +460,29 @@
 
         function findPartner() {
             updateStatus('searching');
-            // Add slight delay before clearing to allow fade out if needed
-            ui.msgsArea.innerHTML = '<div class="text-center text-xs text-[var(--text-secondary)] mt-6 mb-10 uppercase tracking-widest opacity-70 font-semibold border-b border-[var(--border)] pb-4 mx-8">Conversation Started</div>';
+            
+            // Clean area but keep the encryption badge and typing indicator
+            const initialBadge = '<div class="text-center text-xs text-[var(--text-secondary)] mt-2 mb-6 uppercase tracking-widest opacity-70 font-semibold bg-[var(--surface)] backdrop-blur-md border border-[var(--border)] py-2 px-4 rounded-full mx-auto shadow-sm">Conversation Started</div>';
+            ui.msgsArea.innerHTML = initialBadge;
+            ui.msgsArea.appendChild(ui.typingInd);
+            ui.typingInd.classList.add('hidden');
             
             const interestString = sessionStorage.getItem('swaploop_interests') || "";
             const interests = interestString.split(',').map(s => s.trim()).filter(s => s);
             
             socket.emit("find-partner", { gender: myGender, lookingFor, type: 'text', interests: interests });
             
-            // For Demo/Testing: Simulate finding a partner if no socket server
             if(typeof io === 'undefined') {
                 setTimeout(() => updateStatus('connected', 'Test User'), 2000);
             }
         }
 
         ui.nextBtn.addEventListener('click', () => {
+            playSound('click');
             socket.emit("next");
             findPartner();
         });
 
-        // Enable/Disable send button based on input
         ui.input.addEventListener('input', () => {
             ui.sendBtn.disabled = ui.input.value.trim().length === 0;
             
@@ -487,9 +508,10 @@
             const div = document.createElement('div');
             div.textContent = text;
             div.className = `chat-bubble ${type}`;
-            ui.msgsArea.appendChild(div);
             
-            // Smooth scroll to bottom
+            // Insert before the typing indicator
+            ui.msgsArea.insertBefore(div, ui.typingInd);
+            
             setTimeout(() => {
                 ui.msgsArea.scrollTo({
                     top: ui.msgsArea.scrollHeight,
@@ -499,9 +521,11 @@
         }
 
         socket.on('partner-typing', (isTyping) => {
-            ui.typingInd.style.display = isTyping ? 'block' : 'none';
             if(isTyping) {
+                ui.typingInd.classList.remove('hidden');
                 ui.msgsArea.scrollTo({ top: ui.msgsArea.scrollHeight, behavior: 'smooth' });
+            } else {
+                ui.typingInd.classList.add('hidden');
             }
         });
 
@@ -510,13 +534,13 @@
         });
 
         socket.on('receive-message', ({ message }) => {
+            ui.typingInd.classList.add('hidden'); 
             appendMsg(message, 'received');
             playSound('receive');
         });
 
         socket.on('partner-disconnected', () => {
             updateStatus('disconnected');
-            // Auto skip after short delay
             setTimeout(() => {
                 socket.emit('next');
                 findPartner();
@@ -527,23 +551,23 @@
             ui.partnerName.textContent = name;
             ui.input.disabled = (state !== 'connected');
             if(state !== 'connected') ui.sendBtn.disabled = true;
-            ui.typingInd.style.display = 'none';
+            ui.typingInd.classList.add('hidden');
 
             if (state === 'searching') {
                 ui.statusText.textContent = "Searching...";
-                ui.statusText.style.color = "#eab308"; // yellow
+                ui.statusText.style.color = "#eab308"; 
                 ui.statusDot.className = "w-2 h-2 rounded-full bg-yellow-500 animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.6)]";
             } else if (state === 'connected') {
                 ui.statusText.textContent = "Online";
-                ui.statusText.style.color = "#22c55e"; // green
+                ui.statusText.style.color = "#22c55e"; 
                 ui.statusDot.className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]";
                 ui.input.disabled = false;
                 ui.input.focus();
             } else if (state === 'disconnected') {
                 ui.statusText.textContent = "Disconnected";
-                ui.statusText.style.color = "#ef4444"; // red
+                ui.statusText.style.color = "#ef4444"; 
                 ui.statusDot.className = "w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]";
-                appendMsg("Stranger has disconnected.", "received"); // Show disconnect message
+                appendMsg("Stranger has disconnected.", "received"); 
             }
         }
     </script>
