@@ -158,8 +158,7 @@
         @keyframes wave {
             0% { transform: scale(0.45); opacity: 0.8; border-width: 4px; }
             100% { transform: scale(2.2); opacity: 0; border-width: 0px; }
-        }
-
+        }                                                                     
         /* --- DIALER UI CONTROLS --- */
         .controls-area {
             padding: 20px;
@@ -407,7 +406,14 @@
     <!-- CALL SCREEN -->
     <div id="call-screen" class="hidden flex-col h-full w-full fade-in absolute inset-0 z-10">
         
-        <div class="text-center pt-24 px-4">
+        <!-- ✨ TOP CENTER LOGO ✨ -->
+        <div class="absolute top-0 w-full h-20 flex items-center justify-center z-20 pointer-events-none">
+            <span class="text-xl font-extrabold tracking-widest lowercase" style="color: var(--accent); text-shadow: 0 0 15px var(--accent-glow);">
+                swaploop.in
+            </span>
+        </div>
+
+        <div class="text-center pt-24 px-4 relative z-10">
             <h2 id="partner-nickname" class="text-4xl font-bold mb-2 flex items-center justify-center tracking-tight">
                 Stranger
                 <div id="signal-bar" class="signal-bar hidden" title="Connection Strength">
@@ -428,7 +434,7 @@
             </div>
         </div>
 
-        <!-- ✨ NEW: CHAT OVERLAY ✨ -->
+        <!-- ✨ CHAT OVERLAY ✨ -->
         <div id="chat-overlay">
             <div class="flex justify-between items-center p-3 border-b border-[var(--border)]">
                 <h3 class="font-semibold text-sm">Live Chat</h3>
@@ -445,7 +451,7 @@
             </form>
         </div>
 
-        <div class="controls-area">
+        <div class="controls-area relative z-10">
             
             <div id="secondary-controls" class="secondary-controls">
                 <!-- Mute -->
@@ -456,7 +462,7 @@
                     <span class="btn-label">Mute</span>
                 </div>
 
-                <!-- ✨ NEW: Chat Button ✨ -->
+                <!-- Chat Button -->
                 <div class="flex flex-col items-center">
                     <button id="chat-toggle" class="icon-btn relative">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
@@ -485,8 +491,7 @@
             </div>
 
         </div>
-    </div>
-
+    </div>                                                   
     <audio id="remoteAudio" autoplay playsinline controls style="display: none;"></audio>
 
     <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
@@ -778,7 +783,7 @@
             peer.on('close', handleRemoteDisconnect);
             peer.on('error', handleRemoteDisconnect);
         });
-
+        
         socket.on('signal', data => { if(peer) peer.signal(data); });
         socket.on('partner-disconnected', handleRemoteDisconnect);
 
