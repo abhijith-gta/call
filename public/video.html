@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>SwapLoop - Split Screen Video Call</title>
+    <title>SwapLoop - Video Call</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
-            /* DARK MODE */
             --bg: #0a0a0a;
-            --surface: rgba(28, 28, 30, 0.75);
-            --header-bg: rgba(28, 28, 30, 0.85);
+            --surface: rgba(28, 28, 30, 0.65);
+            --header-bg: rgba(15, 15, 18, 0.85);
             --text-primary: #ffffff;
             --text-secondary: #a3a3a3;
             --accent: #8b5cf6;
@@ -21,26 +20,8 @@
             --accent-gradient: linear-gradient(135deg, #6366f1 0%, #d946ef 100%);
             --border: rgba(255, 255, 255, 0.08);
             --input-bg: rgba(255, 255, 255, 0.05);
-            
-            /* Chat Bubbles */
             --msg-sent: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             --msg-received: rgba(255, 255, 255, 0.15);
-        }
-
-        [data-theme="light"] {
-            --bg: #f8fafc;
-            --surface: rgba(255, 255, 255, 0.85);
-            --header-bg: rgba(255, 255, 255, 0.95);
-            --text-primary: #0f172a;
-            --text-secondary: #64748b;
-            --accent: #6366f1;
-            --accent-glow: rgba(99, 102, 241, 0.3);
-            --accent-gradient: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
-            --border: rgba(0, 0, 0, 0.08);
-            --input-bg: rgba(0, 0, 0, 0.04);
-            
-            --msg-sent: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            --msg-received: rgba(0, 0, 0, 0.08);
         }
 
         body {
@@ -71,218 +52,131 @@
             background: var(--accent-gradient);
             color: white;
             border-color: transparent;
+            box-shadow: 0 4px 15px var(--accent-glow);
         }
 
-        /* ✨ SPLIT SCREEN VIDEO AREA ✨ */
         #video-area {
-            position: relative;
-            background: #000;
-            flex-grow: 1;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column; /* Mobile: മുകളിലും താഴെയുമായി */
+            position: relative; background: #000; flex-grow: 1; overflow: hidden;
+            display: flex; flex-direction: column; transition: all 0.3s ease;
         }
-        
-        @media (min-width: 768px) {
-            #video-area {
-                flex-direction: row; /* PC: ഇടത്തും വലത്തുമായി */
-            }
-        }
+        @media (min-width: 768px) { #video-area { flex-direction: row; } }
 
         .video-wrapper {
-            position: relative;
-            flex: 1; /* 50-50 Ratio */
-            width: 100%;
-            height: 100%;
-            background: #0a0a0a;
-            border-bottom: 2px solid var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
+            position: relative; flex: 1; width: 100%; height: 100%; background: #0a0a0a;
+            border-bottom: 2px solid var(--accent); display: flex; align-items: center;
+            justify-content: center; overflow: hidden; transition: all 0.3s ease;
         }
-        
         @media (min-width: 768px) {
-            .video-wrapper {
-                border-bottom: none;
-                border-right: 2px solid var(--accent);
-            }
-            .video-wrapper:last-child {
-                border-right: none;
-            }
+            .video-wrapper { border-bottom: none; border-right: 2px solid var(--accent); }
+            .video-wrapper:last-child { border-right: none; }
         }
 
-        #remote-video, #local-video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        @media (min-width: 768px) {
+            #chat-ui.creator-active #video-area {
+                display: grid; grid-template-columns: 380px 1fr; 
+                grid-template-rows: calc(50% - 8px) calc(50% - 8px); gap: 16px; padding: 16px; background: var(--bg);
+            }
+            #chat-ui.creator-active .video-wrapper { border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+            #chat-ui.creator-active #remote-wrapper { grid-column: 1; grid-row: 1; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+            #chat-ui.creator-active #local-wrapper { grid-column: 1; grid-row: 2; border-right: 1px solid var(--border); }
+            #chat-ui.creator-active #chat-overlay {
+                position: relative; bottom: auto; left: auto; transform: none; width: 100%; height: 100%;
+                max-width: none; grid-column: 2; grid-row: 1 / span 2; opacity: 1; pointer-events: auto; border-radius: 12px; display: flex;
+            }
+            #chat-ui.creator-active #close-chat, #chat-ui.creator-active #chat-toggle { display: none; }
         }
 
-        #remote-video {
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
+        #remote-video, #local-video { width: 100%; height: 100%; object-fit: cover; }
+        #remote-video { opacity: 0; transition: opacity 0.5s ease; }
         #remote-video.active { opacity: 1; }
+        #local-video { transform: scaleX(-1); }
 
-        #local-video {
-            transform: scaleX(-1);
+        .status-pill {
+            position: absolute; top: 16px; left: 50%; transform: translateX(-50%); background: var(--surface);
+            backdrop-filter: blur(15px); border: 1px solid var(--border); border-radius: 999px; padding: 8px 20px;
+            display: flex; align-items: center; gap: 12px; z-index: 30; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        /* Controls */
         .control-area {
-            background: var(--surface);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid var(--border);
-            padding: 16px;
-            padding-bottom: max(16px, env(safe-area-inset-bottom));
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            z-index: 30;
+            background: var(--surface); backdrop-filter: blur(20px); border-top: 1px solid var(--border);
+            padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); display: flex; justify-content: center; gap: 15px; z-index: 30;
         }
 
         .btn-control {
-            background: var(--input-bg);
-            color: var(--text-primary);
-            border-radius: 50%;
-            width: 50px; height: 50px;
-            display: flex; align-items: center; justify-content: center;
-            border: 1px solid var(--border);
-            cursor: pointer;
-            position: relative;
-            transition: all 0.3s;
+            background: var(--input-bg); color: var(--text-primary); border-radius: 50%; width: 50px; height: 50px;
+            display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); cursor: pointer; transition: all 0.3s;
         }
-        .btn-control.off {
-            background: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
-            border-color: #ef4444;
-        }
+        .btn-control.off { background: rgba(239, 68, 68, 0.2); color: #ef4444; border-color: #ef4444; }
         .btn-control:hover { transform: translateY(-2px); border-color: var(--accent); }
         
         .btn-skip {
-            background: var(--accent-gradient);
-            color: white;
-            border-radius: 50%;
-            width: 50px; height: 50px;
-            display: flex; align-items: center; justify-content: center;
-            border: none;
-            transition: all 0.3s;
+            background: var(--accent-gradient); color: white; border-radius: 50%; width: 50px; height: 50px;
+            display: flex; align-items: center; justify-content: center; border: none; transition: all 0.3s;
         }
-        .btn-skip:hover { transform: scale(1.05); }
+        .btn-skip:hover { transform: scale(1.05); box-shadow: 0 4px 15px var(--accent-glow); }
+        .btn-skip:active { transform: scale(0.95); }
 
-        /* Chat Overlay UI */
         #chat-overlay {
-            position: absolute;
-            bottom: 90px;
-            left: 50%;
-            transform: translateX(-50%) translateY(20px);
-            width: 90%;
-            max-width: 350px;
-            height: 320px;
-            background: var(--surface);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            z-index: 40;
-            display: flex;
-            flex-direction: column;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); width: 90%; max-width: 350px; height: 320px;
+            background: var(--surface); backdrop-filter: blur(25px); border: 1px solid var(--border); border-radius: 20px;
+            z-index: 40; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: all 0.3s ease; box-shadow: 0 15px 35px rgba(0,0,0,0.5);
         }
-        #chat-overlay.active {
-            opacity: 1;
-            pointer-events: all;
-            transform: translateX(-50%) translateY(0);
-        }
+        #chat-overlay.active { opacity: 1; pointer-events: all; transform: translateX(-50%) translateY(0); }
 
-        .chat-bubble {
-            max-width: 85%;
-            padding: 8px 14px;
-            border-radius: 18px;
-            font-size: 0.85rem;
-            line-height: 1.4;
-            word-wrap: break-word;
-            margin-bottom: 6px;
-            animation: popIn 0.3s ease forwards;
-        }
-        .sent {
-            background: var(--msg-sent);
-            align-self: flex-end;
-            border-bottom-right-radius: 4px;
-            color: white;
-        }
-        .received {
-            background: var(--msg-received);
-            align-self: flex-start;
-            border-bottom-left-radius: 4px;
-            color: var(--text-primary);
-        }
-        @keyframes popIn { from { opacity: 0; transform: scale(0.9) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .chat-bubble { max-width: 85%; padding: 8px 14px; border-radius: 18px; font-size: 0.85rem; line-height: 1.4; word-wrap: break-word; margin-bottom: 6px; }
+        .sent { background: var(--msg-sent); align-self: flex-end; border-bottom-right-radius: 4px; color: white; }
+        .received { background: var(--msg-received); align-self: flex-start; border-bottom-left-radius: 4px; color: var(--text-primary); border: 1px solid var(--border); }
 
-        #chat-badge {
-            position: absolute;
-            top: -2px; right: -2px;
-            width: 14px; height: 14px;
-            background: #ef4444;
-            border-radius: 50%;
-            border: 2px solid var(--surface);
-            display: none;
-        }
-        
-        .glass-input {
-            background: var(--input-bg);
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-        }
+        #chat-badge { position: absolute; top: -2px; right: -2px; width: 14px; height: 14px; background: #ef4444; border-radius: 50%; border: 2px solid var(--surface); display: none; }
+        .glass-input { background: var(--input-bg); border: 1px solid var(--border); color: var(--text-primary); }
         .glass-input:focus { outline: none; border-color: var(--accent); }
 
-        /* ✨ AI Warning Banner ✨ */
         #ai-warning {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(239, 68, 68, 0.9);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-weight: bold;
-            z-index: 100;
-            display: none;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.5);
-            text-align: center;
+            position: absolute; top: 70px; left: 50%; transform: translateX(-50%); background: rgba(239, 68, 68, 0.95);
+            color: white; padding: 12px 24px; border-radius: 12px; font-weight: bold; z-index: 100; display: none;
+            backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4); text-align: center; border: 1px solid #f87171;
+            transition: all 0.3s ease;
         }
     </style>
 </head>
 <body>
 
     <!-- SETUP SCREEN -->
-    <div id="setup-screen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">                 
+    <div id="setup-screen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">                
         <div class="satin-card w-full max-w-sm p-8 rounded-[2rem] text-center">
-            <div class="text-4xl mb-6">📹</div>
+            <div class="text-4xl mb-4">📹</div>
             <h1 class="text-3xl font-bold mb-2">Video Call</h1>
+            <p id="ai-loading-text" class="text-xs text-[var(--accent)] font-semibold mb-4 animate-pulse">Loading AI Safety Module...</p>
             
-            <p id="ai-loading-text" class="text-xs text-[var(--accent)] font-semibold mb-6 animate-pulse">Loading AI Safety Module...</p>
-            
-            <div class="space-y-5">
-                <input id="nickname-input" type="text" placeholder="Enter Nickname" class="glass-input w-full p-4 rounded-2xl text-center font-medium">
+            <div class="space-y-4">
+                <input id="nickname-input" type="text" placeholder="Enter Nickname" class="glass-input w-full p-3 rounded-xl text-center font-medium">
                 
-                <div class="grid grid-cols-2 gap-4">
-                    <button class="toggle-btn p-3 rounded-xl font-semibold" data-group="gender" data-val="male">Male</button>
-                    <button class="toggle-btn p-3 rounded-xl font-semibold" data-group="gender" data-val="female">Female</button>
+                <div class="text-left mt-2">
+                    <label class="text-xs uppercase tracking-widest text-[var(--text-secondary)] font-bold ml-2 mb-2 block">I am</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button class="toggle-btn p-3 rounded-xl font-semibold text-sm" data-group="gender" data-val="male">Male</button>
+                        <button class="toggle-btn p-3 rounded-xl font-semibold text-sm" data-group="gender" data-val="female">Female</button>
+                    </div>
                 </div>
                 
-                <div class="grid grid-cols-3 gap-3">
-                    <button class="toggle-btn p-2 rounded-lg text-sm" data-group="looking" data-val="male">Male</button>
-                    <button class="toggle-btn p-2 rounded-lg text-sm" data-group="looking" data-val="female">Female</button>
-                    <button class="toggle-btn active p-2 rounded-lg text-sm" data-group="looking" data-val="anyone">Anyone</button>
+                <div class="text-left">
+                    <label class="text-xs uppercase tracking-widest text-[var(--text-secondary)] font-bold ml-2 mb-2 block">Looking for</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button class="toggle-btn p-2 rounded-lg text-xs" data-group="looking" data-val="male">Male</button>
+                        <button class="toggle-btn p-2 rounded-lg text-xs" data-group="looking" data-val="female">Female</button>
+                        <button class="toggle-btn active p-2 rounded-lg text-xs" data-group="looking" data-val="anyone">Anyone</button>
+                    </div>
                 </div>
 
-                <button id="start-button" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold p-4 rounded-2xl mt-4 shadow-lg disabled:opacity-50" disabled>
+                <div class="text-left">
+                    <label class="text-xs uppercase tracking-widest text-[var(--text-secondary)] font-bold ml-2 mb-2 block">Layout Mode</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button class="toggle-btn active p-3 rounded-xl font-semibold text-sm" data-group="mode" data-val="normal">Normal</button>
+                        <button class="toggle-btn p-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-1" data-group="mode" data-val="creator">🎬 Creator</button>
+                    </div>
+                </div>
+
+                <button id="start-button" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold p-3.5 rounded-xl mt-2 shadow-lg disabled:opacity-50" disabled>
                     Start Camera
                 </button>
             </div>
@@ -292,21 +186,26 @@
     <!-- CALL UI -->
     <div id="chat-ui" class="flex flex-col h-full hidden absolute inset-0">
         
-        <div class="h-16 flex items-center justify-between px-5 shrink-0 z-10" style="background: var(--header-bg); border-bottom: 1px solid var(--border);">
-            <div>
-                <h2 id="partner-nickname" class="text-lg font-bold">Stranger</h2>
-                <div class="flex items-center gap-2 mt-0.5">
-                    <span id="status-dot" class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span>
-                    <p id="status-text" class="text-xs font-semibold text-yellow-500 uppercase">Searching...</p>
-                </div>
+        <div class="h-16 flex items-center px-6 shrink-0 z-10 relative shadow-sm justify-between" style="background: var(--header-bg); border-bottom: 1px solid var(--border);">
+            <div class="text-2xl md:text-3xl font-extrabold tracking-widest cursor-default" style="color: var(--accent); text-shadow: 0 0 15px var(--accent-glow);">
+                swaploop.in
             </div>
         </div>
 
         <div id="video-area">
-            <div id="ai-warning">⚠️ Inappropriate Content Detected. Auto-Skipping...</div>
+            
+            <div class="status-pill">
+                <h2 id="partner-nickname" class="text-sm font-bold tracking-wide">Stranger</h2>
+                <div class="w-px h-4 bg-[var(--text-secondary)] opacity-30"></div>
+                <div class="flex items-center gap-2">
+                    <span id="status-dot" class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.6)]"></span>
+                    <p id="status-text" class="text-[0.7rem] font-extrabold text-yellow-500 uppercase tracking-wider mt-0.5">Searching...</p>
+                </div>
+            </div>
 
-            <!-- ✨ Remote Video Section (Stranger) ✨ -->
-            <div class="video-wrapper">
+            <div id="ai-warning">⚠️ Warning</div>
+
+            <div id="remote-wrapper" class="video-wrapper">
                 <video id="remote-video" autoplay playsinline></video>
                 <div id="waiting-indicator" class="absolute inset-0 flex flex-col items-center justify-center text-white/50 z-10">
                     <span class="text-5xl mb-4 animate-pulse">🌍</span>
@@ -314,12 +213,10 @@
                 </div>
             </div>
 
-            <!-- ✨ Local Video Section (You) ✨ -->
-            <div class="video-wrapper">
+            <div id="local-wrapper" class="video-wrapper">
                 <video id="local-video" autoplay muted playsinline crossorigin="anonymous"></video>
             </div>
 
-            <!-- CHAT OVERLAY IN VIDEO -->
             <div id="chat-overlay">
                 <div class="flex justify-between items-center p-3 border-b border-[var(--border)]">
                     <h3 class="font-semibold text-sm">Live Chat</h3>
@@ -335,36 +232,37 @@
             </div>
         </div>
 
-        <!-- Controls -->
         <div class="control-area shrink-0">
             <button id="mic-toggle" class="btn-control"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg></button>
-            <button id="cam-toggle" class="btn-control"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button>
             
-            <button id="chat-toggle" class="btn-control">
+            <button id="chat-toggle" class="btn-control relative">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
                 <div id="chat-badge"></div>
             </button>
 
-            <button id="next-button" class="btn-skip"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg></button>
+            <button id="next-button" class="btn-skip" title="Skip to Next">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+            </button>
         </div>
     </div>
 
-    <!-- WebRTC SimplePeer -->
     <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    
-    <!-- ✨ HIGHLY RELIABLE CDNS FOR AI MODERATION ✨ -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/2.8.5/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nsfwjs@2.4.1/dist/nsfwjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface"></script>
 
     <script>
         const socket = typeof io !== 'undefined' ? io() : { emit: () => {}, on: () => {} };
-        let myGender = null, lookingFor = 'anyone', localStream = null, isChatOpen = false;
-        let peer = null; 
+
+        let myGender = null, lookingFor = 'anyone', selectedMode = 'normal';
+        let localStream = null, isChatOpen = false, peer = null; 
         
-        // AI Variables
         let nsfwModel = null;
+        let faceModel = null;
         let aiScanInterval = null;
+        let noFaceWarningCount = 0; 
+        let connectedTime = 0; 
 
         const ui = {
             setupScreen: document.getElementById('setup-screen'),
@@ -378,6 +276,7 @@
             statusDot: document.getElementById('status-dot'),
             localVideo: document.getElementById('local-video'),
             remoteVideo: document.getElementById('remote-video'),
+            videoArea: document.getElementById('video-area'),
             waitingInd: document.getElementById('waiting-indicator'),
             chatOverlay: document.getElementById('chat-overlay'),
             chatToggle: document.getElementById('chat-toggle'),
@@ -386,27 +285,22 @@
             msgArea: document.getElementById('messages-area'),
             chatForm: document.getElementById('chat-form'),
             chatInput: document.getElementById('chat-input'),
-            sendBtn: document.getElementById('send-btn'),
-            videoArea: document.getElementById('video-area')
+            sendBtn: document.getElementById('send-button')
         };
 
-        // ✨ LOCAL MODEL URL ✨
         const modelUrl = '/model/';
         
-        nsfwjs.load(modelUrl).then(model => {
-            nsfwModel = model;
-            ui.aiLoadingText.textContent = "✅ AI Safety Module Active";
-            ui.aiLoadingText.classList.remove('animate-pulse');
-            ui.aiLoadingText.style.color = "#22c55e"; // Green
-            ui.startBtn.disabled = false; // Enable Start button
+        Promise.all([nsfwjs.load(modelUrl).catch(() => nsfwjs.load()), blazeface.load()]).then(([nsfw, face]) => {
+            nsfwModel = nsfw; faceModel = face;
+            ui.aiLoadingText.textContent = "✅ AI Safety Module & Face Tracking Active";
+            ui.aiLoadingText.classList.remove('animate-pulse'); ui.aiLoadingText.style.color = "#22c55e"; 
+            ui.startBtn.disabled = false; 
         }).catch(err => {
-            console.error("AI Fetch Error:", err);
-            ui.aiLoadingText.textContent = "⚠️ Error: Model loading failed.";
-            ui.aiLoadingText.style.color = "#ef4444"; // Red
-            ui.startBtn.disabled = false; // Unblock UI anyway
+            console.error("AI Error:", err);
+            ui.aiLoadingText.textContent = "⚠️ Error: AI models failed to load."; ui.aiLoadingText.style.color = "#ef4444"; 
+            ui.startBtn.disabled = false; 
         });
 
-        // Selectors logic
         document.querySelectorAll('.toggle-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const group = btn.dataset.group;
@@ -414,6 +308,7 @@
                 btn.classList.add('active');
                 if(group === 'gender') myGender = btn.dataset.val;
                 if(group === 'looking') lookingFor = btn.dataset.val;
+                if(group === 'mode') selectedMode = btn.dataset.val;
             });
         });
 
@@ -422,49 +317,67 @@
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 ui.localVideo.srcObject = localStream;
-                
-                // Start AI Scanning every 2.5 seconds
-                if (nsfwModel) {
-                    aiScanInterval = setInterval(checkVideoForNSFW, 2500);
-                }
+                if (nsfwModel && faceModel) { aiScanInterval = setInterval(scanVideoContent, 3000); }
+            } catch (err) { alert("Camera/Mic access required!"); return; }
 
-            } catch (err) {
-                alert("Camera/Mic access required!"); return;
-            }
+            if (selectedMode === 'creator') { ui.chatUI.classList.add('creator-active'); } 
+            else { ui.chatUI.classList.remove('creator-active'); }
+
             socket.emit("set-nickname", ui.nickInput.value.trim() || "Anonymous");
-            ui.setupScreen.classList.add('hidden');
-            ui.chatUI.classList.remove('hidden');
+            ui.setupScreen.classList.add('hidden'); ui.chatUI.classList.remove('hidden');
             findPartner();
         });
 
-        // AI Video Scanning Function
-        async function checkVideoForNSFW() {
-            if (!nsfwModel || !ui.localVideo || ui.localVideo.paused || ui.localVideo.ended) return;
-            
+        async function scanVideoContent() {
+            if (!nsfwModel || !faceModel || !ui.localVideo || ui.localVideo.paused || ui.localVideo.ended) return;
+            if (ui.localVideo.readyState !== 4 || ui.localVideo.videoWidth === 0 || ui.localVideo.videoHeight === 0) return; 
+
             try {
+                // 1. Check for Explicit NSFW (If detected, forces skip and shows warning, NO PERMANENT BAN SCREEN)
                 const predictions = await nsfwModel.classify(ui.localVideo);
-                const badContent = predictions.find(p => (p.className === 'Porn' || p.className === 'Hentai') && p.probability > 0.6);
+                const badContent = predictions.find(p => (p.className === 'Porn' || p.className === 'Hentai') && p.probability > 0.90);
                 
                 if (badContent) {
-                    console.warn("🚫 NSFW Content Detected! Probability:", badContent.probability);
-                    
-                    ui.aiWarning.style.display = 'block';
-                    
                     if (peer) { peer.destroy(); peer = null; }
                     socket.emit("next");
-                    
-                    setTimeout(() => {
-                        ui.aiWarning.style.display = 'none';
-                        findPartner();
-                    }, 3000); 
+                    ui.aiWarning.textContent = `⚠️ Call skipped: Explicit content detected.`;
+                    ui.aiWarning.style.display = 'block';
+                    setTimeout(() => { ui.aiWarning.style.display = 'none'; findPartner(); }, 2000);
+                    return;
                 }
-            } catch (e) {
-                console.error("AI Scan Error:", e);
-            }
+
+                // 2. Check for Face (Skip if face not found after 8s grace period)
+                if (peer && connectedTime > 0 && (Date.now() - connectedTime > 8000)) {
+                    const faces = await faceModel.estimateFaces(ui.localVideo, false);
+                    if (faces.length === 0) {
+                        noFaceWarningCount++;
+                        ui.aiWarning.textContent = `⚠️ Please show your face! Warning ${noFaceWarningCount}/3`;
+                        ui.aiWarning.style.display = 'block';
+                        
+                        if (noFaceWarningCount >= 3) {
+                            if (peer) { peer.destroy(); peer = null; }
+                            socket.emit("next");
+                            ui.aiWarning.textContent = `⚠️ Skipped: Face not detected.`;
+                            setTimeout(() => { 
+                                ui.aiWarning.style.display = 'none'; 
+                                noFaceWarningCount = 0;
+                                findPartner(); 
+                            }, 1500);
+                        }
+                    } else {
+                        noFaceWarningCount = 0;
+                        ui.aiWarning.style.display = 'none';
+                    }
+                } else {
+                    noFaceWarningCount = 0;
+                    ui.aiWarning.style.display = 'none';
+                }
+            } catch (e) { console.error("AI Scan Error:", e); }
         }
 
         function findPartner() {
             updateStatus('searching');
+            connectedTime = 0; 
             ui.remoteVideo.classList.remove('active');
             ui.remoteVideo.srcObject = null;
             ui.waitingInd.style.display = 'flex';
@@ -476,11 +389,9 @@
 
         document.getElementById('next-button').addEventListener('click', () => {
             if (peer) { peer.destroy(); peer = null; }
-            socket.emit("next"); 
-            findPartner();
+            socket.emit("next"); findPartner();
         });
 
-        // Toggles
         document.getElementById('mic-toggle').addEventListener('click', function() {
             if(localStream) {
                 let enabled = localStream.getAudioTracks()[0].enabled;
@@ -488,81 +399,42 @@
                 this.classList.toggle('off', enabled);
             }
         });
-        document.getElementById('cam-toggle').addEventListener('click', function() {
-            if(localStream) {
-                let enabled = localStream.getVideoTracks()[0].enabled;
-                localStream.getVideoTracks()[0].enabled = !enabled;
-                this.classList.toggle('off', enabled);
-            }
-        });
 
-        // CHAT LOGIC 
         function toggleChat() {
             isChatOpen = !isChatOpen;
             ui.chatOverlay.classList.toggle('active', isChatOpen);
-            ui.videoArea.classList.toggle('chat-open', isChatOpen);
-            if(isChatOpen) {
-                ui.chatBadge.style.display = 'none';
-                setTimeout(() => ui.chatInput.focus(), 300);
-            }
+            if(isChatOpen) { ui.chatBadge.style.display = 'none'; setTimeout(() => ui.chatInput.focus(), 300); }
         }
         ui.chatToggle.addEventListener('click', toggleChat);
         ui.closeChat.addEventListener('click', toggleChat);
-
         ui.chatInput.addEventListener('input', () => ui.sendBtn.disabled = !ui.chatInput.value.trim());
 
         ui.chatForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const msg = ui.chatInput.value.trim();
-            if(msg) {
-                socket.emit('send-message', { message: msg });
-                appendMsg(msg, 'sent');
-                ui.chatInput.value = '';
-                ui.sendBtn.disabled = true;
-            }
+            e.preventDefault(); const msg = ui.chatInput.value.trim();
+            if(msg) { socket.emit('send-message', { message: msg }); appendMsg(msg, 'sent'); ui.chatInput.value = ''; ui.sendBtn.disabled = true; }
         });
 
         function appendMsg(text, type) {
-            const div = document.createElement('div');
-            div.className = `chat-bubble ${type}`;
-            div.textContent = text;
-            ui.msgArea.appendChild(div);
-            ui.msgArea.scrollTop = ui.msgArea.scrollHeight;
+            const div = document.createElement('div'); div.className = `chat-bubble ${type}`; div.textContent = text;
+            ui.msgArea.appendChild(div); ui.msgArea.scrollTop = ui.msgArea.scrollHeight;
         }
 
-        socket.on('receive-message', ({ message }) => {
-            appendMsg(message, 'received');
-            if(!isChatOpen) {
-                ui.chatBadge.style.display = 'block';
-            }
-        });
+        socket.on('receive-message', ({ message }) => { appendMsg(message, 'received'); if(!isChatOpen) ui.chatBadge.style.display = 'block'; });
 
-        // FULL WEBRTC LOGIC 
         socket.on('partner-found', ({ initiator, partnerNickname }) => {
             updateStatus('connected', partnerNickname);
+            connectedTime = Date.now(); 
             ui.waitingInd.style.display = 'none';
             ui.chatInput.disabled = false;
 
             peer = new SimplePeer({
-                initiator: initiator,
-                stream: localStream,
-                config: { 
-                    iceServers: [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:global.stun.twilio.com:3478' }
-                    ] 
-                }
+                initiator: initiator, stream: localStream,
+                config: { iceServers: [ { urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:global.stun.twilio.com:3478' } ] }
             });
 
             peer.on('signal', data => socket.emit('signal', data));
-            
-            peer.on('stream', stream => {
-                ui.remoteVideo.srcObject = stream;
-                ui.remoteVideo.classList.add('active');
-            });
-
-            peer.on('close', handleRemoteDisconnect);
-            peer.on('error', handleRemoteDisconnect);
+            peer.on('stream', stream => { ui.remoteVideo.srcObject = stream; ui.remoteVideo.classList.add('active'); });
+            peer.on('close', handleRemoteDisconnect); peer.on('error', handleRemoteDisconnect);
         });
 
         socket.on('signal', data => { if(peer) peer.signal(data); });
@@ -571,26 +443,28 @@
         function handleRemoteDisconnect() {
             if (peer) { peer.destroy(); peer = null; }
             updateStatus('disconnected');
+            connectedTime = 0;
             ui.remoteVideo.classList.remove('active');
             ui.remoteVideo.srcObject = null;
             ui.chatInput.disabled = true;
-            setTimeout(() => { socket.emit('next'); findPartner(); }, 2000); 
+            
+            setTimeout(() => {
+                socket.emit("next");
+                findPartner();
+            }, 1500);
         }
 
         function updateStatus(state, name="Stranger") {
             ui.partnerName.textContent = name;
             if (state === 'searching') {
-                ui.statusText.textContent = "Searching...";
-                ui.statusText.style.color = "#eab308";
-                ui.statusDot.className = "w-2 h-2 rounded-full bg-yellow-500 animate-pulse";
+                ui.statusText.textContent = "Searching..."; ui.statusText.style.color = "#eab308";
+                ui.statusDot.className = "w-2 h-2 rounded-full bg-yellow-500 animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.6)]";
             } else if (state === 'connected') {
-                ui.statusText.textContent = "Online";
-                ui.statusText.style.color = "#22c55e";
-                ui.statusDot.className = "w-2 h-2 rounded-full bg-green-500";
+                ui.statusText.textContent = "Online"; ui.statusText.style.color = "#22c55e";
+                ui.statusDot.className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]";
             } else {
-                ui.statusText.textContent = "Disconnected";
-                ui.statusText.style.color = "#ef4444";
-                ui.statusDot.className = "w-2 h-2 rounded-full bg-red-500";
+                ui.statusText.textContent = "Disconnected"; ui.statusText.style.color = "#ef4444";
+                ui.statusDot.className = "w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]";
             }
         }
     </script>
