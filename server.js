@@ -63,7 +63,24 @@ function findMatch(newUserSocketId) {
 
     if (candidates.length === 0) return;
 
-    let partnerId = candidates[0];
+    // ✨ INTEREST MATCHING LOGIC ✨
+    let bestCandidate = null;
+    let maxCommon = -1;
+    let matchedInterest = null;
+
+    for (const id of candidates) {
+        const userB = users.get(id);
+        // Find common interests between User A and User B
+        const common = userA.interests.filter(interest => userB.interests.includes(interest));
+        
+        if (common.length > maxCommon) {
+            maxCommon = common.length;
+            bestCandidate = id;
+            matchedInterest = common.length > 0 ? common[0] : null;
+        }
+    }
+
+    let partnerId = bestCandidate;
 
     if (partnerId) {
         const userB = users.get(partnerId);
@@ -78,10 +95,19 @@ function findMatch(newUserSocketId) {
         else if (userA.type === 'voice') voiceWaitingPool = voiceWaitingPool.filter(id => id !== newUserSocketId && id !== partnerId);
         else videoWaitingPool = videoWaitingPool.filter(id => id !== newUserSocketId && id !== partnerId);
 
-        console.log(`✅ Matched: ${userA.nickname} <-> ${userB.nickname}`);
+        console.log(`✅ Matched: ${userA.nickname} <-> ${userB.nickname} | Interest: ${matchedInterest || 'None'}`);
 
-        userA.socket.emit("partner-found", { initiator: true, partnerNickname: userB.nickname });
-        userB.socket.emit("partner-found", { initiator: false, partnerNickname: userA.nickname });
+        // Sending common interest to frontend to show "Matched via: ..."
+        userA.socket.emit("partner-found", { 
+            initiator: true, 
+            partnerNickname: userB.nickname,
+            commonInterests: matchedInterest ? [matchedInterest] : []
+        });
+        userB.socket.emit("partner-found", { 
+            initiator: false, 
+            partnerNickname: userA.nickname,
+            commonInterests: matchedInterest ? [matchedInterest] : []
+        });
     }
 }
 
@@ -98,6 +124,13 @@ io.on("connection", socket => {
     });
     updateOnlineCount();
 
+    // ✨ SIGNAL BAR PING LISTENER (Fixed Network Bar Bug)
+    socket.on("latency-ping", (callback) => {
+        if (typeof callback === "function") {
+            callback();
+        }
+    });
+
     socket.on("set-nickname", nickname => {
         const user = users.get(socket.id);
         if (user) user.nickname = sanitize(nickname).substring(0, 20);
@@ -111,6 +144,9 @@ io.on("connection", socket => {
         user.lookingFor = preferences.lookingFor;
         user.type = preferences.type;
         user.clientId = preferences.clientId; 
+        
+        // Ensure interests array is stored safely (Fixed empty array bug)
+        user.interests = Array.isArray(preferences.interests) ? preferences.interests : [];
         
         let pool = user.type === 'text' ? textWaitingPool : user.type === 'voice' ? voiceWaitingPool : videoWaitingPool;
         if (!pool.includes(socket.id)) pool.push(socket.id);
@@ -192,7 +228,6 @@ io.on("connection", socket => {
         }
     });
 
-    // ✨ TYPING INDICATOR CODE ADDED BACK ✨
     socket.on("typing", (isTyping) => {
         const user = users.get(socket.id);
         if (user?.partnerId) {
@@ -221,6 +256,7 @@ io.on("connection", socket => {
     };
 
     socket.on("next", handleDisconnectOrNext);
+    
     socket.on("disconnect", () => {
         handleDisconnectOrNext();
         users.delete(socket.id);
