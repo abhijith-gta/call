@@ -247,12 +247,12 @@
 
     <script>
         // BAN CHECK
-        if (localStorage.getItem('swaploop_ban_v27')) {
-            if (Date.now() < parseInt(localStorage.getItem('swaploop_ban_v27'))) {
+        if (localStorage.getItem('swaploop_ban_v28')) {
+            if (Date.now() < parseInt(localStorage.getItem('swaploop_ban_v28'))) {
                 document.getElementById('ban-screen').classList.remove('hidden');
                 document.getElementById('setup-screen').classList.add('hidden');
                 throw new Error("User is currently banned.");
-            } else localStorage.removeItem('swaploop_ban_v27');
+            } else localStorage.removeItem('swaploop_ban_v28');
         }
 
         // GENERATE DEVICE ID
@@ -321,23 +321,22 @@
             ui.startBtn.disabled = false; 
         }).catch(() => { ui.startBtn.disabled = false; });
 
-        function setupSelectors(id, callback) {
-            const container = document.getElementById(id);
-            const btns = container.querySelectorAll('.toggle-btn');
-            btns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    playSound('click');
-                    btns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    callback(btn.dataset.val || btn.dataset.group);
-                    
-                    if(btn.dataset.group === 'gender') myGender = btn.dataset.val;
-                    if(btn.dataset.group === 'looking') lookingFor = btn.dataset.val;
-                    if(btn.dataset.group === 'mode') selectedMode = btn.dataset.val;
-                });
+        // ✨ FIXED TOGGLE BUTTON LOGIC ✨
+        document.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                playSound('click');
+                const group = btn.dataset.group;
+                
+                // Aa particuar group-ile buttons matram remove cheyyunnu
+                document.querySelectorAll(`.toggle-btn[data-group="${group}"]`).forEach(b => b.classList.remove('active'));
+                
+                btn.classList.add('active');
+                
+                if(group === 'gender') myGender = btn.dataset.val;
+                if(group === 'looking') lookingFor = btn.dataset.val;
+                if(group === 'mode') selectedMode = btn.dataset.val;
             });
-        }
-        setupSelectors('setup-screen', () => {}); // Initialize all toggle buttons
+        });
 
         ui.startBtn.addEventListener('click', async () => {
             playSound('click');
@@ -452,7 +451,7 @@
                 ui.waitingInd.classList.add('hidden');
                 return; // Do NOT set 24-hr ban
             }
-            localStorage.setItem('swaploop_ban_v27', Date.now() + 24 * 60 * 60 * 1000); 
+            localStorage.setItem('swaploop_ban_v28', Date.now() + 24 * 60 * 60 * 1000); 
             location.reload();
         });
 
@@ -474,6 +473,7 @@
             playSound('click');
             ui.nextBtn.disabled = true; 
             
+            // Bypass face check on Next button if Creator mode
             if (faceModel && ui.localVideo.srcObject && selectedMode !== 'creator') {
                 const faces = await faceModel.estimateFaces(ui.localVideo, false);
                 if (faces.length === 0 || faces[0].probability[0] < 0.50) {
