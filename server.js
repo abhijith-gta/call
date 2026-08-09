@@ -31,8 +31,9 @@ let textWaitingPool = [];
 let voiceWaitingPool = [];
 let videoWaitingPool = [];
 
-// Storage for Reports
-const reportLedger = new Map();
+// ✨ GLOBAL STORAGE FOR BLOCKS & REPORTS
+const clientBlocklists = new Map(); 
+const reportLedger = new Map();     
 
 const updateOnlineCount = () => {
     io.emit("online-count", users.size);
@@ -40,17 +41,20 @@ const updateOnlineCount = () => {
 
 function findMatch(newUserSocketId) {
     const userA = users.get(newUserSocketId);
-    if (!userA || userA.partnerId) return;
+    if (!userA || userA.partnerId || !userA.clientId) return;
 
     let pool = userA.type === 'text' ? textWaitingPool : userA.type === 'voice' ? voiceWaitingPool : videoWaitingPool;
 
     const candidates = pool.filter(id => {
         if (id === newUserSocketId) return false;
         const userB = users.get(id);
-        if (!userB || userB.partnerId) return false;
+        if (!userB || userB.partnerId || !userB.clientId) return false;
 
-        // 🛑 BLOCKLIST: Report cheytha aalumaayi pinne connect aavilla
-        if (userA.blocked.has(id) || userB.blocked.has(newUserSocketId)) return false;
+        // 🛑 GLOBAL BLOCKLIST CHECK
+        const aBlocks = clientBlocklists.get(userA.clientId) || new Set();
+        const bBlocks = clientBlocklists.get(userB.clientId) || new Set();
+
+        if (aBlocks.has(userB.clientId) || bBlocks.has(userA.clientId)) return false;
 
         const aWantsB = userA.lookingFor === 'anyone' || userA.lookingFor === userB.gender;
         const bWantsA = userB.lookingFor === 'anyone' || userB.lookingFor === userA.gender;
@@ -64,12 +68,11 @@ function findMatch(newUserSocketId) {
     if (partnerId) {
         const userB = users.get(partnerId);
 
-        // Save Current & Last Partner on SERVER SIDE (This fixes the hit-and-run report issue!)
         userA.partnerId = userB.socket.id;
-        userA.lastPartnerId = userB.socket.id;
+        userA.lastPartnerClientId = userB.clientId;
         
         userB.partnerId = userA.socket.id;
-        userB.lastPartnerId = userA.socket.id;
+        userB.lastPartnerClientId = userA.clientId;
 
         if (userA.type === 'text') textWaitingPool = textWaitingPool.filter(id => id !== newUserSocketId && id !== partnerId);
         else if (userA.type === 'voice') voiceWaitingPool = voiceWaitingPool.filter(id => id !== newUserSocketId && id !== partnerId);
@@ -84,10 +87,14 @@ function findMatch(newUserSocketId) {
 
 io.on("connection", socket => {
     console.log("🟢 Connected:", socket.id);
+    
     users.set(socket.id, { 
-        socket, nickname: "Stranger", 
-        partnerId: null, lastPartnerId: null, 
-        interests: [], blocked: new Set() 
+        socket, 
+        clientId: null,
+        nickname: "Stranger", 
+        partnerId: null, 
+        lastPartnerClientId: null, 
+        interests: [] 
     });
     updateOnlineCount();
 
@@ -103,6 +110,7 @@ io.on("connection", socket => {
         user.gender = preferences.gender;
         user.lookingFor = preferences.lookingFor;
         user.type = preferences.type;
+        user.clientId = preferences.clientId; 
         
         let pool = user.type === 'text' ? textWaitingPool : user.type === 'voice' ? voiceWaitingPool : videoWaitingPool;
         if (!pool.includes(socket.id)) pool.push(socket.id);
@@ -118,53 +126,54 @@ io.on("connection", socket => {
         }
     });
 
-    // --- REPORT & BAN SYSTEM (Server identifies the user) ---
     socket.on("report-user", ({ reason }) => {
         const user = users.get(socket.id);
         if (!user) return;
 
-        // Automatically get the last person they were talking to
-        const targetId = user.partnerId || user.lastPartnerId;
-        
-        if (!targetId || targetId === socket.id || !users.has(targetId)) return;
+        const targetClientId = user.lastPartnerClientId;
+        if (!targetClientId || targetClientId === user.clientId) return;
 
-        // 1. Block Immediately
-        user.blocked.add(targetId);
-        const reportedUser = users.get(targetId);
-        if (reportedUser) reportedUser.blocked.add(socket.id);
+        if (!clientBlocklists.has(user.clientId)) clientBlocklists.set(user.clientId, new Set());
+        clientBlocklists.get(user.clientId).add(targetClientId);
 
-        // 2. Count Report
-        if (!reportLedger.has(targetId)) {
-            reportLedger.set(targetId, { total: 0, reporters: new Set() });
+        if (!clientBlocklists.has(targetClientId)) clientBlocklists.set(targetClientId, new Set());
+        clientBlocklists.get(targetClientId).add(user.clientId);
+
+        console.log(`🛡️ User ${user.clientId} blocked ${targetClientId}`);
+
+        if (!reportLedger.has(targetClientId)) {
+            reportLedger.set(targetClientId, { total: 0, reporters: new Set() });
         }
-        const record = reportLedger.get(targetId);
+        const record = reportLedger.get(targetClientId);
 
-        if (record.reporters.has(socket.id)) return; // Prevents spam
+        if (record.reporters.has(user.clientId)) return; 
         
-        record.reporters.add(socket.id);
+        record.reporters.add(user.clientId);
         record.total += 1;
-        console.log(`🚩 Report against ${targetId}. Total: ${record.total}`);
+        console.log(`🚩 Report against Device ID ${targetClientId}. Total: ${record.total}`);
 
-        // 3. IF 2 REPORTS = 24 HR BAN
         if (record.total >= 2) {
-            console.log(`🔨 User ${targetId} BANNED.`);
-            if (reportedUser) {
-                reportedUser.socket.emit("you-are-banned"); 
-                
-                if (reportedUser.partnerId) {
-                    const theirPartner = users.get(reportedUser.partnerId);
-                    if (theirPartner) {
-                        theirPartner.partnerId = null;
-                        theirPartner.socket.emit("partner-disconnected");
+            console.log(`🔨 Device ID ${targetClientId} BANNED.`);
+            
+            for (const [id, u] of users.entries()) {
+                if (u.clientId === targetClientId) {
+                    u.socket.emit("you-are-banned"); 
+                    
+                    if (u.partnerId) {
+                        const theirPartner = users.get(u.partnerId);
+                        if (theirPartner) {
+                            theirPartner.partnerId = null;
+                            theirPartner.socket.emit("partner-disconnected");
+                        }
                     }
+                    users.delete(id);
+                    textWaitingPool = textWaitingPool.filter(pid => pid !== id);
+                    voiceWaitingPool = voiceWaitingPool.filter(pid => pid !== id);
+                    videoWaitingPool = videoWaitingPool.filter(pid => pid !== id);
                 }
-                users.delete(targetId);
-                textWaitingPool = textWaitingPool.filter(id => id !== targetId);
-                voiceWaitingPool = voiceWaitingPool.filter(id => id !== targetId);
-                videoWaitingPool = videoWaitingPool.filter(id => id !== targetId);
-                updateOnlineCount();
             }
-            reportLedger.delete(targetId);
+            updateOnlineCount();
+            reportLedger.delete(targetClientId);
         }
     });
 
@@ -180,6 +189,15 @@ io.on("connection", socket => {
                 }
                 partner.socket.emit("receive-message", { message: sanitizedMessage });
             }
+        }
+    });
+
+    // ✨ TYPING INDICATOR CODE ADDED BACK ✨
+    socket.on("typing", (isTyping) => {
+        const user = users.get(socket.id);
+        if (user?.partnerId) {
+            const partner = users.get(user.partnerId);
+            if (partner) partner.socket.emit("partner-typing", isTyping);
         }
     });
 
@@ -199,7 +217,7 @@ io.on("connection", socket => {
                 partner.socket.emit("partner-disconnected");
             }
         }
-        user.partnerId = null; // Do NOT clear lastPartnerId, so they can still report them!
+        user.partnerId = null;
     };
 
     socket.on("next", handleDisconnectOrNext);
