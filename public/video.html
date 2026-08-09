@@ -114,8 +114,6 @@
         <div class="satin-card w-full max-w-sm p-8 rounded-[2rem] text-center">
             <div class="text-4xl mb-4">📹</div>
             <h1 class="text-3xl font-bold mb-2">Video Call</h1>
-            
-            <!-- CHANGED: Made the text sound like a heavy AI module is loading -->
             <p id="ai-loading-text" class="text-xs text-[var(--accent)] font-semibold mb-4 animate-pulse">Loading Face Tracking & AI Module...</p>
             
             <div class="space-y-4">
@@ -210,7 +208,6 @@
                 <div id="chat-badge"></div>
             </button>
             
-            <!-- Report button starts disabled -->
             <button id="report-btn" class="btn-control report" title="Report User" disabled>
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg>
             </button>
@@ -231,16 +228,14 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface"></script>
 
     <script>
-        // Ban version updated to v22 to clear out all old test bans
-        if (localStorage.getItem('swaploop_ban_v22')) {
-            if (Date.now() < parseInt(localStorage.getItem('swaploop_ban_v22'))) {
+        if (localStorage.getItem('swaploop_ban_v24')) {
+            if (Date.now() < parseInt(localStorage.getItem('swaploop_ban_v24'))) {
                 document.getElementById('ban-screen').classList.remove('hidden');
                 document.getElementById('setup-screen').classList.add('hidden');
                 throw new Error("User is currently banned.");
-            } else localStorage.removeItem('swaploop_ban_v22');
+            } else localStorage.removeItem('swaploop_ban_v24');
         }
 
-        // GENERATE DEVICE ID
         let myClientId = localStorage.getItem('swaploop_client_id');
         if (!myClientId) {
             myClientId = 'device_' + Math.random().toString(36).substr(2, 16);
@@ -301,15 +296,17 @@
                 await new Promise(r => { ui.localVideo.onloadedmetadata = () => ui.localVideo.play().then(r); });
                 await new Promise(r => setTimeout(r, 600));
 
-                if (faceModel) {
+                if (faceModel && selectedMode !== 'creator') {
                     const faces = await faceModel.estimateFaces(ui.localVideo, false);
                     if (faces.length === 0 || faces[0].probability[0] < 0.50) {
-                        alert("⚠️ Please show your face clearly to enter.");
+                        alert("⚠️ Please show your face clearly to enter SwapLoop.");
                         localStream.getTracks().forEach(t => t.stop());
                         ui.startBtn.textContent = "Start Camera"; ui.startBtn.disabled = false; return;
                     }
-                    aiScanInterval = setInterval(scanVideoContent, 1000); 
                 }
+                
+                if (faceModel) aiScanInterval = setInterval(scanVideoContent, 1000);
+                
             } catch (err) { alert("Camera access required!"); ui.startBtn.textContent = "Start Camera"; ui.startBtn.disabled = false; return; }
 
             if (selectedMode === 'creator') ui.chatUI.classList.add('creator-active'); 
@@ -325,7 +322,7 @@
                 const faces = await faceModel.estimateFaces(ui.localVideo, false);
                 const hasFace = faces.length > 0 && faces[0].probability[0] > 0.60;
 
-                if (peer && connectedTime > 0) {
+                if (peer && connectedTime > 0 && selectedMode !== 'creator') {
                     if (!hasFace) {
                         noFaceTime++;
                         if (noFaceTime <= 5) ui.aiWarning.style.display = 'none';
@@ -345,7 +342,6 @@
             } catch (e) {}
         }
 
-        // --- REPORT LOGIC START ---
         ui.reportBtn.addEventListener('click', () => {
             if (!hasConnectedOnce) {
                 ui.aiWarning.textContent = `⚠️ No user connected to report!`;
@@ -363,18 +359,15 @@
 
         ui.submitReport.addEventListener('click', () => {
             const reason = document.querySelector('input[name="report-reason"]:checked').value;
-            
             socket.emit('report-user', { reason: reason });
             
             ui.reportModal.classList.add('hidden'); ui.reportModal.classList.remove('flex');
 
-            // CHANGED MESSAGE: Removed the word "blocked"
             ui.aiWarning.textContent = `✅ Thank you for reporting! We will check and take action.`;
             ui.aiWarning.style.background = 'rgba(34, 197, 94, 0.95)';
             ui.aiWarning.style.borderColor = '#22c55e';
             ui.aiWarning.style.display = 'block';
             
-            // DISABLE BUTTON UNTIL NEXT NEW CONNECTION
             ui.reportBtn.disabled = true;
             
             setTimeout(() => { 
@@ -383,7 +376,6 @@
                 ui.aiWarning.style.borderColor = '#f87171';
             }, 3500);
 
-            // Disconnect immediately after reporting
             if (peer) { peer.destroy(); peer = null; }
             socket.emit("next");
             updateStatus('disconnected', 'Stopped');
@@ -393,10 +385,24 @@
             ui.waitingInd.classList.add('hidden');
         });
 
+        // ✨ SILENT CALL CUT FOR CREATORS INSTEAD OF BAN ✨
         socket.on('you-are-banned', () => {
-            localStorage.setItem('swaploop_ban_v22', Date.now() + 24 * 60 * 60 * 1000); location.reload();
+            if (selectedMode === 'creator') {
+                // Drop the call normally to simulate normal disconnection
+                if (peer) { peer.destroy(); peer = null; }
+                socket.emit("next");
+                updateStatus('disconnected', 'Stopped');
+                connectedTime = 0;
+                hasConnectedOnce = false;
+                ui.remoteVideo.classList.remove('active'); ui.remoteVideo.srcObject = null;
+                ui.waitingInd.classList.add('hidden');
+                return; // Do NOT set 24-hr ban
+            }
+            
+            // Standard User Ban
+            localStorage.setItem('swaploop_ban_v24', Date.now() + 24 * 60 * 60 * 1000); 
+            location.reload();
         });
-        // --- REPORT LOGIC END ---
 
         function findPartner() {
             updateStatus('searching');
@@ -408,7 +414,9 @@
 
         ui.nextBtn.addEventListener('click', async () => {
             ui.nextBtn.disabled = true; 
-            if (faceModel && ui.localVideo.srcObject) {
+            
+            // Bypass face check on Next button if Creator mode
+            if (faceModel && ui.localVideo.srcObject && selectedMode !== 'creator') {
                 const faces = await faceModel.estimateFaces(ui.localVideo, false);
                 if (faces.length === 0 || faces[0].probability[0] < 0.50) {
                     ui.aiWarning.textContent = `⚠️ Please show your face to search!`;
@@ -453,11 +461,8 @@
         socket.on('partner-found', (data) => {
             updateStatus('connected', data.partnerNickname);
             connectedTime = Date.now(); 
-            hasConnectedOnce = true; // Enables reporting system for this specific session
-            
-            // Connect aayal udane report button ON aakum
+            hasConnectedOnce = true;
             ui.reportBtn.disabled = false; 
-            
             ui.waitingInd.classList.add('hidden');
 
             peer = new SimplePeer({
@@ -480,9 +485,6 @@
             ui.remoteVideo.classList.remove('active'); ui.remoteVideo.srcObject = null;
             ui.waitingInd.classList.add('hidden');
             socket.emit("next");
-            
-            // DO NOT DISABLE REPORT BUTTON HERE.
-            // It remains ON so user can report a hit-and-run!
         }
 
         function updateStatus(state, name="Stranger") {
