@@ -80,6 +80,7 @@
             color: var(--text-secondary);
             border: 1px solid var(--border);
             transition: all 0.3s ease;
+            cursor: pointer;
         }
         .toggle-btn:hover { border-color: var(--accent); color: var(--text-primary); }
         .toggle-btn.active {
@@ -308,21 +309,21 @@
                 <div class="text-left">
                     <label class="text-xs uppercase tracking-widest text-[var(--text-secondary)] font-bold ml-2 mb-3 block">I am</label>
                     <div id="my-gender-selector" class="grid grid-cols-2 gap-4">
-                        <button class="toggle-btn p-4 rounded-2xl font-semibold" data-gender="male">Male</button>
-                        <button class="toggle-btn p-4 rounded-2xl font-semibold" data-gender="female">Female</button>
+                        <button type="button" class="toggle-btn p-4 rounded-2xl font-semibold" data-gender="male">Male</button>
+                        <button type="button" class="toggle-btn p-4 rounded-2xl font-semibold" data-gender="female">Female</button>
                     </div>
                 </div>
 
                 <div class="text-left">
                     <label class="text-xs uppercase tracking-widest text-[var(--text-secondary)] font-bold ml-2 mb-3 block">Looking for</label>
                     <div id="looking-for-selector" class="grid grid-cols-3 gap-3">
-                        <button class="toggle-btn p-3 rounded-xl font-medium" data-gender="male">Male</button>
-                        <button class="toggle-btn p-3 rounded-xl font-medium" data-gender="female">Female</button>
-                        <button class="toggle-btn active p-3 rounded-xl font-medium" data-gender="anyone">Anyone</button>
+                        <button type="button" class="toggle-btn p-3 rounded-xl font-medium" data-gender="male">Male</button>
+                        <button type="button" class="toggle-btn p-3 rounded-xl font-medium" data-gender="female">Female</button>
+                        <button type="button" class="toggle-btn active p-3 rounded-xl font-medium" data-gender="anyone">Anyone</button>
                     </div>
                 </div>
 
-                <button id="start-button" class="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold p-5 rounded-2xl mt-4 shadow-lg hover:shadow-indigo-500/50 hover:-translate-y-1 active:scale-95 transition-all duration-300 text-lg">
+                <button type="button" id="start-button" class="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold p-5 rounded-2xl mt-4 shadow-lg hover:shadow-indigo-500/50 hover:-translate-y-1 active:scale-95 transition-all duration-300 text-lg">
                     Start Chatting
                 </button>
             </div>
@@ -423,30 +424,34 @@
         document.documentElement.setAttribute('data-theme', savedTheme);
         updateIcons(savedTheme);
 
-        // --- Audio Feedback ---
+        // --- Audio Feedback (Wrapped in Try-Catch to prevent UI breaks) ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playSound(type) {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            
-            if (type === 'send') {
-                osc.frequency.setValueAtTime(500, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
-                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            } else if (type === 'receive') {
-                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(500, audioCtx.currentTime + 0.1);
-                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            } else if (type === 'click') {
-                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                if (type === 'send') {
+                    osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                } else if (type === 'receive') {
+                    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(500, audioCtx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                } else if (type === 'click') {
+                    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                }
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            } catch (e) {
+                // Ignore audio errors on first tap to prevent UI breaking
             }
-            
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.1);
         }
 
         themeBtn.addEventListener('click', () => {
@@ -546,6 +551,7 @@
             ui.aiWarning.style.borderColor = '#22c55e';
             ui.aiWarning.style.display = 'block';
             
+            // Disable report button until next match
             ui.reportBtn.disabled = true;
             
             setTimeout(() => { 
@@ -554,6 +560,7 @@
                 ui.aiWarning.style.borderColor = '#f87171';
             }, 3000);
 
+            // Disconnect
             socket.emit("next");
             updateStatus('disconnected');
             hasConnectedOnce = false;
@@ -652,7 +659,7 @@
 
         socket.on('partner-disconnected', () => {
             updateStatus('disconnected');
-            ui.typingInd.classList.add('hidden'); // Hide typing indicator if they disconnect
+            // Report stays enabled to report hit-and-run users
         });
 
         function updateStatus(state, name="Stranger") {
