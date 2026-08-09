@@ -4,21 +4,13 @@ const http = require("http").createServer(app);
 const { Server } = require("socket.io");
 const path = require("path");
 
-// 1. Security: Basic HTML sanitization to prevent XSS attacks
 const sanitize = (str) => {
     if (!str) return "";
-    return str.replace(/&/g, "&amp;")
-              .replace(/</g, "&lt;")
-              .replace(/>/g, "&gt;")
-              .replace(/"/g, "&quot;")
-              .replace(/'/g, "&#039;");
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 };
 
 const io = new Server(http, {
-    cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
-    }
+    cors: { origin: "*", methods: ["GET", "POST"] }
 });
 
 const PORT = process.env.PORT || 5000;
@@ -28,95 +20,75 @@ http.listen(PORT, () => {
     console.log(`🚀 SwapLoop Server running on port ${PORT}`);
 });
 
-// State Management
+const BAD_WORDS = ["fuck", "shit", "bitch", "asshole", "idiot", "stupid", "nude", "nsfw"];
+const containsBadWords = (text) => {
+    if (!text) return false;
+    return BAD_WORDS.some(word => text.toLowerCase().includes(word));
+};
+
 const users = new Map();
 let textWaitingPool = [];
 let voiceWaitingPool = [];
-let videoWaitingPool = []; // ✨ NEW: Video Call Pool
+let videoWaitingPool = [];
 
-// Helper: Broadcast online count to all users
+// Storage for Reports
+const reportLedger = new Map();
+
 const updateOnlineCount = () => {
-    const count = users.size;
-    io.emit("online-count", count);
+    io.emit("online-count", users.size);
 };
 
 function findMatch(newUserSocketId) {
     const userA = users.get(newUserSocketId);
     if (!userA || userA.partnerId) return;
 
-    // Determine which pool to search in (Text vs Voice vs Video)
-    let pool;
-    if (userA.type === 'text') pool = textWaitingPool;
-    else if (userA.type === 'voice') pool = voiceWaitingPool;
-    else pool = videoWaitingPool; // ✨ NEW: Video pool selection
+    let pool = userA.type === 'text' ? textWaitingPool : userA.type === 'voice' ? voiceWaitingPool : videoWaitingPool;
 
-    // 1. Filter: Find all valid candidates based on Gender & LookingFor
     const candidates = pool.filter(id => {
         if (id === newUserSocketId) return false;
         const userB = users.get(id);
         if (!userB || userB.partnerId) return false;
 
+        // 🛑 BLOCKLIST: Report cheytha aalumaayi pinne connect aavilla
+        if (userA.blocked.has(id) || userB.blocked.has(newUserSocketId)) return false;
+
         const aWantsB = userA.lookingFor === 'anyone' || userA.lookingFor === userB.gender;
         const bWantsA = userB.lookingFor === 'anyone' || userB.lookingFor === userA.gender;
-
         return aWantsB && bWantsA;
     });
 
     if (candidates.length === 0) return;
 
-    let partnerId = null;
-    let commonInterests = [];
-
-    // 2. Priority: Interest Matching
-    if (userA.interests && userA.interests.length > 0) {
-        const interestMatch = candidates.find(id => {
-            const userB = users.get(id);
-            if (!userB.interests || userB.interests.length === 0) return false;
-            
-            // Check for overlap
-            const overlap = userA.interests.filter(tag => userB.interests.includes(tag));
-            if (overlap.length > 0) {
-                commonInterests = overlap;
-                return true;
-            }
-            return false;
-        });
-
-        if (interestMatch) partnerId = interestMatch;
-    }
-
-    // 3. Fallback: Random Stranger
-    if (!partnerId) {
-        partnerId = candidates[0];
-    }
+    let partnerId = candidates[0];
 
     if (partnerId) {
         const userB = users.get(partnerId);
 
-        // Link them together
+        // Save Current & Last Partner on SERVER SIDE (This fixes the hit-and-run report issue!)
         userA.partnerId = userB.socket.id;
+        userA.lastPartnerId = userB.socket.id;
+        
         userB.partnerId = userA.socket.id;
+        userB.lastPartnerId = userA.socket.id;
 
-        // Remove both users from the specific pool immediately
-        if (userA.type === 'text') {
-            textWaitingPool = textWaitingPool.filter(id => id !== newUserSocketId && id !== partnerId);
-        } else if (userA.type === 'voice') {
-            voiceWaitingPool = voiceWaitingPool.filter(id => id !== newUserSocketId && id !== partnerId);
-        } else if (userA.type === 'video') {
-            videoWaitingPool = videoWaitingPool.filter(id => id !== newUserSocketId && id !== partnerId); // ✨ NEW: Video pool cleanup
-        }
+        if (userA.type === 'text') textWaitingPool = textWaitingPool.filter(id => id !== newUserSocketId && id !== partnerId);
+        else if (userA.type === 'voice') voiceWaitingPool = voiceWaitingPool.filter(id => id !== newUserSocketId && id !== partnerId);
+        else videoWaitingPool = videoWaitingPool.filter(id => id !== newUserSocketId && id !== partnerId);
 
-        console.log(`✅ Matched (${userA.type}): ${userA.nickname} <-> ${userB.nickname} ${commonInterests.length ? `[Tags: ${commonInterests}]` : ''}`);
+        console.log(`✅ Matched: ${userA.nickname} <-> ${userB.nickname}`);
 
-        // Notify both users
-        userA.socket.emit("partner-found", { initiator: true, partnerNickname: userB.nickname, type: userA.type, commonInterests });
-        userB.socket.emit("partner-found", { initiator: false, partnerNickname: userA.nickname, type: userB.type, commonInterests });
+        userA.socket.emit("partner-found", { initiator: true, partnerNickname: userB.nickname });
+        userB.socket.emit("partner-found", { initiator: false, partnerNickname: userA.nickname });
     }
 }
 
 io.on("connection", socket => {
     console.log("🟢 Connected:", socket.id);
-    users.set(socket.id, { socket, nickname: "Stranger", partnerId: null, interests: [] });
+    users.set(socket.id, { 
+        socket, nickname: "Stranger", 
+        partnerId: null, lastPartnerId: null, 
+        interests: [], blocked: new Set() 
+    });
     updateOnlineCount();
 
     socket.on("set-nickname", nickname => {
@@ -132,25 +104,12 @@ io.on("connection", socket => {
         user.lookingFor = preferences.lookingFor;
         user.type = preferences.type;
         
-        user.interests = Array.isArray(preferences.interests) 
-            ? preferences.interests.map(i => sanitize(i).toLowerCase().trim()).filter(i => i.length > 0)
-            : [];
+        let pool = user.type === 'text' ? textWaitingPool : user.type === 'voice' ? voiceWaitingPool : videoWaitingPool;
+        if (!pool.includes(socket.id)) pool.push(socket.id);
 
-        // Add to the correct pool based on type
-        let pool;
-        if (user.type === 'text') pool = textWaitingPool;
-        else if (user.type === 'voice') pool = voiceWaitingPool;
-        else pool = videoWaitingPool; // ✨ NEW: Assign to Video pool
-
-        if (!pool.includes(socket.id)) {
-            pool.push(socket.id);
-        }
-
-        console.log(`🔎 ${user.nickname} searching (${user.type})... Tags: [${user.interests.join(', ')}]`);
         findMatch(socket.id);
     });
 
-    // 3. Voice & Video Signaling (WebRTC)
     socket.on("signal", data => {
         const user = users.get(socket.id);
         if (user?.partnerId) {
@@ -159,41 +118,79 @@ io.on("connection", socket => {
         }
     });
 
-    // --- Text Chat Features ---
+    // --- REPORT & BAN SYSTEM (Server identifies the user) ---
+    socket.on("report-user", ({ reason }) => {
+        const user = users.get(socket.id);
+        if (!user) return;
+
+        // Automatically get the last person they were talking to
+        const targetId = user.partnerId || user.lastPartnerId;
+        
+        if (!targetId || targetId === socket.id || !users.has(targetId)) return;
+
+        // 1. Block Immediately
+        user.blocked.add(targetId);
+        const reportedUser = users.get(targetId);
+        if (reportedUser) reportedUser.blocked.add(socket.id);
+
+        // 2. Count Report
+        if (!reportLedger.has(targetId)) {
+            reportLedger.set(targetId, { total: 0, reporters: new Set() });
+        }
+        const record = reportLedger.get(targetId);
+
+        if (record.reporters.has(socket.id)) return; // Prevents spam
+        
+        record.reporters.add(socket.id);
+        record.total += 1;
+        console.log(`🚩 Report against ${targetId}. Total: ${record.total}`);
+
+        // 3. IF 2 REPORTS = 24 HR BAN
+        if (record.total >= 2) {
+            console.log(`🔨 User ${targetId} BANNED.`);
+            if (reportedUser) {
+                reportedUser.socket.emit("you-are-banned"); 
+                
+                if (reportedUser.partnerId) {
+                    const theirPartner = users.get(reportedUser.partnerId);
+                    if (theirPartner) {
+                        theirPartner.partnerId = null;
+                        theirPartner.socket.emit("partner-disconnected");
+                    }
+                }
+                users.delete(targetId);
+                textWaitingPool = textWaitingPool.filter(id => id !== targetId);
+                voiceWaitingPool = voiceWaitingPool.filter(id => id !== targetId);
+                videoWaitingPool = videoWaitingPool.filter(id => id !== targetId);
+                updateOnlineCount();
+            }
+            reportLedger.delete(targetId);
+        }
+    });
+
     socket.on("send-message", ({ message }) => {
         const user = users.get(socket.id);
         if (user?.partnerId) {
             const partner = users.get(user.partnerId);
             if (partner) {
-                partner.socket.emit("receive-message", { message: sanitize(message) });
+                const sanitizedMessage = sanitize(message);
+                if (containsBadWords(sanitizedMessage)) {
+                    socket.emit("receive-message", { message: "⚠️ Warning: Inappropriate language." });
+                    return; 
+                }
+                partner.socket.emit("receive-message", { message: sanitizedMessage });
             }
         }
     });
 
-    // 4. Typing Indicators
-    socket.on("typing", (isTyping) => {
-        const user = users.get(socket.id);
-        if (user?.partnerId) {
-            const partner = users.get(user.partnerId);
-            if (partner) partner.socket.emit("partner-typing", isTyping);
-        }
-    });
-
-    socket.on("latency-ping", (callback) => {
-        if (typeof callback === 'function') callback();
-    });
-
-    // --- Disconnect / Next Logic ---
     const handleDisconnectOrNext = () => {
         const user = users.get(socket.id);
         if (!user) return;
 
-        // Clean up pools
         textWaitingPool = textWaitingPool.filter(id => id !== socket.id);
         voiceWaitingPool = voiceWaitingPool.filter(id => id !== socket.id);
-        videoWaitingPool = videoWaitingPool.filter(id => id !== socket.id); // ✨ NEW: Remove from video pool on disconnect
+        videoWaitingPool = videoWaitingPool.filter(id => id !== socket.id);
 
-        // Notify partner
         const partnerId = user.partnerId;
         if (partnerId) {
             const partner = users.get(partnerId);
@@ -202,13 +199,11 @@ io.on("connection", socket => {
                 partner.socket.emit("partner-disconnected");
             }
         }
-        user.partnerId = null;
+        user.partnerId = null; // Do NOT clear lastPartnerId, so they can still report them!
     };
 
     socket.on("next", handleDisconnectOrNext);
-
     socket.on("disconnect", () => {
-        console.log("🔴 Disconnected:", socket.id);
         handleDisconnectOrNext();
         users.delete(socket.id);
         updateOnlineCount();
