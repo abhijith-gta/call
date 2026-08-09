@@ -56,21 +56,31 @@ function findMatch(newUserSocketId) {
 
         if (aBlocks.has(userB.clientId) || bBlocks.has(userA.clientId)) return false;
 
-        const aWantsB = userA.lookingFor === 'anyone' || userA.lookingFor === userB.gender;
-        const bWantsA = userB.lookingFor === 'anyone' || userB.lookingFor === userA.gender;
-        return aWantsB && bWantsA;
+        // 🛑 STRICT GENDER MATCHING FIX 🛑
+        let isMatch = false;
+
+        if (userA.lookingFor === 'anyone' || userB.lookingFor === 'anyone') {
+            // Anyone kodutha aalkkar vere Anyone kodutha aalumaayi mathrame connect aavuu
+            isMatch = (userA.lookingFor === 'anyone' && userB.lookingFor === 'anyone');
+        } else {
+            // Strict targeted matching (Male -> Female <-> Female -> Male)
+            const aWantsB = (userA.lookingFor === userB.gender);
+            const bWantsA = (userB.lookingFor === userA.gender);
+            isMatch = (aWantsB && bWantsA);
+        }
+
+        return isMatch;
     });
 
     if (candidates.length === 0) return;
 
-    // ✨ INTEREST MATCHING LOGIC ✨
+    // ✨ INTEREST MATCHING LOGIC
     let bestCandidate = null;
     let maxCommon = -1;
     let matchedInterest = null;
 
     for (const id of candidates) {
         const userB = users.get(id);
-        // Find common interests between User A and User B
         const common = userA.interests.filter(interest => userB.interests.includes(interest));
         
         if (common.length > maxCommon) {
@@ -97,7 +107,6 @@ function findMatch(newUserSocketId) {
 
         console.log(`✅ Matched: ${userA.nickname} <-> ${userB.nickname} | Interest: ${matchedInterest || 'None'}`);
 
-        // Sending common interest to frontend to show "Matched via: ..."
         userA.socket.emit("partner-found", { 
             initiator: true, 
             partnerNickname: userB.nickname,
@@ -124,7 +133,6 @@ io.on("connection", socket => {
     });
     updateOnlineCount();
 
-    // ✨ SIGNAL BAR PING LISTENER (Fixed Network Bar Bug)
     socket.on("latency-ping", (callback) => {
         if (typeof callback === "function") {
             callback();
@@ -145,7 +153,6 @@ io.on("connection", socket => {
         user.type = preferences.type;
         user.clientId = preferences.clientId; 
         
-        // Ensure interests array is stored safely (Fixed empty array bug)
         user.interests = Array.isArray(preferences.interests) ? preferences.interests : [];
         
         let pool = user.type === 'text' ? textWaitingPool : user.type === 'voice' ? voiceWaitingPool : videoWaitingPool;
