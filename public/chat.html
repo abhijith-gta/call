@@ -184,7 +184,7 @@
             transition: all 0.3s ease;
             flex-shrink: 0;
             cursor: pointer;
-            border-color: #f59e0b;
+            border-color: rgba(245, 158, 11, 0.3);
         }
         .btn-report:hover:not(:disabled) {
             background: #f59e0b; color: white;
@@ -220,11 +220,27 @@
         .btn-send:active { transform: scale(0.95); }
         .btn-send:disabled { background: var(--input-bg); color: var(--text-secondary); box-shadow: none; cursor: not-allowed; border: 1px solid var(--border); transform: none; }
 
-        .typing-bubble { display: inline-flex; align-items: center; gap: 4px; padding: 12px 18px; }
-        .typing-dot { width: 5px; height: 5px; background-color: var(--text-secondary); border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
+        /* --- INSTAGRAM STYLE TYPING INDICATOR --- */
+        .typing-bubble {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 14px 18px;
+            width: fit-content;
+            margin-top: 4px;
+        }
+        .typing-dot {
+            width: 6px; height: 6px;
+            background-color: var(--text-secondary);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
         .typing-dot:nth-child(1) { animation-delay: -0.32s; }
         .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); opacity: 0.4; } 40% { transform: scale(1.2); opacity: 1; background-color: var(--accent); } }
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.4; }
+            40% { transform: scale(1.2); opacity: 1; background-color: var(--accent); }
+        }
 
         #messages-area::-webkit-scrollbar { width: 5px; }
         #messages-area::-webkit-scrollbar-track { background: transparent; }
@@ -340,15 +356,21 @@
 
         <div id="ai-warning">⚠️ Warning</div>
 
-        <!-- MESSAGES AREA -->
+        <!-- MESSAGES AREA (Instagram Style Layout) -->
         <div id="messages-area" class="flex-grow flex flex-col gap-2 px-4 pt-6 pb-4 overflow-y-auto scroll-smooth">
-            <div class="text-center text-xs text-[var(--text-secondary)] mt-2 mb-6 uppercase tracking-widest opacity-70 font-semibold bg-[var(--surface)] backdrop-blur-md border border-[var(--border)] py-2 px-4 rounded-full mx-auto shadow-sm">End-to-end encrypted</div>
             
+            <div class="text-center text-xs text-[var(--text-secondary)] mt-2 mb-2 uppercase tracking-widest opacity-70 font-semibold bg-[var(--surface)] backdrop-blur-md border border-[var(--border)] py-2 px-4 rounded-full mx-auto shadow-sm">End-to-end encrypted</div>
+            
+            <!-- Spacer to push messages to the bottom -->
+            <div class="flex-grow"></div>
+            
+            <!-- Typing Indicator (Always stays at the bottom) -->
             <div id="typing-indicator" class="chat-bubble received typing-bubble hidden">
                 <span class="typing-dot"></span>
                 <span class="typing-dot"></span>
                 <span class="typing-dot"></span>
             </div>
+
         </div>
 
         <!-- ACCESSIBLE BOTTOM CONTROL BAR -->
@@ -358,6 +380,7 @@
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
             </button>
 
+            <!-- Report Button -->
             <button type="button" id="report-btn" class="btn-report" title="Report User" disabled>
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg>
             </button>
@@ -376,12 +399,12 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         // BAN CHECK
-        if (localStorage.getItem('swaploop_ban_v22')) {
-            if (Date.now() < parseInt(localStorage.getItem('swaploop_ban_v22'))) {
+        if (localStorage.getItem('swaploop_ban_v25')) {
+            if (Date.now() < parseInt(localStorage.getItem('swaploop_ban_v25'))) {
                 document.getElementById('ban-screen').classList.remove('hidden');
                 document.getElementById('setup-screen').classList.add('hidden');
                 throw new Error("User is currently banned.");
-            } else localStorage.removeItem('swaploop_ban_v22');
+            } else localStorage.removeItem('swaploop_ban_v25');
         }
 
         // GENERATE DEVICE ID
@@ -448,7 +471,6 @@
         // --- Chat Logic ---
         const socket = typeof io !== 'undefined' ? io() : { emit: () => {}, on: () => {} };
         let myGender = null, lookingFor = 'anyone';
-        
         let hasConnectedOnce = false;
 
         const ui = {
@@ -524,7 +546,6 @@
             ui.aiWarning.style.borderColor = '#22c55e';
             ui.aiWarning.style.display = 'block';
             
-            // Disable report button until next match
             ui.reportBtn.disabled = true;
             
             setTimeout(() => { 
@@ -533,25 +554,25 @@
                 ui.aiWarning.style.borderColor = '#f87171';
             }, 3000);
 
-            // Disconnect
             socket.emit("next");
             updateStatus('disconnected');
             hasConnectedOnce = false;
         });
 
         socket.on('you-are-banned', () => {
-            localStorage.setItem('swaploop_ban_v22', Date.now() + 24 * 60 * 60 * 1000); 
+            localStorage.setItem('swaploop_ban_v25', Date.now() + 24 * 60 * 60 * 1000); 
             location.reload();
         });
         // --- REPORT LOGIC END ---
 
         function findPartner() {
             updateStatus('searching');
-            ui.reportBtn.disabled = true; // Disable during search
+            ui.reportBtn.disabled = true; 
             
-            const initialBadge = '<div class="text-center text-xs text-[var(--text-secondary)] mt-2 mb-6 uppercase tracking-widest opacity-70 font-semibold bg-[var(--surface)] backdrop-blur-md border border-[var(--border)] py-2 px-4 rounded-full mx-auto shadow-sm">Conversation Started</div>';
-            ui.msgsArea.innerHTML = initialBadge;
-            ui.msgsArea.appendChild(ui.typingInd);
+            // CAREFULLY clear chat bubbles without destroying the typing indicator
+            const oldBubbles = ui.msgsArea.querySelectorAll('.chat-bubble:not(#typing-indicator)');
+            oldBubbles.forEach(bubble => bubble.remove());
+            
             ui.typingInd.classList.add('hidden');
             
             const interestString = sessionStorage.getItem('swaploop_interests') || "";
@@ -566,12 +587,17 @@
             findPartner();
         });
 
+        // ✨ TYPING INDICATOR EMISSION ✨
+        let typingTimeout;
         ui.input.addEventListener('input', () => {
             ui.sendBtn.disabled = ui.input.value.trim().length === 0;
             
             socket.emit('typing', true);
-            clearTimeout(window.typingTimeout);
-            window.typingTimeout = setTimeout(() => socket.emit('typing', false), 2000);
+            
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                socket.emit('typing', false);
+            }, 1500);
         });
 
         ui.form.addEventListener('submit', (e) => {
@@ -583,7 +609,9 @@
                 playSound('send');
                 ui.input.value = '';
                 ui.sendBtn.disabled = true;
+                
                 socket.emit('typing', false); 
+                clearTimeout(typingTimeout);
             }
         });
 
@@ -592,17 +620,19 @@
             div.textContent = text;
             div.className = `chat-bubble ${type}`;
             
+            // Insert the new message EXACTLY before the typing indicator
             ui.msgsArea.insertBefore(div, ui.typingInd);
             
             setTimeout(() => {
-                ui.msgsArea.scrollTo({ top: ui.msgsArea.scrollHeight, behavior: 'smooth' });
+                ui.msgsArea.scrollTop = ui.msgsArea.scrollHeight;
             }, 50);
         }
 
+        // ✨ TYPING INDICATOR RECEPTION ✨
         socket.on('partner-typing', (isTyping) => {
             if(isTyping) {
                 ui.typingInd.classList.remove('hidden');
-                ui.msgsArea.scrollTo({ top: ui.msgsArea.scrollHeight, behavior: 'smooth' });
+                ui.msgsArea.scrollTop = ui.msgsArea.scrollHeight;
             } else {
                 ui.typingInd.classList.add('hidden');
             }
@@ -622,7 +652,7 @@
 
         socket.on('partner-disconnected', () => {
             updateStatus('disconnected');
-            // We removed the auto-next so the user has time to click 'Report' if they want!
+            ui.typingInd.classList.add('hidden'); // Hide typing indicator if they disconnect
         });
 
         function updateStatus(state, name="Stranger") {
