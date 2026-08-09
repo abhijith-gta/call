@@ -63,6 +63,8 @@
                 radial-gradient(circle at 90% 80%, rgba(217, 70, 239, 0.04), transparent 40%);
         }
 
+        .hidden { display: none !important; }
+
         /* Setup Card */
         .satin-card {
             background-color: var(--surface);
@@ -95,7 +97,6 @@
             height: 70px;
         }
 
-        /* Theme Toggle Button (Inside Header) */
         .header-theme-btn {
             width: 40px; height: 40px;
             border-radius: 50%;
@@ -144,7 +145,7 @@
 
         @keyframes popIn { to { opacity: 1; transform: scale(1) translateY(0); } }
 
-        /* Easy Access Bottom Control Bar */
+        /* Bottom Control Bar */
         .bottom-control-bar {
             background: var(--header-bg);
             backdrop-filter: blur(20px);
@@ -158,7 +159,6 @@
             z-index: 20;
         }
 
-        /* Next/Skip Button (Left side of input) */
         .btn-skip {
             background: var(--input-bg);
             color: var(--text-primary);
@@ -170,14 +170,28 @@
             flex-shrink: 0;
             cursor: pointer;
         }
-        .btn-skip:hover {
-            border-color: var(--accent);
-            background: var(--btn-hover);
-            transform: scale(1.05);
-        }
+        .btn-skip:hover { border-color: var(--accent); background: var(--btn-hover); transform: scale(1.05); }
         .btn-skip:active { transform: scale(0.95); }
 
-        /* Text Input */
+        /* Report Button */
+        .btn-report {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 48px; height: 48px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            cursor: pointer;
+            border-color: #f59e0b;
+        }
+        .btn-report:hover:not(:disabled) {
+            background: #f59e0b; color: white;
+            transform: scale(1.05); box-shadow: 0 4px 15px rgba(245,158,11,0.4);
+        }
+        .btn-report:disabled { opacity: 0.3; cursor: not-allowed; filter: grayscale(80%); }
+
         .chat-input-wrapper {
             flex-grow: 1;
             background: var(--input-bg);
@@ -188,22 +202,10 @@
             padding: 4px 16px;
             transition: all 0.3s ease;
         }
-        .chat-input-wrapper:focus-within {
-            border-color: var(--accent);
-            background: var(--surface);
-            box-shadow: 0 0 0 2px var(--accent-glow);
-        }
-        .glass-input {
-            background: transparent;
-            border: none;
-            color: var(--text-primary);
-            width: 100%;
-            padding: 10px 0;
-            font-size: 1rem;
-        }
-        .glass-input:focus { outline: none; }
-
-        /* Send Button */
+        .chat-input-wrapper:focus-within { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 2px var(--accent-glow); }
+        .glass-input { background: transparent; border: none; color: var(--text-primary); width: 100%; padding: 10px 0; font-size: 1rem; }
+        .glass-input:focus { outline: none; }                                
+        
         .btn-send {
             background: var(--accent-gradient);
             color: white;
@@ -212,42 +214,18 @@
             display: flex; align-items: center; justify-content: center;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 4px 15px var(--accent-glow);
-            flex-shrink: 0;
-            border: none;
-            cursor: pointer;
+            flex-shrink: 0; border: none; cursor: pointer;
         }
         .btn-send:hover { transform: scale(1.05); box-shadow: 0 6px 20px var(--accent-glow); }
         .btn-send:active { transform: scale(0.95); }
-        .btn-send:disabled {
-            background: var(--input-bg);
-            color: var(--text-secondary);
-            box-shadow: none;
-            cursor: not-allowed;
-            border: 1px solid var(--border);
-            transform: none;
-        }
+        .btn-send:disabled { background: var(--input-bg); color: var(--text-secondary); box-shadow: none; cursor: not-allowed; border: 1px solid var(--border); transform: none; }
 
-        /* Typing Indicator Animation */
-        .typing-bubble {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 12px 18px;
-        }
-        .typing-dot {
-            width: 5px; height: 5px;
-            background-color: var(--text-secondary);
-            border-radius: 50%;
-            animation: bounce 1.4s infinite ease-in-out both;
-        }
+        .typing-bubble { display: inline-flex; align-items: center; gap: 4px; padding: 12px 18px; }
+        .typing-dot { width: 5px; height: 5px; background-color: var(--text-secondary); border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
         .typing-dot:nth-child(1) { animation-delay: -0.32s; }
         .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); opacity: 0.4; }
-            40% { transform: scale(1.2); opacity: 1; background-color: var(--accent); }
-        }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); opacity: 0.4; } 40% { transform: scale(1.2); opacity: 1; background-color: var(--accent); } }
 
-        /* Scrollbar */
         #messages-area::-webkit-scrollbar { width: 5px; }
         #messages-area::-webkit-scrollbar-track { background: transparent; }
         #messages-area::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3); border-radius: 10px; }
@@ -255,9 +233,50 @@
         
         .fade-in { animation: fadeIn 0.5s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Custom AI / Report Warning Toast */
+        #ai-warning {
+            position: absolute; top: 80px; left: 50%; transform: translateX(-50%);
+            background: rgba(239, 68, 68, 0.95); color: white; padding: 12px 24px;
+            border-radius: 12px; font-weight: bold; z-index: 100; display: none;
+            backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+            text-align: center; border: 1px solid #f87171; transition: all 0.3s ease;
+        }
+
+        /* Report Modal CSS */
+        .radio-label { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 8px; cursor: pointer; background: var(--input-bg); border: 1px solid var(--border); transition: all 0.2s; }
+        .radio-label:hover { border-color: #f59e0b; }
+        input[type="radio"]:checked + span { color: #f59e0b; font-weight: 600; }
     </style>
 </head>
 <body>
+
+    <!-- REPORT MODAL -->
+    <div id="report-modal" class="fixed inset-0 z-[1000] hidden flex-col items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div class="satin-card w-full max-w-xs p-6 rounded-2xl">
+            <h3 class="text-xl font-bold text-yellow-500 mb-2">Report User</h3>
+            <p class="text-xs text-gray-400 mb-4">Why are you reporting this user?</p>
+            
+            <div class="flex flex-col gap-3 mb-6 text-sm">
+                <label class="radio-label"><input type="radio" name="report-reason" value="harassment" checked> <span>Harassment / Abuse</span></label>
+                <label class="radio-label"><input type="radio" name="report-reason" value="spam"> <span>Spam / Bot</span></label>
+                <label class="radio-label"><input type="radio" name="report-reason" value="nudity"> <span>Inappropriate Content</span></label>
+                <label class="radio-label"><input type="radio" name="report-reason" value="other"> <span>Other</span></label>
+            </div>
+            
+            <div class="flex gap-3">
+                <button id="close-report" class="flex-1 p-2.5 rounded-xl border border-gray-600 hover:bg-[var(--btn-hover)] transition">Cancel</button>
+                <button id="submit-report" class="flex-1 p-2.5 rounded-xl bg-yellow-600 text-white font-bold shadow-lg hover:bg-yellow-500 transition">Report</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 24HR BAN SCREEN -->
+    <div id="ban-screen" class="fixed inset-0 z-[999] hidden flex-col items-center justify-center p-4 bg-black text-center">
+        <h1 class="text-5xl mb-4">🚫</h1>
+        <h2 class="text-3xl font-bold text-red-500 mb-2">BANNED</h2>
+        <p class="text-gray-300">You have been banned for 24 hours due to multiple reports.</p>
+    </div>
 
     <!-- SETUP SCREEN -->
     <div id="setup-screen" class="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/50 backdrop-blur-md">
@@ -299,7 +318,6 @@
         
         <!-- HEADER -->
         <div class="chat-header flex items-center px-5 shrink-0 z-20 shadow-sm relative justify-between">
-            <!-- Left Side: Stranger Info -->
             <div class="flex-1 flex flex-col justify-center">
                 <h2 id="partner-nickname" class="text-lg font-bold leading-tight tracking-tight">Stranger</h2>
                 <div class="flex items-center gap-2 mt-0.5">
@@ -308,12 +326,10 @@
                 </div>
             </div>
 
-            <!-- Center: Domain Name -->
             <div class="absolute left-1/2 transform -translate-x-1/2 text-xl font-extrabold tracking-widest cursor-default" style="color: var(--accent); text-shadow: 0 0 15px var(--accent-glow);">
                 swaploop.in
             </div>
 
-            <!-- Right Side: Theme Toggle -->
             <div class="flex-1 flex justify-end items-center">
                 <button id="theme-btn" class="header-theme-btn" aria-label="Toggle Theme">
                     <svg id="moon-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
@@ -322,11 +338,12 @@
             </div>
         </div>
 
+        <div id="ai-warning">⚠️ Warning</div>
+
         <!-- MESSAGES AREA -->
         <div id="messages-area" class="flex-grow flex flex-col gap-2 px-4 pt-6 pb-4 overflow-y-auto scroll-smooth">
             <div class="text-center text-xs text-[var(--text-secondary)] mt-2 mb-6 uppercase tracking-widest opacity-70 font-semibold bg-[var(--surface)] backdrop-blur-md border border-[var(--border)] py-2 px-4 rounded-full mx-auto shadow-sm">End-to-end encrypted</div>
             
-            <!-- Typing Indicator (Hidden by default) -->
             <div id="typing-indicator" class="chat-bubble received typing-bubble hidden">
                 <span class="typing-dot"></span>
                 <span class="typing-dot"></span>
@@ -337,17 +354,18 @@
         <!-- ACCESSIBLE BOTTOM CONTROL BAR -->
         <form id="chat-form" class="bottom-control-bar">
             
-            <!-- Next / Skip Button -->
             <button type="button" id="next-button" class="btn-skip" title="Next Stranger">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
             </button>
 
-            <!-- Input Box -->
+            <button type="button" id="report-btn" class="btn-report" title="Report User" disabled>
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg>
+            </button>
+
             <div class="chat-input-wrapper">
                 <input id="chat-input" type="text" placeholder="Type a message..." autocomplete="off" class="glass-input" disabled>
             </div>
 
-            <!-- Send Button -->
             <button type="submit" id="send-button" class="btn-send" disabled>
                 <svg class="w-5 h-5 translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
             </button>
@@ -357,6 +375,22 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
+        // BAN CHECK
+        if (localStorage.getItem('swaploop_ban_v22')) {
+            if (Date.now() < parseInt(localStorage.getItem('swaploop_ban_v22'))) {
+                document.getElementById('ban-screen').classList.remove('hidden');
+                document.getElementById('setup-screen').classList.add('hidden');
+                throw new Error("User is currently banned.");
+            } else localStorage.removeItem('swaploop_ban_v22');
+        }
+
+        // GENERATE DEVICE ID
+        let myClientId = localStorage.getItem('swaploop_client_id');
+        if (!myClientId) {
+            myClientId = 'device_' + Math.random().toString(36).substr(2, 16);
+            localStorage.setItem('swaploop_client_id', myClientId);
+        }
+
         // --- Theme Logic ---
         const themeBtn = document.getElementById('theme-btn');
         const moonIcon = document.getElementById('moon-icon');
@@ -414,6 +448,8 @@
         // --- Chat Logic ---
         const socket = typeof io !== 'undefined' ? io() : { emit: () => {}, on: () => {} };
         let myGender = null, lookingFor = 'anyone';
+        
+        let hasConnectedOnce = false;
 
         const ui = {
             setupScreen: document.getElementById('setup-screen'),
@@ -428,7 +464,12 @@
             form: document.getElementById('chat-form'),
             input: document.getElementById('chat-input'),
             sendBtn: document.getElementById('send-button'),
-            nextBtn: document.getElementById('next-button')
+            nextBtn: document.getElementById('next-button'),
+            reportBtn: document.getElementById('report-btn'),
+            reportModal: document.getElementById('report-modal'),
+            closeReport: document.getElementById('close-report'),
+            submitReport: document.getElementById('submit-report'),
+            aiWarning: document.getElementById('ai-warning')
         };
 
         function setupSelectors(id, callback) {
@@ -458,10 +499,56 @@
             findPartner();
         });
 
+        // --- REPORT LOGIC START ---
+        ui.reportBtn.addEventListener('click', () => {
+            if (!hasConnectedOnce) return;
+            ui.reportModal.classList.remove('hidden'); 
+            ui.reportModal.classList.add('flex');
+        });
+
+        ui.closeReport.addEventListener('click', () => {
+            ui.reportModal.classList.add('hidden'); 
+            ui.reportModal.classList.remove('flex');
+        });
+
+        ui.submitReport.addEventListener('click', () => {
+            const reason = document.querySelector('input[name="report-reason"]:checked').value;
+            
+            socket.emit('report-user', { reason: reason });
+            
+            ui.reportModal.classList.add('hidden'); 
+            ui.reportModal.classList.remove('flex');
+
+            ui.aiWarning.textContent = `✅ Thank you for reporting! We will check and take action.`;
+            ui.aiWarning.style.background = 'rgba(34, 197, 94, 0.95)';
+            ui.aiWarning.style.borderColor = '#22c55e';
+            ui.aiWarning.style.display = 'block';
+            
+            // Disable report button until next match
+            ui.reportBtn.disabled = true;
+            
+            setTimeout(() => { 
+                ui.aiWarning.style.display = 'none'; 
+                ui.aiWarning.style.background = 'rgba(239, 68, 68, 0.95)'; 
+                ui.aiWarning.style.borderColor = '#f87171';
+            }, 3000);
+
+            // Disconnect
+            socket.emit("next");
+            updateStatus('disconnected');
+            hasConnectedOnce = false;
+        });
+
+        socket.on('you-are-banned', () => {
+            localStorage.setItem('swaploop_ban_v22', Date.now() + 24 * 60 * 60 * 1000); 
+            location.reload();
+        });
+        // --- REPORT LOGIC END ---
+
         function findPartner() {
             updateStatus('searching');
+            ui.reportBtn.disabled = true; // Disable during search
             
-            // Clean area but keep the encryption badge and typing indicator
             const initialBadge = '<div class="text-center text-xs text-[var(--text-secondary)] mt-2 mb-6 uppercase tracking-widest opacity-70 font-semibold bg-[var(--surface)] backdrop-blur-md border border-[var(--border)] py-2 px-4 rounded-full mx-auto shadow-sm">Conversation Started</div>';
             ui.msgsArea.innerHTML = initialBadge;
             ui.msgsArea.appendChild(ui.typingInd);
@@ -470,11 +557,7 @@
             const interestString = sessionStorage.getItem('swaploop_interests') || "";
             const interests = interestString.split(',').map(s => s.trim()).filter(s => s);
             
-            socket.emit("find-partner", { gender: myGender, lookingFor, type: 'text', interests: interests });
-            
-            if(typeof io === 'undefined') {
-                setTimeout(() => updateStatus('connected', 'Test User'), 2000);
-            }
+            socket.emit("find-partner", { gender: myGender, lookingFor, type: 'text', interests: interests, clientId: myClientId });
         }
 
         ui.nextBtn.addEventListener('click', () => {
@@ -509,14 +592,10 @@
             div.textContent = text;
             div.className = `chat-bubble ${type}`;
             
-            // Insert before the typing indicator
             ui.msgsArea.insertBefore(div, ui.typingInd);
             
             setTimeout(() => {
-                ui.msgsArea.scrollTo({
-                    top: ui.msgsArea.scrollHeight,
-                    behavior: 'smooth'
-                });
+                ui.msgsArea.scrollTo({ top: ui.msgsArea.scrollHeight, behavior: 'smooth' });
             }, 50);
         }
 
@@ -531,6 +610,8 @@
 
         socket.on('partner-found', ({ partnerNickname }) => {
             updateStatus('connected', partnerNickname);
+            hasConnectedOnce = true;
+            ui.reportBtn.disabled = false; // ENABLE REPORT WHEN CONNECTED
         });
 
         socket.on('receive-message', ({ message }) => {
@@ -541,10 +622,7 @@
 
         socket.on('partner-disconnected', () => {
             updateStatus('disconnected');
-            setTimeout(() => {
-                socket.emit('next');
-                findPartner();
-            }, 2000); 
+            // We removed the auto-next so the user has time to click 'Report' if they want!
         });
 
         function updateStatus(state, name="Stranger") {
@@ -567,7 +645,7 @@
                 ui.statusText.textContent = "Disconnected";
                 ui.statusText.style.color = "#ef4444"; 
                 ui.statusDot.className = "w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]";
-                appendMsg("Stranger has disconnected.", "received"); 
+                appendMsg("Stranger has disconnected. Click 'Next' to find someone else.", "received"); 
             }
         }
     </script>
