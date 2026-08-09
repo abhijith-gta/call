@@ -111,6 +111,7 @@
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             overflow: hidden;
+            cursor: pointer;
         }
         .toggle-btn:hover { border-color: var(--accent); color: var(--text-primary); }
         .toggle-btn.active {
@@ -222,6 +223,22 @@
         .received { background: var(--msg-received); align-self: flex-start; border-bottom-left-radius: 4px; color: var(--text-primary); }
         @keyframes popIn { from { opacity: 0; transform: scale(0.9) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
+        /* --- INSTAGRAM STYLE TYPING INDICATOR --- */
+        .typing-bubble {
+            display: inline-flex; align-items: center; gap: 4px; padding: 10px 14px;
+            width: fit-content; margin-top: 4px;
+        }
+        .typing-dot {
+            width: 5px; height: 5px; background-color: var(--text-secondary); border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.4; }
+            40% { transform: scale(1.2); opacity: 1; background-color: var(--accent); }
+        }
+
         #chat-badge { position: absolute; top: -2px; right: -2px; width: 14px; height: 14px; background: var(--danger); border-radius: 50%; border: 2px solid var(--bg); display: none; }
         
         .chat-input-field { background: var(--btn-bg); border: 1px solid var(--border); color: var(--text-primary); flex-grow: 1; border-radius: 999px; padding: 8px 16px; font-size: 14px; }
@@ -252,7 +269,7 @@
 </head>
 <body>
 
-    <button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme">
+    <button type="button" id="theme-btn" class="theme-toggle" aria-label="Toggle Theme">
         <svg id="moon-icon" class="w-5 h-5 text-[var(--text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
         <svg id="sun-icon" class="hidden w-5 h-5 text-[var(--text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
     </button>
@@ -271,8 +288,8 @@
             </div>
             
             <div class="flex gap-3">
-                <button id="close-report" class="flex-1 p-2.5 rounded-xl border border-gray-600 hover:bg-[var(--btn-bg)] transition">Cancel</button>
-                <button id="submit-report" class="flex-1 p-2.5 rounded-xl bg-yellow-600 text-white font-bold shadow-lg hover:bg-yellow-500 transition">Report</button>
+                <button type="button" id="close-report" class="flex-1 p-2.5 rounded-xl border border-gray-600 hover:bg-[var(--btn-bg)] transition">Cancel</button>
+                <button type="button" id="submit-report" class="flex-1 p-2.5 rounded-xl bg-yellow-600 text-white font-bold shadow-lg hover:bg-yellow-500 transition">Report</button>
             </div>
         </div>
     </div>
@@ -300,21 +317,21 @@
                 <div class="text-left">
                     <label class="text-xs uppercase tracking-widest text-[var(--text-secondary)] font-bold ml-2 mb-3 block">I am</label>
                     <div id="my-gender-selector" class="grid grid-cols-2 gap-4">
-                        <button class="toggle-btn p-4 rounded-2xl font-semibold text-lg" data-gender="male">Male</button>
-                        <button class="toggle-btn p-4 rounded-2xl font-semibold text-lg" data-gender="female">Female</button>
+                        <button type="button" class="toggle-btn p-4 rounded-2xl font-semibold text-lg" data-gender="male">Male</button>
+                        <button type="button" class="toggle-btn p-4 rounded-2xl font-semibold text-lg" data-gender="female">Female</button>
                     </div>
                 </div>
 
                 <div class="text-left">
                     <label class="text-xs uppercase tracking-widest text-[var(--text-secondary)] font-bold ml-2 mb-3 block">Looking for</label>
                     <div id="looking-for-selector" class="grid grid-cols-3 gap-3">
-                        <button class="toggle-btn p-3 rounded-xl font-medium" data-gender="male">Male</button>
-                        <button class="toggle-btn p-3 rounded-xl font-medium" data-gender="female">Female</button>
-                        <button class="toggle-btn active p-3 rounded-xl font-medium" data-gender="anyone">Anyone</button>
+                        <button type="button" class="toggle-btn p-3 rounded-xl font-medium" data-gender="male">Male</button>
+                        <button type="button" class="toggle-btn p-3 rounded-xl font-medium" data-gender="female">Female</button>
+                        <button type="button" class="toggle-btn active p-3 rounded-xl font-medium" data-gender="anyone">Anyone</button>
                     </div>
                 </div>
 
-                <button id="start-button" class="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold p-5 rounded-2xl mt-4 shadow-lg hover:shadow-indigo-500/50 hover:-translate-y-1 active:scale-95 transition-all duration-300 text-lg">
+                <button type="button" id="start-button" class="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold p-5 rounded-2xl mt-4 shadow-lg hover:shadow-indigo-500/50 hover:-translate-y-1 active:scale-95 transition-all duration-300 text-lg">
                     Start Call
                 </button>
             </div>
@@ -358,10 +375,18 @@
         <div id="chat-overlay">
             <div class="flex justify-between items-center p-3 border-b border-[var(--border)]">
                 <h3 class="font-semibold text-sm">Live Chat</h3>
-                <button id="close-chat" class="text-[var(--text-secondary)] hover:text-white text-xl leading-none">&times;</button>
+                <button type="button" id="close-chat" class="text-[var(--text-secondary)] hover:text-white text-xl leading-none">&times;</button>
             </div>
             <div id="messages-area" class="flex-grow p-3 overflow-y-auto flex flex-col scroll-smooth">
-                <!-- Messages appear here -->
+                <!-- Spacer to push messages to bottom -->
+                <div class="flex-grow"></div>
+                
+                <!-- Typing Indicator -->
+                <div id="typing-indicator" class="chat-bubble received typing-bubble hidden">
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                </div>
             </div>
             <form id="chat-form" class="p-2 border-t border-[var(--border)] flex gap-2 shrink-0">
                 <input id="chat-input" type="text" placeholder="Type a message..." class="chat-input-field" autocomplete="off" disabled>
@@ -377,7 +402,7 @@
                 
                 <!-- Report Button -->
                 <div class="flex flex-col items-center">
-                    <button id="report-btn" class="icon-btn report-btn" disabled>
+                    <button type="button" id="report-btn" class="icon-btn report-btn" disabled>
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg>
                     </button>
                     <span class="btn-label">Report</span>
@@ -385,7 +410,7 @@
 
                 <!-- Mute -->
                 <div class="flex flex-col items-center">
-                    <button id="mute-button" class="icon-btn">
+                    <button type="button" id="mute-button" class="icon-btn">
                         <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
                     </button>
                     <span class="btn-label">Mute</span>
@@ -393,7 +418,7 @@
 
                 <!-- Chat Button -->
                 <div class="flex flex-col items-center">
-                    <button id="chat-toggle" class="icon-btn relative">
+                    <button type="button" id="chat-toggle" class="icon-btn relative">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
                         <div id="chat-badge"></div>
                     </button>
@@ -403,29 +428,29 @@
             </div>
 
             <div class="main-action-container">
-                <button id="end-button" class="btn-end visible-scale" title="End Call">
+                <button type="button" id="end-button" class="btn-end visible-scale" title="End Call">
                     <svg class="w-10 h-10 transform rotate-135" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10.707 3.293a1 1 0 010 1.414L6.414 9H16a1 1 0 110 2H6.414l4.293 4.293a1 1 0 01-1.414 1.414l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                 </button>
 
-                <button id="next-button" class="btn-next hidden-scale">
-                    Next Stranger <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                <button type="button" id="next-button" class="btn-next hidden-scale">
+                    Next Stranger <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
                 </button>
             </div>
 
         </div>
-    </div>                                                 
+    </div>                                              
     <audio id="remoteAudio" autoplay playsinline controls style="display: none;"></audio>
 
     <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         // BAN CHECK
-        if (localStorage.getItem('swaploop_ban_v22')) {
-            if (Date.now() < parseInt(localStorage.getItem('swaploop_ban_v22'))) {
+        if (localStorage.getItem('swaploop_ban_v26')) {
+            if (Date.now() < parseInt(localStorage.getItem('swaploop_ban_v26'))) {
                 document.getElementById('ban-screen').classList.remove('hidden');
                 document.getElementById('setup-screen').classList.add('hidden');
                 throw new Error("User is currently banned.");
-            } else localStorage.removeItem('swaploop_ban_v22');
+            } else localStorage.removeItem('swaploop_ban_v26');
         }
 
         // GENERATE DEVICE ID
@@ -463,31 +488,35 @@
         // --- Sound Logic ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playSound(type) {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
 
-            if (type === 'click') {
-                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.05);
-            } else if (type === 'connect') {
-                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.2);
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-            } else if (type === 'end') {
-                osc.frequency.setValueAtTime(300, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.3);
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-            } else if (type === 'msg') {
-                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(500, audioCtx.currentTime + 0.1);
-                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+                if (type === 'click') {
+                    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+                } else if (type === 'connect') {
+                    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'end') {
+                    osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.3);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'msg') {
+                    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(500, audioCtx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+                }
+            } catch(e) {
+                // Ignore audio errors to prevent UI breaking
             }
         }
 
@@ -521,6 +550,7 @@
             chatForm: document.getElementById('chat-form'),
             chatInput: document.getElementById('chat-input'),
             sendBtn: document.getElementById('send-btn'),
+            typingInd: document.getElementById('typing-indicator'),
             // Report UI
             reportBtn: document.getElementById('report-btn'),
             reportModal: document.getElementById('report-modal'),
@@ -549,7 +579,7 @@
             if (!myGender) {
                 return alert("Please select your gender first.");
             }
-            if (audioCtx.state === 'suspended') { await audioCtx.resume(); }
+            try { if (audioCtx.state === 'suspended') await audioCtx.resume(); } catch(e){}
 
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -612,7 +642,12 @@
         function findPartner() {
             resetCallUI();
             updateStatus('searching');
-            ui.msgArea.innerHTML = ''; 
+            
+            // CAREFULLY clear chat bubbles without destroying the typing indicator
+            const oldBubbles = ui.msgArea.querySelectorAll('.chat-bubble:not(#typing-indicator)');
+            oldBubbles.forEach(bubble => bubble.remove());
+            ui.typingInd.classList.add('hidden');
+            
             ui.reportBtn.disabled = true; // Disable during search
             
             const interestString = sessionStorage.getItem('swaploop_interests') || "";
@@ -656,7 +691,13 @@
         ui.chatToggle.addEventListener('click', () => { playSound('click'); toggleChat(); });
         ui.closeChat.addEventListener('click', toggleChat);
 
-        ui.chatInput.addEventListener('input', () => ui.sendBtn.disabled = !ui.chatInput.value.trim());
+        let typingTimeout;
+        ui.chatInput.addEventListener('input', () => {
+            ui.sendBtn.disabled = !ui.chatInput.value.trim();
+            socket.emit('typing', true);
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => socket.emit('typing', false), 1500);
+        });
 
         ui.chatForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -666,6 +707,8 @@
                 appendMsg(msg, 'sent');
                 ui.chatInput.value = '';
                 ui.sendBtn.disabled = true;
+                socket.emit('typing', false); 
+                clearTimeout(typingTimeout);
             }
         });
 
@@ -673,11 +716,22 @@
             const div = document.createElement('div');
             div.className = `chat-bubble ${type}`;
             div.textContent = text;
-            ui.msgArea.appendChild(div);
-            ui.msgArea.scrollTop = ui.msgArea.scrollHeight;
+            // Insert the new message EXACTLY before the typing indicator
+            ui.msgArea.insertBefore(div, ui.typingInd);
+            setTimeout(() => { ui.msgArea.scrollTop = ui.msgArea.scrollHeight; }, 50);
         }
 
+        socket.on('partner-typing', (isTyping) => {
+            if(isTyping) {
+                ui.typingInd.classList.remove('hidden');
+                ui.msgArea.scrollTop = ui.msgArea.scrollHeight;
+            } else {
+                ui.typingInd.classList.add('hidden');
+            }
+        });
+
         socket.on('receive-message', ({ message }) => {
+            ui.typingInd.classList.add('hidden');
             appendMsg(message, 'received');
             if(!isChatOpen) {
                 ui.chatBadge.style.display = 'block';
@@ -768,6 +822,7 @@
             if (peer) { peer.destroy(); peer = null; }
             playSound('end');
             updateStatus('ended');
+            ui.typingInd.classList.add('hidden');
             // Kept report enabled so user can report hit and runs
         }
 
@@ -781,6 +836,7 @@
                 ui.statusText.style.color = "var(--text-secondary)";
                 ui.signalBar.classList.add('hidden');
                 ui.interestMatch.classList.add('hidden');
+                ui.typingInd.classList.add('hidden');
             } 
             else if (state === 'connecting') {
                 ui.statusText.textContent = "Connecting...";
@@ -810,8 +866,6 @@
                 
                 ui.endBtn.classList.replace('visible-scale', 'hidden-scale');
                 ui.nextBtn.classList.replace('hidden-scale', 'visible-scale');
-                
-                // IMPORTANT: Removed secondary controls hiding, so Report btn stays visible!
                 
                 if (isChatOpen) toggleChat();
             }
