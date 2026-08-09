@@ -24,6 +24,10 @@
             --btn-bg: rgba(255, 255, 255, 0.05);
             --border: rgba(255, 255, 255, 0.08);
             --audio-level: 0.1;
+            
+            /* Chat Bubbles */
+            --msg-sent: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --msg-received: rgba(255, 255, 255, 0.15);
         }
 
         [data-theme="light"] {
@@ -39,6 +43,9 @@
             --success: #10b981;
             --btn-bg: rgba(0, 0, 0, 0.03);
             --border: rgba(0, 0, 0, 0.08);
+            
+            --msg-sent: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            --msg-received: rgba(0, 0, 0, 0.08);
         }
 
         body {
@@ -60,6 +67,8 @@
             0% { background-position: 0% 0%; }
             100% { background-position: 100% 100%; }
         }
+
+        .hidden { display: none !important; }
 
         /* Theme Toggle */
         .theme-toggle {
@@ -103,14 +112,10 @@
             position: relative;
             overflow: hidden;
         }
-        .toggle-btn:hover {
-            border-color: var(--accent);
-            color: var(--text-primary);
-        }
+        .toggle-btn:hover { border-color: var(--accent); color: var(--text-primary); }
         .toggle-btn.active {
             background: var(--accent-gradient);
-            color: white;
-            border-color: transparent;
+            color: white; border-color: transparent;
             box-shadow: 0 4px 15px var(--accent-glow);
             transform: translateY(-2px);
         }
@@ -128,22 +133,12 @@
             box-shadow: 0 0 40px var(--accent-glow);
             transform: scale(calc(1 + var(--audio-level) * 0.9));
             transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1);
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            z-index: 10; display: flex; align-items: center; justify-content: center;
         }
-        .vis-core::after {
-            content: '🎙️';
-            font-size: 3rem;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
-        }
+        .vis-core::after { content: '🎙️'; font-size: 3rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
         .vis-wave {
-            position: absolute;
-            border: 2px solid var(--accent);
-            border-radius: 50%;
-            width: 100%; height: 100%;
-            opacity: 0;
+            position: absolute; border: 2px solid var(--accent); border-radius: 50%;
+            width: 100%; height: 100%; opacity: 0;
             animation: wave 2.5s infinite cubic-bezier(0.1, 0.4, 0.8, 1);
         }
         .vis-wave:nth-child(2) { animation-delay: 0.8s; }
@@ -151,146 +146,108 @@
         @keyframes wave {
             0% { transform: scale(0.45); opacity: 0.8; border-width: 4px; }
             100% { transform: scale(2.2); opacity: 0; border-width: 0px; }
-        }
+        }                               
 
         /* --- DIALER UI CONTROLS --- */
         .controls-area {
-            padding: 30px;
-            padding-bottom: 50px;
-            display: flex;
-            flex-direction: column;
-            gap: 40px;
-            align-items: center;
-            justify-content: flex-end;
-            min-height: 280px;
-            background: linear-gradient(to top, var(--bg) 20%, transparent 100%);
+            padding: 20px; padding-bottom: max(30px, env(safe-area-inset-bottom));
+            display: flex; flex-direction: column; gap: 30px; align-items: center; justify-content: flex-end;
+            min-height: 250px; background: linear-gradient(to top, var(--bg) 20%, transparent 100%);
         }
 
-        /* Secondary Controls Row (Mute/Speaker) */
         .secondary-controls {
-            display: flex;
-            gap: 70px;
-            justify-content: center;
-            width: 100%;
+            display: flex; gap: 30px; justify-content: center; width: 100%;
             transition: opacity 0.4s ease, transform 0.4s ease;
         }
 
         .icon-btn {
-            width: 68px; height: 68px;
-            border-radius: 50%;
-            background: var(--btn-bg);
-            backdrop-filter: blur(10px);
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            border: 1px solid var(--border);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            color: var(--text-primary);
+            width: 60px; height: 60px; border-radius: 50%; background: var(--btn-bg);
+            backdrop-filter: blur(10px); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; border: 1px solid var(--border);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); color: var(--text-primary); cursor: pointer;
         }
-        .icon-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-3px);
-            border-color: rgba(255,255,255,0.2);
+        .icon-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.1); transform: translateY(-3px); border-color: rgba(255,255,255,0.2);
         }
-        .icon-btn:active { transform: scale(0.95); }
-        .icon-btn.active-state { 
-            background: white; 
-            color: black; 
-            box-shadow: 0 0 15px rgba(255,255,255,0.3);
-        }
+        .icon-btn:active:not(:disabled) { transform: scale(0.95); }
+        .icon-btn.active-state { background: white; color: black; box-shadow: 0 0 15px rgba(255,255,255,0.3); }
+        .icon-btn:disabled { opacity: 0.3; cursor: not-allowed; filter: grayscale(80%); }
 
-        .btn-label {
-            font-size: 13px;
-            margin-top: 10px;
-            color: var(--text-secondary);
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
+        .icon-btn.report-btn { color: #f59e0b; border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.1); }
+        .icon-btn.report-btn:hover:not(:disabled) { background: #f59e0b; color: white; border-color: #f59e0b; box-shadow: 0 4px 15px rgba(245,158,11,0.4); }
 
-        /* Main Action Buttons (End / Next) */
-        .main-action-container {
-            position: relative;
-            width: 90px;
-            height: 90px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+        .btn-label { font-size: 12px; margin-top: 8px; color: var(--text-secondary); font-weight: 600; letter-spacing: 0.5px; }
+
+        .main-action-container { position: relative; width: 80px; height: 80px; display: flex; justify-content: center; align-items: center; }
 
         .btn-end {
-            width: 80px; height: 80px;
-            border-radius: 50%;
-            background: var(--danger);
-            color: white;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 20px var(--danger-glow);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: absolute;
-            border: none;
+            width: 70px; height: 70px; border-radius: 50%; background: var(--danger); color: white;
+            display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px var(--danger-glow);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: absolute; border: none; cursor: pointer;
         }
-        .btn-end:hover {
-            transform: scale(1.08);
-            box-shadow: 0 8px 30px var(--danger-glow);
-        }
+        .btn-end:hover { transform: scale(1.08); box-shadow: 0 8px 30px var(--danger-glow); }
         .btn-end:active { transform: scale(0.92); }
 
         .btn-next {
-            width: auto; height: 64px;
-            border-radius: 32px;
-            background: var(--success);
-            color: white;
-            display: flex; align-items: center; justify-content: center; gap: 12px;
-            font-weight: 700;
-            font-size: 1.1rem;
-            box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: absolute;
-            white-space: nowrap;
-            padding: 0 35px;
-            border: none;
+            width: auto; height: 60px; border-radius: 30px; background: var(--success); color: white;
+            display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 700; font-size: 1rem;
+            box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: absolute; white-space: nowrap; padding: 0 30px; border: none; cursor: pointer;
         }
-        .btn-next:hover {
-            transform: scale(1.05) translateY(-2px);
-            box-shadow: 0 8px 25px rgba(34, 197, 94, 0.5);
-        }
+        .btn-next:hover { transform: scale(1.05) translateY(-2px); box-shadow: 0 8px 25px rgba(34, 197, 94, 0.5); }
         .btn-next:active { transform: scale(0.95); }
 
         /* Signal Strength Bar */
-        .signal-bar {
-            display: inline-flex;
-            gap: 3px;
-            align-items: flex-end;
-            height: 16px;
-            margin-left: 10px;
-        }
+        .signal-bar { display: inline-flex; gap: 3px; align-items: flex-end; height: 16px; margin-left: 10px; }
         .bar { width: 4px; background: var(--text-secondary); border-radius: 2px; transition: background-color 0.3s; }
         .bar:nth-child(1) { height: 6px; }
         .bar:nth-child(2) { height: 11px; }
         .bar:nth-child(3) { height: 16px; }
-        
         .signal-good .bar { background: var(--success); }
         .signal-fair .bar { background: #eab308; }
         .signal-poor .bar { background: var(--danger); }
+
+        /* --- CHAT OVERLAY --- */
+        #chat-overlay {
+            position: absolute; bottom: 110px; left: 50%; transform: translateX(-50%) translateY(20px);
+            width: 90%; max-width: 350px; height: 320px; background: var(--surface); backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px); border: 1px solid var(--border); border-radius: 20px; z-index: 40;
+            display: flex; flex-direction: column; opacity: 0; pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+        }
+        #chat-overlay.active { opacity: 1; pointer-events: all; transform: translateX(-50%) translateY(0); }
+
+        .chat-bubble { max-width: 85%; padding: 8px 14px; border-radius: 18px; font-size: 0.85rem; line-height: 1.4; word-wrap: break-word; margin-bottom: 6px; animation: popIn 0.3s ease forwards; }
+        .sent { background: var(--msg-sent); align-self: flex-end; border-bottom-right-radius: 4px; color: white; }
+        .received { background: var(--msg-received); align-self: flex-start; border-bottom-left-radius: 4px; color: var(--text-primary); }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.9) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+        #chat-badge { position: absolute; top: -2px; right: -2px; width: 14px; height: 14px; background: var(--danger); border-radius: 50%; border: 2px solid var(--bg); display: none; }
+        
+        .chat-input-field { background: var(--btn-bg); border: 1px solid var(--border); color: var(--text-primary); flex-grow: 1; border-radius: 999px; padding: 8px 16px; font-size: 14px; }
+        .chat-input-field:focus { outline: none; border-color: var(--accent); }
 
         /* Logic States */
         .hidden-scale { transform: scale(0.5); opacity: 0; pointer-events: none; }
         .visible-scale { transform: scale(1); opacity: 1; pointer-events: auto; }
 
-        /* Input Styling */
-        input {
-            background: var(--input-bg);
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-            transition: all 0.3s ease;
-        }
-        input:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 2px var(--accent-glow);
-        }
-
         /* Animations */
         .fade-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Custom AI Warning / Toast */
+        #ai-warning {
+            position: absolute; top: 80px; left: 50%; transform: translateX(-50%);
+            background: rgba(239, 68, 68, 0.95); color: white; padding: 12px 24px;
+            border-radius: 12px; font-weight: bold; z-index: 100; display: none;
+            backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+            text-align: center; border: 1px solid #f87171; transition: all 0.3s ease;
+        }
+
+        /* Report Modal CSS */
+        .radio-label { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 8px; cursor: pointer; background: var(--btn-bg); border: 1px solid var(--border); transition: all 0.2s; }
+        .radio-label:hover { border-color: #f59e0b; }
+        input[type="radio"]:checked + span { color: #f59e0b; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -299,6 +256,33 @@
         <svg id="moon-icon" class="w-5 h-5 text-[var(--text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
         <svg id="sun-icon" class="hidden w-5 h-5 text-[var(--text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
     </button>
+
+    <!-- REPORT MODAL -->
+    <div id="report-modal" class="fixed inset-0 z-[1000] hidden flex-col items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div class="satin-card w-full max-w-xs p-6 rounded-2xl">
+            <h3 class="text-xl font-bold text-yellow-500 mb-2">Report User</h3>
+            <p class="text-xs text-gray-400 mb-4">Why are you reporting this user?</p>
+            
+            <div class="flex flex-col gap-3 mb-6 text-sm">
+                <label class="radio-label"><input type="radio" name="report-reason" value="harassment" checked> <span>Harassment / Abuse</span></label>
+                <label class="radio-label"><input type="radio" name="report-reason" value="spam"> <span>Spam / Bot</span></label>
+                <label class="radio-label"><input type="radio" name="report-reason" value="nudity"> <span>Inappropriate Audio</span></label>
+                <label class="radio-label"><input type="radio" name="report-reason" value="other"> <span>Other</span></label>
+            </div>
+            
+            <div class="flex gap-3">
+                <button id="close-report" class="flex-1 p-2.5 rounded-xl border border-gray-600 hover:bg-[var(--btn-bg)] transition">Cancel</button>
+                <button id="submit-report" class="flex-1 p-2.5 rounded-xl bg-yellow-600 text-white font-bold shadow-lg hover:bg-yellow-500 transition">Report</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 24HR BAN SCREEN -->
+    <div id="ban-screen" class="fixed inset-0 z-[999] hidden flex-col items-center justify-center p-4 bg-black text-center">
+        <h1 class="text-5xl mb-4">🚫</h1>
+        <h2 class="text-3xl font-bold text-red-500 mb-2">BANNED</h2>
+        <p class="text-gray-300">You have been banned for 24 hours due to multiple reports.</p>
+    </div>
 
     <!-- SETUP SCREEN -->
     <div id="setup-screen" class="flex items-center justify-center h-full p-4 fade-in z-20 absolute inset-0">
@@ -310,7 +294,7 @@
             
             <div class="space-y-8">
                 <div>
-                    <input id="nickname-input" type="text" placeholder="Enter Nickname" class="w-full p-4 rounded-2xl text-center text-lg font-medium focus:outline-none transition-all duration-300">
+                    <input id="nickname-input" type="text" placeholder="Enter Nickname" class="w-full p-4 rounded-2xl text-center text-lg font-medium focus:outline-none transition-all duration-300" style="background: var(--btn-bg); border: 1px solid var(--border);">
                 </div>
                 
                 <div class="text-left">
@@ -340,7 +324,16 @@
     <!-- CALL SCREEN -->
     <div id="call-screen" class="hidden flex-col h-full w-full fade-in absolute inset-0 z-10">
         
-        <div class="text-center pt-24 px-4">
+        <!-- ✨ TOP CENTER LOGO ✨ -->
+        <div class="absolute top-0 w-full h-20 flex items-center justify-center z-20 pointer-events-none">
+            <span class="text-xl font-extrabold tracking-widest lowercase" style="color: var(--accent); text-shadow: 0 0 15px var(--accent-glow);">
+                swaploop.in
+            </span>
+        </div>
+
+        <div id="ai-warning">⚠️ Warning</div>
+
+        <div class="text-center pt-24 px-4 relative z-10">
             <h2 id="partner-nickname" class="text-4xl font-bold mb-2 flex items-center justify-center tracking-tight">
                 Stranger
                 <div id="signal-bar" class="signal-bar hidden" title="Connection Strength">
@@ -361,22 +354,52 @@
             </div>
         </div>
 
-        <div class="controls-area">
+        <!-- ✨ CHAT OVERLAY ✨ -->
+        <div id="chat-overlay">
+            <div class="flex justify-between items-center p-3 border-b border-[var(--border)]">
+                <h3 class="font-semibold text-sm">Live Chat</h3>
+                <button id="close-chat" class="text-[var(--text-secondary)] hover:text-white text-xl leading-none">&times;</button>
+            </div>
+            <div id="messages-area" class="flex-grow p-3 overflow-y-auto flex flex-col scroll-smooth">
+                <!-- Messages appear here -->
+            </div>
+            <form id="chat-form" class="p-2 border-t border-[var(--border)] flex gap-2 shrink-0">
+                <input id="chat-input" type="text" placeholder="Type a message..." class="chat-input-field" autocomplete="off" disabled>
+                <button type="submit" id="send-btn" class="bg-[var(--accent)] text-white rounded-full w-10 h-10 flex items-center justify-center disabled:opacity-50" disabled>
+                    <svg class="w-4 h-4 ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                </button>
+            </form>
+        </div>
+
+        <div class="controls-area relative z-10">
             
             <div id="secondary-controls" class="secondary-controls">
+                
+                <!-- Report Button -->
+                <div class="flex flex-col items-center">
+                    <button id="report-btn" class="icon-btn report-btn" disabled>
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg>
+                    </button>
+                    <span class="btn-label">Report</span>
+                </div>
+
+                <!-- Mute -->
                 <div class="flex flex-col items-center">
                     <button id="mute-button" class="icon-btn">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
                     </button>
                     <span class="btn-label">Mute</span>
                 </div>
 
+                <!-- Chat Button -->
                 <div class="flex flex-col items-center">
-                    <button id="speaker-button" class="icon-btn">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+                    <button id="chat-toggle" class="icon-btn relative">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                        <div id="chat-badge"></div>
                     </button>
-                    <span class="btn-label">Speaker</span>
+                    <span class="btn-label">Chat</span>
                 </div>
+
             </div>
 
             <div class="main-action-container">
@@ -385,19 +408,33 @@
                 </button>
 
                 <button id="next-button" class="btn-next hidden-scale">
-                    Next Stranger <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                    Next Stranger <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                 </button>
             </div>
 
         </div>
-    </div>
-
-    <!-- UPDATE 1: Added 'controls' and set display none for mobile compatibility -->
+    </div>                                                 
     <audio id="remoteAudio" autoplay playsinline controls style="display: none;"></audio>
 
     <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
+        // BAN CHECK
+        if (localStorage.getItem('swaploop_ban_v22')) {
+            if (Date.now() < parseInt(localStorage.getItem('swaploop_ban_v22'))) {
+                document.getElementById('ban-screen').classList.remove('hidden');
+                document.getElementById('setup-screen').classList.add('hidden');
+                throw new Error("User is currently banned.");
+            } else localStorage.removeItem('swaploop_ban_v22');
+        }
+
+        // GENERATE DEVICE ID
+        let myClientId = localStorage.getItem('swaploop_client_id');
+        if (!myClientId) {
+            myClientId = 'device_' + Math.random().toString(36).substr(2, 16);
+            localStorage.setItem('swaploop_client_id', myClientId);
+        }
+
         // --- Theme Logic ---
         const themeBtn = document.getElementById('theme-btn');
         const moonIcon = document.getElementById('moon-icon');
@@ -417,11 +454,9 @@
 
         function updateIcons(theme) {
             if (theme === 'dark') {
-                moonIcon.classList.remove('hidden');
-                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden'); sunIcon.classList.add('hidden');
             } else {
-                moonIcon.classList.add('hidden');
-                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden'); sunIcon.classList.remove('hidden');
             }
         }
 
@@ -437,29 +472,33 @@
             if (type === 'click') {
                 osc.frequency.setValueAtTime(600, audioCtx.currentTime);
                 gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.05);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.05);
             } else if (type === 'connect') {
                 osc.frequency.setValueAtTime(400, audioCtx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.2);
                 gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
             } else if (type === 'end') {
                 osc.frequency.setValueAtTime(300, audioCtx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.3);
                 gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'msg') {
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(500, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
             }
         }
 
-        // --- Call Logic ---
+        // --- Call & Chat Logic ---
         const socket = typeof io !== 'undefined' ? io() : { emit: () => {}, on: () => {} }; 
-        let peer = null, localStream = null, isMuted = false, isSpeaker = true, analyser = null;
+        let peer = null, localStream = null, isMuted = false, analyser = null, isChatOpen = false;
         let myGender = null, lookingFor = 'anyone';
+        
+        let hasConnectedOnce = false;
 
-        const ui = {
+         const ui = {
             setupScreen: document.getElementById('setup-screen'),
             callScreen: document.getElementById('call-screen'),
             startBtn: document.getElementById('start-button'),
@@ -468,13 +507,26 @@
             statusText: document.getElementById('status-text'),
             timer: document.getElementById('call-timer'),
             muteBtn: document.getElementById('mute-button'),
-            speakerBtn: document.getElementById('speaker-button'),
             nextBtn: document.getElementById('next-button'),
             endBtn: document.getElementById('end-button'),
-            secondaryControls: document.getElementById('secondary-controls'),
             remoteAudio: document.getElementById('remoteAudio'),
             interestMatch: document.getElementById('interest-match'),
-            signalBar: document.getElementById('signal-bar')
+            signalBar: document.getElementById('signal-bar'),
+            // Chat UI
+            chatOverlay: document.getElementById('chat-overlay'),
+            chatToggle: document.getElementById('chat-toggle'),
+            chatBadge: document.getElementById('chat-badge'),
+            closeChat: document.getElementById('close-chat'),
+            msgArea: document.getElementById('messages-area'),
+            chatForm: document.getElementById('chat-form'),
+            chatInput: document.getElementById('chat-input'),
+            sendBtn: document.getElementById('send-btn'),
+            // Report UI
+            reportBtn: document.getElementById('report-btn'),
+            reportModal: document.getElementById('report-modal'),
+            closeReport: document.getElementById('close-report'),
+            submitReport: document.getElementById('submit-report'),
+            aiWarning: document.getElementById('ai-warning')
         };
 
         function setupSelectors(id, callback) {
@@ -497,7 +549,6 @@
             if (!myGender) {
                 return alert("Please select your gender first.");
             }
-            
             if (audioCtx.state === 'suspended') { await audioCtx.resume(); }
 
             try {
@@ -517,25 +568,57 @@
             }
         });
 
+        // --- REPORT LOGIC START ---
+        ui.reportBtn.addEventListener('click', () => {
+            if (!hasConnectedOnce) return;
+            ui.reportModal.classList.remove('hidden'); 
+            ui.reportModal.classList.add('flex');
+        });
+
+        ui.closeReport.addEventListener('click', () => {
+            ui.reportModal.classList.add('hidden'); 
+            ui.reportModal.classList.remove('flex');
+        });
+
+        ui.submitReport.addEventListener('click', () => {
+            const reason = document.querySelector('input[name="report-reason"]:checked').value;
+            
+            socket.emit('report-user', { reason: reason });
+            
+            ui.reportModal.classList.add('hidden'); 
+            ui.reportModal.classList.remove('flex');
+
+            ui.aiWarning.textContent = `✅ Thank you for reporting! We will check and take action.`;
+            ui.aiWarning.style.background = 'rgba(34, 197, 94, 0.95)';
+            ui.aiWarning.style.borderColor = '#22c55e';
+            ui.aiWarning.style.display = 'block';
+            
+            ui.reportBtn.disabled = true;
+            
+            setTimeout(() => { 
+                ui.aiWarning.style.display = 'none'; 
+                ui.aiWarning.style.background = 'rgba(239, 68, 68, 0.95)'; 
+                ui.aiWarning.style.borderColor = '#f87171';
+            }, 3000);
+
+            // Disconnect immediately after reporting
+            if (peer) { peer.destroy(); peer = null; }
+            socket.emit("next");
+            updateStatus('ended');
+            hasConnectedOnce = false;
+        });
+        // --- REPORT LOGIC END ---
+
         function findPartner() {
             resetCallUI();
             updateStatus('searching');
+            ui.msgArea.innerHTML = ''; 
+            ui.reportBtn.disabled = true; // Disable during search
+            
             const interestString = sessionStorage.getItem('swaploop_interests') || "";
             const interests = interestString.split(',').map(s => s.trim()).filter(s => s);
             
-            socket.emit('find-partner', { gender: myGender, lookingFor, type: 'voice', interests: interests });
-            
-            if(typeof io === 'undefined') {
-                setTimeout(() => {
-                    socket.emit = (event, data) => {
-                        if(event === 'latency-ping' && typeof data === 'function') data();
-                    }
-                    ui.remoteAudio.play = () => Promise.resolve();
-                    playSound('connect');
-                    updateStatus('connected', 'Test User');
-                    startLatencyCheck();
-                }, 3000);
-            }
+            socket.emit('find-partner', { gender: myGender, lookingFor, type: 'voice', interests: interests, clientId: myClientId });
         }
 
         ui.endBtn.addEventListener('click', () => {
@@ -543,6 +626,7 @@
             if (peer) { peer.destroy(); peer = null; }
             socket.emit('next');
             updateStatus('ended');
+            // Keep report button enabled so they can report after ending call
         });
 
         ui.nextBtn.addEventListener('click', () => {
@@ -559,11 +643,46 @@
             localStream.getAudioTracks()[0].enabled = !isMuted;
             ui.muteBtn.classList.toggle('active-state', isMuted);
         });
-        
-        ui.speakerBtn.addEventListener('click', () => {
-            playSound('click');
-            isSpeaker = !isSpeaker;
-            ui.speakerBtn.classList.toggle('active-state', !isSpeaker);
+
+        // ✨ CHAT LOGIC ✨
+        function toggleChat() {
+            isChatOpen = !isChatOpen;
+            ui.chatOverlay.classList.toggle('active', isChatOpen);
+            if(isChatOpen) {
+                ui.chatBadge.style.display = 'none';
+                setTimeout(() => ui.chatInput.focus(), 300);
+            }
+        }
+        ui.chatToggle.addEventListener('click', () => { playSound('click'); toggleChat(); });
+        ui.closeChat.addEventListener('click', toggleChat);
+
+        ui.chatInput.addEventListener('input', () => ui.sendBtn.disabled = !ui.chatInput.value.trim());
+
+        ui.chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const msg = ui.chatInput.value.trim();
+            if(msg) {
+                socket.emit('send-message', { message: msg });
+                appendMsg(msg, 'sent');
+                ui.chatInput.value = '';
+                ui.sendBtn.disabled = true;
+            }
+        });
+
+        function appendMsg(text, type) {
+            const div = document.createElement('div');
+            div.className = `chat-bubble ${type}`;
+            div.textContent = text;
+            ui.msgArea.appendChild(div);
+            ui.msgArea.scrollTop = ui.msgArea.scrollHeight;
+        }
+
+        socket.on('receive-message', ({ message }) => {
+            appendMsg(message, 'received');
+            if(!isChatOpen) {
+                ui.chatBadge.style.display = 'block';
+                playSound('msg');
+            }
         });
 
         function setupVisualizer(stream) {
@@ -605,6 +724,9 @@
         socket.on('partner-found', ({ initiator, partnerNickname, commonInterests }) => {
             resetCallUI();
             updateStatus('connecting', partnerNickname);
+            hasConnectedOnce = true;
+            
+            ui.reportBtn.disabled = false; // ENABLE REPORT WHEN CONNECTED
             
             if (commonInterests && commonInterests.length > 0) {
                 ui.interestMatch.textContent = `Matched via: ${commonInterests[0]}`;
@@ -613,27 +735,13 @@
                 ui.interestMatch.classList.add('hidden');
             }
 
-            // UPDATE 2: Added a public free TURN server (Metered.ca) for better connectivity on mobile networks
             peer = new SimplePeer({
                 initiator: initiator,
                 stream: localStream,
                 config: { 
                     iceServers: [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:global.stun.twilio.com:3478' }
+                        { urls: 'stun:stun.l.google.com:19302' }
                     ] 
-                }
-            });
-
-            // UPDATE 3: Added connection state logging for debugging
-            peer.on('connect', () => {
-                console.log("Peer connection fully established!");
-            });
-
-            peer.on('iceStateChange', state => {
-                console.log("ICE Connection State:", state);
-                if (state === 'failed' || state === 'disconnected') {
-                    console.error("Network blocked the audio! STUN/TURN server issue.");
                 }
             });
 
@@ -641,20 +749,9 @@
             
             peer.on('stream', stream => {
                 ui.remoteAudio.srcObject = stream;
-                
-                // UPDATE 4: Force volume and handle autoplay promise
                 ui.remoteAudio.volume = 1.0;
                 let playPromise = ui.remoteAudio.play();
-                
-                if (playPromise !== undefined) {
-                    playPromise.then(_ => {
-                        console.log("Audio playing successfully");
-                    })
-                    .catch(error => {
-                        console.error("Audio play prevented by browser:", error);
-                        // You can add a visual alert here if needed
-                    });
-                }
+                if (playPromise !== undefined) { playPromise.catch(e => console.log(e)); }
                 
                 playSound('connect');
                 updateStatus('connected', partnerNickname);
@@ -663,7 +760,7 @@
             peer.on('close', handleRemoteDisconnect);
             peer.on('error', handleRemoteDisconnect);
         });
-
+        
         socket.on('signal', data => { if(peer) peer.signal(data); });
         socket.on('partner-disconnected', handleRemoteDisconnect);
 
@@ -671,6 +768,7 @@
             if (peer) { peer.destroy(); peer = null; }
             playSound('end');
             updateStatus('ended');
+            // Kept report enabled so user can report hit and runs
         }
 
         let timerInt;
@@ -692,6 +790,7 @@
                 ui.statusText.textContent = "00:00";
                 ui.statusText.style.color = "var(--success)";
                 ui.timer.style.opacity = '1';
+                ui.chatInput.disabled = false;
                 
                 let sec = 0;
                 timerInt = setInterval(() => {
@@ -707,19 +806,20 @@
                 ui.timer.style.opacity = '0';
                 ui.signalBar.classList.add('hidden');
                 clearInterval(latencyInterval);
+                ui.chatInput.disabled = true;
                 
                 ui.endBtn.classList.replace('visible-scale', 'hidden-scale');
                 ui.nextBtn.classList.replace('hidden-scale', 'visible-scale');
-                ui.secondaryControls.style.opacity = '0';
-                ui.secondaryControls.style.transform = 'translateY(20px)';
+                
+                // IMPORTANT: Removed secondary controls hiding, so Report btn stays visible!
+                
+                if (isChatOpen) toggleChat();
             }
         }
 
         function resetCallUI() {
             ui.endBtn.classList.replace('hidden-scale', 'visible-scale');
             ui.nextBtn.classList.replace('visible-scale', 'hidden-scale');
-            ui.secondaryControls.style.opacity = '1';
-            ui.secondaryControls.style.transform = 'translateY(0)';
             ui.timer.textContent = "00:00";
             ui.timer.style.opacity = '0';
         }
