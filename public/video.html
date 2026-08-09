@@ -21,7 +21,7 @@
         .hidden { display: none !important; }
 
         .satin-card { background-color: var(--surface); border: 1px solid var(--border); backdrop-filter: blur(20px); }
-        .toggle-btn { background: var(--input-bg); color: var(--text-secondary); border: 1px solid var(--border); transition: all 0.3s ease; }
+        .toggle-btn { background: var(--input-bg); color: var(--text-secondary); border: 1px solid var(--border); transition: all 0.3s ease; cursor: pointer; }
         .toggle-btn.active { background: var(--accent-gradient); color: white; border-color: transparent; box-shadow: 0 4px 15px var(--accent-glow); }
 
         #video-area { position: relative; background: var(--bg); flex-grow: 1; overflow: hidden; display: flex; flex-direction: column; gap: 12px; padding: 12px; transition: all 0.3s ease; }
@@ -65,11 +65,19 @@
         #chat-overlay { position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); width: 90%; max-width: 350px; height: 320px; background: var(--surface); backdrop-filter: blur(25px); border: 1px solid var(--border); border-radius: 20px; z-index: 40; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: all 0.3s ease; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
         #chat-overlay.active { opacity: 1; pointer-events: all; transform: translateX(-50%) translateY(0); }
 
-        .chat-bubble { max-width: 85%; padding: 8px 14px; border-radius: 18px; font-size: 0.85rem; line-height: 1.4; word-wrap: break-word; margin-bottom: 6px; }
+        .chat-bubble { max-width: 85%; padding: 8px 14px; border-radius: 18px; font-size: 0.85rem; line-height: 1.4; word-wrap: break-word; margin-bottom: 6px; animation: popIn 0.3s ease forwards; }
         .sent { background: var(--msg-sent); align-self: flex-end; border-bottom-right-radius: 4px; color: white; }
-        .received { background: var(--msg-received); align-self: flex-start; border-bottom-left-radius: 4px; color: var(--text-primary); border: 1px solid var(--border); }
+        .received { background: var(--msg-received); align-self: flex-start; border-bottom-left-radius: 4px; color: var(--text-primary); border: 1px solid var(--border); backdrop-filter: blur(10px); }
 
-        #chat-badge { position: absolute; top: -2px; right: -2px; width: 14px; height: 14px; background: #ef4444; border-radius: 50%; display: none; }
+        /* --- TYPING INDICATOR --- */
+        .typing-bubble { display: inline-flex; align-items: center; gap: 4px; padding: 10px 14px; width: fit-content; margin-top: 4px; }
+        .typing-dot { width: 5px; height: 5px; background-color: var(--text-secondary); border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); opacity: 0.4; } 40% { transform: scale(1.2); opacity: 1; background-color: var(--accent); } }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.9) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+        #chat-badge { position: absolute; top: -2px; right: -2px; width: 14px; height: 14px; background: #ef4444; border-radius: 50%; display: none; border: 2px solid var(--surface); }
         .glass-input { background: var(--input-bg); border: 1px solid var(--border); color: var(--text-primary); }
         .glass-input:focus { outline: none; border-color: var(--accent); }
 
@@ -90,14 +98,14 @@
             
             <div class="flex flex-col gap-3 mb-6 text-sm">
                 <label class="radio-label"><input type="radio" name="report-reason" value="nudity"> <span>Nudity / Inappropriate</span></label>
-                <label class="radio-label"><input type="radio" name="report-reason" value="harassment"> <span>Harassment / Abuse</span></label>
+                <label class="radio-label"><input type="radio" name="report-reason" value="harassment" checked> <span>Harassment / Abuse</span></label>
                 <label class="radio-label"><input type="radio" name="report-reason" value="spam"> <span>Spam / Bot</span></label>
-                <label class="radio-label"><input type="radio" name="report-reason" value="other" checked> <span>Other</span></label>
+                <label class="radio-label"><input type="radio" name="report-reason" value="other"> <span>Other</span></label>
             </div>
             
             <div class="flex gap-3">
-                <button id="close-report" class="flex-1 p-2.5 rounded-xl border border-gray-600 hover:bg-gray-800 transition">Cancel</button>
-                <button id="submit-report" class="flex-1 p-2.5 rounded-xl bg-yellow-600 text-white font-bold shadow-lg hover:bg-yellow-500 transition">Report</button>
+                <button type="button" id="close-report" class="flex-1 p-2.5 rounded-xl border border-gray-600 hover:bg-gray-800 transition">Cancel</button>
+                <button type="button" id="submit-report" class="flex-1 p-2.5 rounded-xl bg-yellow-600 text-white font-bold shadow-lg hover:bg-yellow-500 transition">Report</button>
             </div>
         </div>
     </div>
@@ -122,29 +130,29 @@
                 <div class="text-left mt-2">
                     <label class="text-xs uppercase tracking-widest text-[var(--text-secondary)] font-bold ml-2 mb-2 block">I am</label>
                     <div class="grid grid-cols-2 gap-3">
-                        <button class="toggle-btn p-3 rounded-xl font-semibold text-sm" data-group="gender" data-val="male">Male</button>
-                        <button class="toggle-btn p-3 rounded-xl font-semibold text-sm" data-group="gender" data-val="female">Female</button>
+                        <button type="button" class="toggle-btn p-3 rounded-xl font-semibold text-sm" data-group="gender" data-val="male">Male</button>
+                        <button type="button" class="toggle-btn p-3 rounded-xl font-semibold text-sm" data-group="gender" data-val="female">Female</button>
                     </div>
                 </div>
                 
                 <div class="text-left">
                     <label class="text-xs uppercase tracking-widest text-[var(--text-secondary)] font-bold ml-2 mb-2 block">Looking for</label>
                     <div class="grid grid-cols-3 gap-2">
-                        <button class="toggle-btn p-2 rounded-lg text-xs" data-group="looking" data-val="male">Male</button>
-                        <button class="toggle-btn p-2 rounded-lg text-xs" data-group="looking" data-val="female">Female</button>
-                        <button class="toggle-btn active p-2 rounded-lg text-xs" data-group="looking" data-val="anyone">Anyone</button>
+                        <button type="button" class="toggle-btn p-2 rounded-lg text-xs" data-group="looking" data-val="male">Male</button>
+                        <button type="button" class="toggle-btn p-2 rounded-lg text-xs" data-group="looking" data-val="female">Female</button>
+                        <button type="button" class="toggle-btn active p-2 rounded-lg text-xs" data-group="looking" data-val="anyone">Anyone</button>
                     </div>
                 </div>
 
                 <div class="text-left">
                     <label class="text-xs uppercase tracking-widest text-[var(--text-secondary)] font-bold ml-2 mb-2 block">Layout Mode</label>
                     <div class="grid grid-cols-2 gap-3">
-                        <button class="toggle-btn active p-3 rounded-xl font-semibold text-sm" data-group="mode" data-val="normal">Normal</button>
-                        <button class="toggle-btn p-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-1" data-group="mode" data-val="creator">🎬 Creator</button>
+                        <button type="button" class="toggle-btn active p-3 rounded-xl font-semibold text-sm" data-group="mode" data-val="normal">Normal</button>
+                        <button type="button" class="toggle-btn p-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-1" data-group="mode" data-val="creator">🎬 Creator</button>
                     </div>
                 </div>
 
-                <button id="start-button" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold p-3.5 rounded-xl mt-2 shadow-lg disabled:opacity-50" disabled>
+                <button type="button" id="start-button" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold p-3.5 rounded-xl mt-2 shadow-lg disabled:opacity-50" disabled>
                     Start Camera
                 </button>
             </div>
@@ -185,15 +193,25 @@
                 <video id="local-video" autoplay muted playsinline crossorigin="anonymous"></video>
             </div>
 
+            <!-- CHAT OVERLAY -->
             <div id="chat-overlay">
                 <div class="flex justify-between items-center p-3 border-b border-[var(--border)]">
                     <h3 class="font-semibold text-sm">Live Chat</h3>
-                    <button id="close-chat" class="text-[var(--text-secondary)] hover:text-white text-xl leading-none">&times;</button>
+                    <button type="button" id="close-chat" class="text-[var(--text-secondary)] hover:text-white text-xl leading-none">&times;</button>
                 </div>
-                <div id="messages-area" class="flex-grow p-3 overflow-y-auto flex flex-col scroll-smooth"></div>
+                <div id="messages-area" class="flex-grow p-3 overflow-y-auto flex flex-col scroll-smooth">
+                    <!-- Spacer -->
+                    <div class="flex-grow"></div>
+                    <!-- Typing Indicator -->
+                    <div id="typing-indicator" class="chat-bubble received typing-bubble hidden">
+                        <span class="typing-dot"></span>
+                        <span class="typing-dot"></span>
+                        <span class="typing-dot"></span>
+                    </div>
+                </div>
                 <form id="chat-form" class="p-2 border-t border-[var(--border)] flex gap-2 shrink-0">
-                    <input id="chat-input" type="text" placeholder="Type a message..." class="glass-input flex-grow rounded-full px-4 py-2 text-sm" autocomplete="off">
-                    <button type="submit" id="send-btn" class="bg-[var(--accent)] text-white rounded-full w-9 h-9 flex items-center justify-center transition-all hover:bg-purple-500">
+                    <input id="chat-input" type="text" placeholder="Type a message..." class="glass-input flex-grow rounded-full px-4 py-2 text-sm" autocomplete="off" disabled>
+                    <button type="submit" id="send-btn" class="bg-[var(--accent)] text-white rounded-full w-9 h-9 flex items-center justify-center transition-all hover:bg-purple-500 disabled:opacity-50" disabled>
                         <svg class="w-4 h-4 ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
                     </button>
                 </form>
@@ -201,22 +219,22 @@
         </div>
 
         <div class="control-area shrink-0">
-            <button id="mic-toggle" class="btn-control"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg></button>
+            <button type="button" id="mic-toggle" class="btn-control"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg></button>
             
-            <button id="chat-toggle" class="btn-control relative">
+            <button type="button" id="chat-toggle" class="btn-control relative">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
                 <div id="chat-badge"></div>
             </button>
             
-            <button id="report-btn" class="btn-control report" title="Report User" disabled>
+            <button type="button" id="report-btn" class="btn-control report" title="Report User" disabled>
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg>
             </button>
 
-            <button id="stop-button" class="btn-control stop" title="Stop Connection">
+            <button type="button" id="stop-button" class="btn-control stop" title="Stop Connection">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
 
-            <button id="next-button" class="btn-skip" title="Find Next">
+            <button type="button" id="next-button" class="btn-skip" title="Find Next">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
             </button>
         </div>
@@ -228,18 +246,44 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface"></script>
 
     <script>
-        if (localStorage.getItem('swaploop_ban_v24')) {
-            if (Date.now() < parseInt(localStorage.getItem('swaploop_ban_v24'))) {
+        // BAN CHECK
+        if (localStorage.getItem('swaploop_ban_v27')) {
+            if (Date.now() < parseInt(localStorage.getItem('swaploop_ban_v27'))) {
                 document.getElementById('ban-screen').classList.remove('hidden');
                 document.getElementById('setup-screen').classList.add('hidden');
                 throw new Error("User is currently banned.");
-            } else localStorage.removeItem('swaploop_ban_v24');
+            } else localStorage.removeItem('swaploop_ban_v27');
         }
 
+        // GENERATE DEVICE ID
         let myClientId = localStorage.getItem('swaploop_client_id');
         if (!myClientId) {
             myClientId = 'device_' + Math.random().toString(36).substr(2, 16);
             localStorage.setItem('swaploop_client_id', myClientId);
+        }
+
+        // --- Audio Feedback (Safe Logic) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                if (type === 'click') {
+                    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                } else if (type === 'msg') {
+                    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(500, audioCtx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                }
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            } catch(e) {}
         }
 
         const socket = typeof io !== 'undefined' ? io() : { emit: () => {}, on: () => {} };
@@ -263,9 +307,11 @@
             chatOverlay: document.getElementById('chat-overlay'), chatToggle: document.getElementById('chat-toggle'),
             chatBadge: document.getElementById('chat-badge'), closeChat: document.getElementById('close-chat'),
             msgArea: document.getElementById('messages-area'), chatForm: document.getElementById('chat-form'),
-            chatInput: document.getElementById('chat-input'), reportBtn: document.getElementById('report-btn'),
+            chatInput: document.getElementById('chat-input'), sendBtn: document.getElementById('send-btn'),
+            typingInd: document.getElementById('typing-indicator'), reportBtn: document.getElementById('report-btn'),
             reportModal: document.getElementById('report-modal'), closeReport: document.getElementById('close-report'),
-            submitReport: document.getElementById('submit-report'), nextBtn: document.getElementById('next-button')
+            submitReport: document.getElementById('submit-report'), nextBtn: document.getElementById('next-button'),
+            endBtn: document.getElementById('stop-button')
         };
 
         blazeface.load().then(face => {
@@ -275,18 +321,26 @@
             ui.startBtn.disabled = false; 
         }).catch(() => { ui.startBtn.disabled = false; });
 
-        document.querySelectorAll('.toggle-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const group = btn.dataset.group;
-                document.querySelectorAll(`.toggle-btn[data-group="${group}"]`).forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                if(group === 'gender') myGender = btn.dataset.val;
-                if(group === 'looking') lookingFor = btn.dataset.val;
-                if(group === 'mode') selectedMode = btn.dataset.val;
+        function setupSelectors(id, callback) {
+            const container = document.getElementById(id);
+            const btns = container.querySelectorAll('.toggle-btn');
+            btns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    playSound('click');
+                    btns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    callback(btn.dataset.val || btn.dataset.group);
+                    
+                    if(btn.dataset.group === 'gender') myGender = btn.dataset.val;
+                    if(btn.dataset.group === 'looking') lookingFor = btn.dataset.val;
+                    if(btn.dataset.group === 'mode') selectedMode = btn.dataset.val;
+                });
             });
-        });
+        }
+        setupSelectors('setup-screen', () => {}); // Initialize all toggle buttons
 
         ui.startBtn.addEventListener('click', async () => {
+            playSound('click');
             if (!myGender) return alert("Please select your gender.");
             ui.startBtn.textContent = "Scanning Face..."; ui.startBtn.disabled = true;
 
@@ -342,6 +396,7 @@
             } catch (e) {}
         }
 
+        // --- REPORT LOGIC START ---
         ui.reportBtn.addEventListener('click', () => {
             if (!hasConnectedOnce) {
                 ui.aiWarning.textContent = `⚠️ No user connected to report!`;
@@ -388,7 +443,6 @@
         // ✨ SILENT CALL CUT FOR CREATORS INSTEAD OF BAN ✨
         socket.on('you-are-banned', () => {
             if (selectedMode === 'creator') {
-                // Drop the call normally to simulate normal disconnection
                 if (peer) { peer.destroy(); peer = null; }
                 socket.emit("next");
                 updateStatus('disconnected', 'Stopped');
@@ -398,9 +452,7 @@
                 ui.waitingInd.classList.add('hidden');
                 return; // Do NOT set 24-hr ban
             }
-            
-            // Standard User Ban
-            localStorage.setItem('swaploop_ban_v24', Date.now() + 24 * 60 * 60 * 1000); 
+            localStorage.setItem('swaploop_ban_v27', Date.now() + 24 * 60 * 60 * 1000); 
             location.reload();
         });
 
@@ -408,14 +460,20 @@
             updateStatus('searching');
             connectedTime = 0; noFaceTime = 0; 
             ui.aiWarning.style.display = 'none'; ui.remoteVideo.classList.remove('active');
-            ui.remoteVideo.srcObject = null; ui.waitingInd.classList.remove('hidden'); ui.msgArea.innerHTML = ''; 
+            ui.remoteVideo.srcObject = null; ui.waitingInd.classList.remove('hidden'); 
+            
+            // CLEAR CHAT KEEPING TYPING INDICATOR
+            const oldBubbles = ui.msgArea.querySelectorAll('.chat-bubble:not(#typing-indicator)');
+            oldBubbles.forEach(bubble => bubble.remove());
+            ui.typingInd.classList.add('hidden');
+            
             socket.emit("find-partner", { gender: myGender, lookingFor, selectedMode, type: 'video', clientId: myClientId });
         }
 
         ui.nextBtn.addEventListener('click', async () => {
+            playSound('click');
             ui.nextBtn.disabled = true; 
             
-            // Bypass face check on Next button if Creator mode
             if (faceModel && ui.localVideo.srcObject && selectedMode !== 'creator') {
                 const faces = await faceModel.estimateFaces(ui.localVideo, false);
                 if (faces.length === 0 || faces[0].probability[0] < 0.50) {
@@ -428,7 +486,8 @@
             socket.emit("next"); findPartner(); ui.nextBtn.disabled = false;
         });
         
-        document.getElementById('stop-button').addEventListener('click', () => {
+        ui.endBtn.addEventListener('click', () => {
+            playSound('click');
             if (peer) { peer.destroy(); peer = null; }
             socket.emit("next"); updateStatus('disconnected', 'Stopped');
             connectedTime = 0;
@@ -437,26 +496,59 @@
         });
 
         document.getElementById('mic-toggle').addEventListener('click', function() {
+            playSound('click');
             if(localStream) { localStream.getAudioTracks()[0].enabled = !localStream.getAudioTracks()[0].enabled; this.classList.toggle('off'); }
         });
 
+        // ✨ CHAT LOGIC ✨
         ui.chatToggle.addEventListener('click', () => {
+            playSound('click');
             isChatOpen = !isChatOpen; ui.chatOverlay.classList.toggle('active', isChatOpen);
             if(isChatOpen) { ui.chatBadge.style.display = 'none'; setTimeout(() => ui.chatInput.focus(), 300); }
         });
         ui.closeChat.addEventListener('click', () => { isChatOpen = false; ui.chatOverlay.classList.remove('active'); });
 
+        let typingTimeout;
+        ui.chatInput.addEventListener('input', () => {
+            ui.sendBtn.disabled = ui.chatInput.value.trim().length === 0;
+            socket.emit('typing', true);
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => socket.emit('typing', false), 1500);
+        });
+
         ui.chatForm.addEventListener('submit', (e) => {
             e.preventDefault(); const msg = ui.chatInput.value.trim();
-            if(msg) { socket.emit('send-message', { message: msg }); appendMsg(msg, 'sent'); ui.chatInput.value = ''; ui.chatInput.focus(); }
+            if(msg) { 
+                socket.emit('send-message', { message: msg }); 
+                appendMsg(msg, 'sent'); 
+                playSound('click');
+                ui.chatInput.value = ''; 
+                ui.sendBtn.disabled = true;
+                socket.emit('typing', false);
+                clearTimeout(typingTimeout);
+            }
         });
 
         function appendMsg(text, type) {
             const div = document.createElement('div'); div.className = `chat-bubble ${type}`; div.textContent = text;
-            ui.msgArea.appendChild(div); ui.msgArea.scrollTop = ui.msgArea.scrollHeight;
+            ui.msgArea.insertBefore(div, ui.typingInd);
+            setTimeout(() => { ui.msgArea.scrollTop = ui.msgArea.scrollHeight; }, 50);
         }
 
-        socket.on('receive-message', ({ message }) => { appendMsg(message, 'received'); if(!isChatOpen) ui.chatBadge.style.display = 'block'; });
+        socket.on('partner-typing', (isTyping) => {
+            if(isTyping) {
+                ui.typingInd.classList.remove('hidden');
+                ui.msgArea.scrollTop = ui.msgArea.scrollHeight;
+            } else {
+                ui.typingInd.classList.add('hidden');
+            }
+        });
+
+        socket.on('receive-message', ({ message }) => { 
+            ui.typingInd.classList.add('hidden');
+            appendMsg(message, 'received'); 
+            if(!isChatOpen) { ui.chatBadge.style.display = 'block'; playSound('msg'); }
+        });
 
         socket.on('partner-found', (data) => {
             updateStatus('connected', data.partnerNickname);
@@ -489,6 +581,10 @@
 
         function updateStatus(state, name="Stranger") {
             ui.partnerName.textContent = name;
+            ui.chatInput.disabled = (state !== 'connected');
+            if(state !== 'connected') ui.sendBtn.disabled = true;
+            ui.typingInd.classList.add('hidden');
+
             if (state === 'searching') {
                 ui.statusText.textContent = "Searching..."; ui.statusText.style.color = "#eab308";
                 ui.statusDot.className = "w-2 h-2 rounded-full bg-yellow-500 animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.6)]";
