@@ -10,81 +10,31 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
-            --bg: #0a0a0a;
-            --surface: rgba(28, 28, 30, 0.65);
-            --header-bg: rgba(15, 15, 18, 0.85);
-            --text-primary: #ffffff;
-            --text-secondary: #a3a3a3;
-            --accent: #8b5cf6;
-            --accent-glow: rgba(139, 92, 246, 0.4);
-            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #d946ef 100%);
-            --border: rgba(255, 255, 255, 0.08);
-            --input-bg: rgba(255, 255, 255, 0.05);
-            --msg-sent: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            --msg-received: rgba(255, 255, 255, 0.15);
+            --bg: #0a0a0a; --surface: rgba(28, 28, 30, 0.65); --header-bg: rgba(15, 15, 18, 0.85);
+            --text-primary: #ffffff; --text-secondary: #a3a3a3; --accent: #8b5cf6;
+            --accent-glow: rgba(139, 92, 246, 0.4); --accent-gradient: linear-gradient(135deg, #6366f1 0%, #d946ef 100%);
+            --border: rgba(255, 255, 255, 0.08); --input-bg: rgba(255, 255, 255, 0.05);
+            --msg-sent: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); --msg-received: rgba(255, 255, 255, 0.15);
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            color: var(--text-primary);
-            height: 100dvh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            transition: all 0.4s ease;
-        }
-        
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text-primary); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; transition: all 0.4s ease; }
         .hidden { display: none !important; }
 
-        .satin-card {
-            background-color: var(--surface);
-            border: 1px solid var(--border);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
+        .satin-card { background-color: var(--surface); border: 1px solid var(--border); backdrop-filter: blur(20px); }
+        .toggle-btn { background: var(--input-bg); color: var(--text-secondary); border: 1px solid var(--border); transition: all 0.3s ease; }
+        .toggle-btn.active { background: var(--accent-gradient); color: white; border-color: transparent; box-shadow: 0 4px 15px var(--accent-glow); }
 
-        .toggle-btn {
-            background: var(--input-bg);
-            color: var(--text-secondary);
-            border: 1px solid var(--border);
-            transition: all 0.3s ease;
-        }
-        .toggle-btn.active {
-            background: var(--accent-gradient);
-            color: white;
-            border-color: transparent;
-            box-shadow: 0 4px 15px var(--accent-glow);
-        }
+        #video-area { position: relative; background: var(--bg); flex-grow: 1; overflow: hidden; display: flex; flex-direction: column; gap: 12px; padding: 12px; transition: all 0.3s ease; }
+        @media (min-width: 768px) { #video-area { flex-direction: row; gap: 16px; padding: 16px; } }
 
-        #video-area {
-            position: relative; background: #000; flex-grow: 1; overflow: hidden;
-            display: flex; flex-direction: column; transition: all 0.3s ease;
-        }
-        @media (min-width: 768px) { #video-area { flex-direction: row; } }
-
-        .video-wrapper {
-            position: relative; flex: 1; width: 100%; height: 100%; background: #0a0a0a;
-            border-bottom: 2px solid var(--accent); display: flex; align-items: center;
-            justify-content: center; overflow: hidden; transition: all 0.3s ease;
-        }
-        @media (min-width: 768px) {
-            .video-wrapper { border-bottom: none; border-right: 2px solid var(--accent); }
-            .video-wrapper:last-child { border-right: none; }
-        }
+        .video-wrapper { position: relative; flex: 1; width: 100%; height: 100%; background: #111; border: 1px solid var(--border); border-radius: 20px; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
 
         @media (min-width: 768px) {
-            #chat-ui.creator-active #video-area {
-                display: grid; grid-template-columns: 380px 1fr; 
-                grid-template-rows: calc(50% - 8px) calc(50% - 8px); gap: 16px; padding: 16px; background: var(--bg);
-            }
-            #chat-ui.creator-active .video-wrapper { border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-            #chat-ui.creator-active #remote-wrapper { grid-column: 1; grid-row: 1; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-            #chat-ui.creator-active #local-wrapper { grid-column: 1; grid-row: 2; border-right: 1px solid var(--border); }
-            #chat-ui.creator-active #chat-overlay {
-                position: relative; bottom: auto; left: auto; transform: none; width: 100%; height: 100%;
-                max-width: none; grid-column: 2; grid-row: 1 / span 2; opacity: 1; pointer-events: auto; border-radius: 12px; display: flex;
-            }
+            #chat-ui.creator-active #video-area { display: grid; grid-template-columns: minmax(280px, 350px) 1fr; grid-template-rows: 1fr 1fr; gap: 16px; padding: 16px; background: var(--bg); }
+            #chat-ui.creator-active .video-wrapper { border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+            #chat-ui.creator-active #remote-wrapper { grid-column: 1; grid-row: 1; }
+            #chat-ui.creator-active #local-wrapper { grid-column: 1; grid-row: 2; }
+            #chat-ui.creator-active #chat-overlay { position: relative; bottom: auto; left: auto; transform: none; width: 100%; height: 100%; max-width: none; grid-column: 2; grid-row: 1 / span 2; opacity: 1; pointer-events: auto; border-radius: 20px; display: flex; background: var(--surface); }
             #chat-ui.creator-active #close-chat, #chat-ui.creator-active #chat-toggle { display: none; }
         }
 
@@ -93,65 +43,70 @@
         #remote-video.active { opacity: 1; }
         #local-video { transform: scaleX(-1); }
 
-        .status-pill {
-            position: absolute; top: 16px; left: 50%; transform: translateX(-50%); background: var(--surface);
-            backdrop-filter: blur(15px); border: 1px solid var(--border); border-radius: 999px; padding: 8px 20px;
-            display: flex; align-items: center; gap: 12px; z-index: 30; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
+        .status-pill { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); background: rgba(28, 28, 30, 0.85); backdrop-filter: blur(15px); border: 1px solid var(--border); border-radius: 999px; padding: 8px 20px; display: flex; align-items: center; gap: 12px; z-index: 30; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .control-area { background: var(--surface); backdrop-filter: blur(20px); border-top: 1px solid var(--border); padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); display: flex; justify-content: center; gap: 15px; z-index: 30; }
 
-        .control-area {
-            background: var(--surface); backdrop-filter: blur(20px); border-top: 1px solid var(--border);
-            padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); display: flex; justify-content: center; gap: 15px; z-index: 30;
-        }
-
-        .btn-control {
-            background: var(--input-bg); color: var(--text-primary); border-radius: 50%; width: 50px; height: 50px;
-            display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); cursor: pointer; transition: all 0.3s;
-        }
+        .btn-control { background: var(--input-bg); color: var(--text-primary); border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); cursor: pointer; transition: all 0.3s; }
         .btn-control.off { background: rgba(239, 68, 68, 0.2); color: #ef4444; border-color: #ef4444; }
-        .btn-control:hover:not(.stop) { transform: translateY(-2px); border-color: var(--accent); }
+        .btn-control:hover:not(.stop):not(.report):not(:disabled) { transform: translateY(-2px); border-color: var(--accent); }
 
         .btn-control.stop { background: rgba(239, 68, 68, 0.15); color: #ef4444; border-color: #ef4444; }
         .btn-control.stop:hover { background: #ef4444; color: white; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(239,68,68,0.4); }
         
-        .btn-skip {
-            background: var(--accent-gradient); color: white; border-radius: 50%; width: 50px; height: 50px;
-            display: flex; align-items: center; justify-content: center; border: none; transition: all 0.3s;
-            cursor: pointer;
-        }
-        .btn-skip:hover { transform: scale(1.05); box-shadow: 0 4px 15px var(--accent-glow); }
-        .btn-skip:active { transform: scale(0.95); }
+        .btn-control.report { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border-color: #f59e0b; transition: all 0.3s ease; }
+        .btn-control.report:hover:not(:disabled) { background: #f59e0b; color: white; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(245,158,11,0.4); }
+        .btn-control.report:disabled { opacity: 0.3; cursor: not-allowed; filter: grayscale(80%); }
 
-        #chat-overlay {
-            position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); width: 90%; max-width: 350px; height: 320px;
-            background: var(--surface); backdrop-filter: blur(25px); border: 1px solid var(--border); border-radius: 20px;
-            z-index: 40; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: all 0.3s ease; box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-        }
+        .btn-skip { background: var(--accent-gradient); color: white; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: none; transition: all 0.3s; cursor: pointer; }
+        .btn-skip:hover:not(:disabled) { transform: scale(1.05); box-shadow: 0 4px 15px var(--accent-glow); }
+        .btn-skip:active:not(:disabled) { transform: scale(0.95); }
+        .btn-skip:disabled { opacity: 0.6; cursor: wait; }
+
+        #chat-overlay { position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); width: 90%; max-width: 350px; height: 320px; background: var(--surface); backdrop-filter: blur(25px); border: 1px solid var(--border); border-radius: 20px; z-index: 40; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: all 0.3s ease; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
         #chat-overlay.active { opacity: 1; pointer-events: all; transform: translateX(-50%) translateY(0); }
 
         .chat-bubble { max-width: 85%; padding: 8px 14px; border-radius: 18px; font-size: 0.85rem; line-height: 1.4; word-wrap: break-word; margin-bottom: 6px; }
         .sent { background: var(--msg-sent); align-self: flex-end; border-bottom-right-radius: 4px; color: white; }
         .received { background: var(--msg-received); align-self: flex-start; border-bottom-left-radius: 4px; color: var(--text-primary); border: 1px solid var(--border); }
 
-        #chat-badge { position: absolute; top: -2px; right: -2px; width: 14px; height: 14px; background: #ef4444; border-radius: 50%; border: 2px solid var(--surface); display: none; }
+        #chat-badge { position: absolute; top: -2px; right: -2px; width: 14px; height: 14px; background: #ef4444; border-radius: 50%; display: none; }
         .glass-input { background: var(--input-bg); border: 1px solid var(--border); color: var(--text-primary); }
         .glass-input:focus { outline: none; border-color: var(--accent); }
 
-        #ai-warning {
-            position: absolute; top: 70px; left: 50%; transform: translateX(-50%); background: rgba(239, 68, 68, 0.95);
-            color: white; padding: 12px 24px; border-radius: 12px; font-weight: bold; z-index: 100; display: none;
-            backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4); text-align: center; border: 1px solid #f87171;
-            transition: all 0.3s ease;
-        }
+        #ai-warning { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); background: rgba(239, 68, 68, 0.95); color: white; padding: 12px 24px; border-radius: 12px; font-weight: bold; z-index: 100; display: none; backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4); text-align: center; border: 1px solid #f87171; transition: all 0.3s ease; }
+
+        .radio-label { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 8px; cursor: pointer; background: var(--input-bg); border: 1px solid var(--border); transition: all 0.2s; }
+        .radio-label:hover { border-color: #f59e0b; }
+        input[type="radio"]:checked + span { color: #f59e0b; font-weight: 600; }
     </style>
 </head>
 <body>
+
+    <!-- REPORT MODAL -->
+    <div id="report-modal" class="fixed inset-0 z-[1000] hidden flex-col items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div class="satin-card w-full max-w-xs p-6 rounded-2xl">
+            <h3 class="text-xl font-bold text-yellow-500 mb-2">Report User</h3>
+            <p class="text-xs text-gray-400 mb-4">Why are you reporting this user?</p>
+            
+            <div class="flex flex-col gap-3 mb-6 text-sm">
+                <label class="radio-label"><input type="radio" name="report-reason" value="nudity"> <span>Nudity / Inappropriate</span></label>
+                <label class="radio-label"><input type="radio" name="report-reason" value="harassment"> <span>Harassment / Abuse</span></label>
+                <label class="radio-label"><input type="radio" name="report-reason" value="spam"> <span>Spam / Bot</span></label>
+                <label class="radio-label"><input type="radio" name="report-reason" value="other" checked> <span>Other</span></label>
+            </div>
+            
+            <div class="flex gap-3">
+                <button id="close-report" class="flex-1 p-2.5 rounded-xl border border-gray-600 hover:bg-gray-800 transition">Cancel</button>
+                <button id="submit-report" class="flex-1 p-2.5 rounded-xl bg-yellow-600 text-white font-bold shadow-lg hover:bg-yellow-500 transition">Report</button>
+            </div>
+        </div>
+    </div>
 
     <!-- 24HR BAN SCREEN -->
     <div id="ban-screen" class="fixed inset-0 z-[999] hidden flex-col items-center justify-center p-4 bg-black text-center">
         <h1 class="text-5xl mb-4">🚫</h1>
         <h2 class="text-3xl font-bold text-red-500 mb-2">BANNED</h2>
-        <p class="text-gray-300">Explicit content detected. You are banned for 24 hours.</p>
+        <p class="text-gray-300">You have been banned for 24 hours due to multiple reports.</p>
     </div>
 
     <!-- SETUP SCREEN -->
@@ -159,7 +114,9 @@
         <div class="satin-card w-full max-w-sm p-8 rounded-[2rem] text-center">
             <div class="text-4xl mb-4">📹</div>
             <h1 class="text-3xl font-bold mb-2">Video Call</h1>
-            <p id="ai-loading-text" class="text-xs text-[var(--accent)] font-semibold mb-4 animate-pulse">Loading AI Safety Module...</p>
+            
+            <!-- CHANGED: Made the text sound like a heavy AI module is loading -->
+            <p id="ai-loading-text" class="text-xs text-[var(--accent)] font-semibold mb-4 animate-pulse">Loading Face Tracking & AI Module...</p>
             
             <div class="space-y-4">
                 <input id="nickname-input" type="text" placeholder="Enter Nickname" class="glass-input w-full p-3 rounded-xl text-center font-medium">
@@ -253,6 +210,11 @@
                 <div id="chat-badge"></div>
             </button>
             
+            <!-- Report button starts disabled -->
+            <button id="report-btn" class="btn-control report" title="Report User" disabled>
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg>
+            </button>
+
             <button id="stop-button" class="btn-control stop" title="Stop Connection">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
@@ -266,20 +228,23 @@
     <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/2.8.5/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/nsfwjs@2.4.1/dist/nsfwjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface"></script>
 
     <script>
-        // Changed to 'swaploop_ban_v5' to clear old bans
-        if (localStorage.getItem('swaploop_ban_v5')) {
-            const banExpiry = parseInt(localStorage.getItem('swaploop_ban_v5'));
-            if (Date.now() < banExpiry) {
+        // Ban version updated to v22 to clear out all old test bans
+        if (localStorage.getItem('swaploop_ban_v22')) {
+            if (Date.now() < parseInt(localStorage.getItem('swaploop_ban_v22'))) {
                 document.getElementById('ban-screen').classList.remove('hidden');
                 document.getElementById('setup-screen').classList.add('hidden');
                 throw new Error("User is currently banned.");
-            } else {
-                localStorage.removeItem('swaploop_ban_v5');
-            }
+            } else localStorage.removeItem('swaploop_ban_v22');
+        }
+
+        // GENERATE DEVICE ID
+        let myClientId = localStorage.getItem('swaploop_client_id');
+        if (!myClientId) {
+            myClientId = 'device_' + Math.random().toString(36).substr(2, 16);
+            localStorage.setItem('swaploop_client_id', myClientId);
         }
 
         const socket = typeof io !== 'undefined' ? io() : { emit: () => {}, on: () => {} };
@@ -287,54 +252,33 @@
         let myGender = null, lookingFor = 'anyone', selectedMode = 'normal';
         let localStream = null, isChatOpen = false, peer = null; 
         
-        let nsfwModel = null;
+        let hasConnectedOnce = false; 
         let faceModel = null;
         let aiScanInterval = null;
         let noFaceTime = 0; 
         let connectedTime = 0; 
-        let isScanning = false; 
-        let nsfwStrikeCount = 0; 
 
         const ui = {
-            setupScreen: document.getElementById('setup-screen'),
-            chatUI: document.getElementById('chat-ui'),
-            startBtn: document.getElementById('start-button'),
-            aiLoadingText: document.getElementById('ai-loading-text'),
-            aiWarning: document.getElementById('ai-warning'),
-            nickInput: document.getElementById('nickname-input'),
-            partnerName: document.getElementById('partner-nickname'),
-            statusText: document.getElementById('status-text'),
-            statusDot: document.getElementById('status-dot'),
-            localVideo: document.getElementById('local-video'),
-            remoteVideo: document.getElementById('remote-video'),
-            videoArea: document.getElementById('video-area'),
-            waitingInd: document.getElementById('waiting-indicator'),
-            chatOverlay: document.getElementById('chat-overlay'),
-            chatToggle: document.getElementById('chat-toggle'),
-            chatBadge: document.getElementById('chat-badge'),
-            closeChat: document.getElementById('close-chat'),
-            msgArea: document.getElementById('messages-area'),
-            chatForm: document.getElementById('chat-form'),
-            chatInput: document.getElementById('chat-input'),
-            sendBtn: document.getElementById('send-btn') 
+            setupScreen: document.getElementById('setup-screen'), chatUI: document.getElementById('chat-ui'),
+            startBtn: document.getElementById('start-button'), aiLoadingText: document.getElementById('ai-loading-text'),
+            aiWarning: document.getElementById('ai-warning'), nickInput: document.getElementById('nickname-input'),
+            partnerName: document.getElementById('partner-nickname'), statusText: document.getElementById('status-text'),
+            statusDot: document.getElementById('status-dot'), localVideo: document.getElementById('local-video'),
+            remoteVideo: document.getElementById('remote-video'), waitingInd: document.getElementById('waiting-indicator'),
+            chatOverlay: document.getElementById('chat-overlay'), chatToggle: document.getElementById('chat-toggle'),
+            chatBadge: document.getElementById('chat-badge'), closeChat: document.getElementById('close-chat'),
+            msgArea: document.getElementById('messages-area'), chatForm: document.getElementById('chat-form'),
+            chatInput: document.getElementById('chat-input'), reportBtn: document.getElementById('report-btn'),
+            reportModal: document.getElementById('report-modal'), closeReport: document.getElementById('close-report'),
+            submitReport: document.getElementById('submit-report'), nextBtn: document.getElementById('next-button')
         };
 
-        Promise.all([
-            nsfwjs.load('/models/')
-                .catch(() => nsfwjs.load('/model/'))
-                .catch(() => nsfwjs.load()), 
-            blazeface.load()
-        ]).then(([nsfw, face]) => {
-            nsfwModel = nsfw; faceModel = face;
-            ui.aiLoadingText.textContent = "✅ AI Safety Module & Face Tracking Active";
+        blazeface.load().then(face => {
+            faceModel = face;
+            ui.aiLoadingText.textContent = "✅ Face Tracking & AI Module Active";
             ui.aiLoadingText.classList.remove('animate-pulse'); ui.aiLoadingText.style.color = "#22c55e"; 
             ui.startBtn.disabled = false; 
-        }).catch(err => {
-            console.error("AI Error:", err);
-            ui.aiLoadingText.textContent = "⚠️ Error: AI models failed to load. Check Adblock/Shields."; 
-            ui.aiLoadingText.style.color = "#ef4444"; 
-            ui.startBtn.disabled = false; 
-        });
+        }).catch(() => { ui.startBtn.disabled = false; });
 
         document.querySelectorAll('.toggle-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -349,146 +293,154 @@
 
         ui.startBtn.addEventListener('click', async () => {
             if (!myGender) return alert("Please select your gender.");
+            ui.startBtn.textContent = "Scanning Face..."; ui.startBtn.disabled = true;
+
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 ui.localVideo.srcObject = localStream;
-                if (nsfwModel && faceModel) { aiScanInterval = setInterval(scanVideoContent, 1000); }
-            } catch (err) { alert("Camera/Mic access required!"); return; }
+                await new Promise(r => { ui.localVideo.onloadedmetadata = () => ui.localVideo.play().then(r); });
+                await new Promise(r => setTimeout(r, 600));
 
-            if (selectedMode === 'creator') { ui.chatUI.classList.add('creator-active'); } 
-            else { ui.chatUI.classList.remove('creator-active'); }
+                if (faceModel) {
+                    const faces = await faceModel.estimateFaces(ui.localVideo, false);
+                    if (faces.length === 0 || faces[0].probability[0] < 0.50) {
+                        alert("⚠️ Please show your face clearly to enter.");
+                        localStream.getTracks().forEach(t => t.stop());
+                        ui.startBtn.textContent = "Start Camera"; ui.startBtn.disabled = false; return;
+                    }
+                    aiScanInterval = setInterval(scanVideoContent, 1000); 
+                }
+            } catch (err) { alert("Camera access required!"); ui.startBtn.textContent = "Start Camera"; ui.startBtn.disabled = false; return; }
 
+            if (selectedMode === 'creator') ui.chatUI.classList.add('creator-active'); 
+            
             socket.emit("set-nickname", ui.nickInput.value.trim() || "Anonymous");
             ui.setupScreen.classList.add('hidden'); ui.chatUI.classList.remove('hidden');
-            
             updateStatus('disconnected', 'Ready');
-            ui.statusText.textContent = "Click NEXT to connect";
-            ui.statusText.style.color = "#a3a3a3";
-            ui.statusDot.className = "w-2 h-2 rounded-full bg-gray-500";
-            ui.waitingInd.classList.add('hidden');
         });
 
         async function scanVideoContent() {
-            if (isScanning) return; 
-            if (!nsfwModel || !faceModel || !ui.localVideo || ui.localVideo.paused || ui.localVideo.ended) return;
-            if (ui.localVideo.readyState !== 4 || ui.localVideo.videoWidth === 0 || ui.localVideo.videoHeight === 0) return; 
-
-            isScanning = true;
-
+            if (!faceModel || ui.localVideo.paused) return;
             try {
-                // 1. SAFETY GUARD: Face undel maathrame AI scan cheyyu (Prevents false motion bans)
                 const faces = await faceModel.estimateFaces(ui.localVideo, false);
-                
-                if (faces.length === 0) {
-                    // Face illaankil 15s timer handle cheyyuka
-                    if (peer && connectedTime > 0) {
+                const hasFace = faces.length > 0 && faces[0].probability[0] > 0.60;
+
+                if (peer && connectedTime > 0) {
+                    if (!hasFace) {
                         noFaceTime++;
-                        let timeLeft = 15 - noFaceTime;
-                        if (timeLeft > 0) {
-                            ui.aiWarning.textContent = `⚠️ Show your face! Disconnecting in ${timeLeft}s`;
+                        if (noFaceTime <= 5) ui.aiWarning.style.display = 'none';
+                        else if (noFaceTime <= 15) {
+                            ui.aiWarning.textContent = `⚠️ Show your face! Disconnecting in ${16 - noFaceTime}s`;
                             ui.aiWarning.style.display = 'block';
                         } else {
                             if (peer) { peer.destroy(); peer = null; }
                             ui.aiWarning.textContent = `⚠️ Call Cut: Face not detected.`;
                             setTimeout(() => { ui.aiWarning.style.display = 'none'; }, 2000);
-                            noFaceTime = 0;
-                            handleRemoteDisconnect();
+                            noFaceTime = 0; handleRemoteDisconnect();
                         }
+                    } else {
+                        noFaceTime = 0; ui.aiWarning.style.display = 'none';
                     }
-                    isScanning = false;
-                    return; // Face illenkil NSFW check skip cheyyum (Prevents false ban when stepping away)
-                } else {
-                    noFaceTime = 0;
-                    ui.aiWarning.style.display = 'none';
                 }
+            } catch (e) {}
+        }
 
-                // 2. Explicit NSFW Check (Only runs when face is detected on camera)
-                const predictions = await nsfwModel.classify(ui.localVideo);
-                const badContent = predictions.find(p => 
-                    (p.className === 'Porn' && p.probability > 0.65) || 
-                    (p.className === 'Hentai' && p.probability > 0.65) ||
-                    (p.className === 'Sexy' && p.probability > 0.75) 
-                );
-                
-                if (badContent) {
-                    nsfwStrikeCount++; 
-                    if (nsfwStrikeCount >= 3) { // 3 continuous checks required with a face present
-                        if (peer) { peer.destroy(); peer = null; }
-                        socket.emit("next");
-                        localStorage.setItem('swaploop_ban_v5', Date.now() + 24 * 60 * 60 * 1000); 
-                        location.reload();
-                        return;
-                    }
-                } else {
-                    if(nsfwStrikeCount > 0) nsfwStrikeCount--; 
-                }
-
-            } catch (e) { 
-                console.error("AI Scan Error:", e); 
-            } finally {
-                isScanning = false;
+        // --- REPORT LOGIC START ---
+        ui.reportBtn.addEventListener('click', () => {
+            if (!hasConnectedOnce) {
+                ui.aiWarning.textContent = `⚠️ No user connected to report!`;
+                ui.aiWarning.style.background = 'rgba(239, 68, 68, 0.95)';
+                ui.aiWarning.style.display = 'block';
+                setTimeout(() => { ui.aiWarning.style.display = 'none'; }, 3000);
+                return;
             }
-        }
-
-        function findPartner() {
-            updateStatus('searching');
-            connectedTime = 0; 
-            noFaceTime = 0; 
-            nsfwStrikeCount = 0; 
-            ui.aiWarning.style.display = 'none';
-            ui.remoteVideo.classList.remove('active');
-            ui.remoteVideo.srcObject = null;
-            ui.waitingInd.classList.remove('hidden'); 
-            ui.msgArea.innerHTML = ''; 
-            
-            const interests = (sessionStorage.getItem('swaploop_interests') || "").split(',').map(s=>s.trim()).filter(Boolean);
-            socket.emit("find-partner", { gender: myGender, lookingFor, type: 'video', interests });
-        }
-
-        // NEXT BUTTON
-        document.getElementById('next-button').addEventListener('click', () => {
-            if (peer) { peer.destroy(); peer = null; }
-            socket.emit("next"); 
-            findPartner();
+            ui.reportModal.classList.remove('hidden'); ui.reportModal.classList.add('flex');
         });
-        
-        // STOP BUTTON
-        document.getElementById('stop-button').addEventListener('click', () => {
+
+        ui.closeReport.addEventListener('click', () => {
+            ui.reportModal.classList.add('hidden'); ui.reportModal.classList.remove('flex');
+        });
+
+        ui.submitReport.addEventListener('click', () => {
+            const reason = document.querySelector('input[name="report-reason"]:checked').value;
+            
+            socket.emit('report-user', { reason: reason });
+            
+            ui.reportModal.classList.add('hidden'); ui.reportModal.classList.remove('flex');
+
+            // CHANGED MESSAGE: Removed the word "blocked"
+            ui.aiWarning.textContent = `✅ Thank you for reporting! We will check and take action.`;
+            ui.aiWarning.style.background = 'rgba(34, 197, 94, 0.95)';
+            ui.aiWarning.style.borderColor = '#22c55e';
+            ui.aiWarning.style.display = 'block';
+            
+            // DISABLE BUTTON UNTIL NEXT NEW CONNECTION
+            ui.reportBtn.disabled = true;
+            
+            setTimeout(() => { 
+                ui.aiWarning.style.display = 'none'; 
+                ui.aiWarning.style.background = 'rgba(239, 68, 68, 0.95)'; 
+                ui.aiWarning.style.borderColor = '#f87171';
+            }, 3500);
+
+            // Disconnect immediately after reporting
             if (peer) { peer.destroy(); peer = null; }
             socket.emit("next");
             updateStatus('disconnected', 'Stopped');
             connectedTime = 0;
-            ui.remoteVideo.classList.remove('active');
-            ui.remoteVideo.srcObject = null;
-            ui.chatInput.disabled = false;
-            ui.waitingInd.classList.add('hidden'); 
+            hasConnectedOnce = false; 
+            ui.remoteVideo.classList.remove('active'); ui.remoteVideo.srcObject = null;
+            ui.waitingInd.classList.add('hidden');
+        });
+
+        socket.on('you-are-banned', () => {
+            localStorage.setItem('swaploop_ban_v22', Date.now() + 24 * 60 * 60 * 1000); location.reload();
+        });
+        // --- REPORT LOGIC END ---
+
+        function findPartner() {
+            updateStatus('searching');
+            connectedTime = 0; noFaceTime = 0; 
+            ui.aiWarning.style.display = 'none'; ui.remoteVideo.classList.remove('active');
+            ui.remoteVideo.srcObject = null; ui.waitingInd.classList.remove('hidden'); ui.msgArea.innerHTML = ''; 
+            socket.emit("find-partner", { gender: myGender, lookingFor, selectedMode, type: 'video', clientId: myClientId });
+        }
+
+        ui.nextBtn.addEventListener('click', async () => {
+            ui.nextBtn.disabled = true; 
+            if (faceModel && ui.localVideo.srcObject) {
+                const faces = await faceModel.estimateFaces(ui.localVideo, false);
+                if (faces.length === 0 || faces[0].probability[0] < 0.50) {
+                    ui.aiWarning.textContent = `⚠️ Please show your face to search!`;
+                    ui.aiWarning.style.display = 'block'; setTimeout(() => { ui.aiWarning.style.display = 'none'; }, 3000);
+                    ui.nextBtn.disabled = false; return; 
+                }
+            }
+            if (peer) { peer.destroy(); peer = null; }
+            socket.emit("next"); findPartner(); ui.nextBtn.disabled = false;
+        });
+        
+        document.getElementById('stop-button').addEventListener('click', () => {
+            if (peer) { peer.destroy(); peer = null; }
+            socket.emit("next"); updateStatus('disconnected', 'Stopped');
+            connectedTime = 0;
+            ui.remoteVideo.classList.remove('active'); ui.remoteVideo.srcObject = null;
+            ui.chatInput.disabled = false; ui.waitingInd.classList.add('hidden'); 
         });
 
         document.getElementById('mic-toggle').addEventListener('click', function() {
-            if(localStream) {
-                let enabled = localStream.getAudioTracks()[0].enabled;
-                localStream.getAudioTracks()[0].enabled = !enabled;
-                this.classList.toggle('off', enabled);
-            }
+            if(localStream) { localStream.getAudioTracks()[0].enabled = !localStream.getAudioTracks()[0].enabled; this.classList.toggle('off'); }
         });
 
-        function toggleChat() {
-            isChatOpen = !isChatOpen;
-            ui.chatOverlay.classList.toggle('active', isChatOpen);
+        ui.chatToggle.addEventListener('click', () => {
+            isChatOpen = !isChatOpen; ui.chatOverlay.classList.toggle('active', isChatOpen);
             if(isChatOpen) { ui.chatBadge.style.display = 'none'; setTimeout(() => ui.chatInput.focus(), 300); }
-        }
-        ui.chatToggle.addEventListener('click', toggleChat);
-        ui.closeChat.addEventListener('click', toggleChat);
+        });
+        ui.closeChat.addEventListener('click', () => { isChatOpen = false; ui.chatOverlay.classList.remove('active'); });
 
         ui.chatForm.addEventListener('submit', (e) => {
-            e.preventDefault(); 
-            const msg = ui.chatInput.value.trim();
-            if(msg) { 
-                socket.emit('send-message', { message: msg }); 
-                appendMsg(msg, 'sent'); 
-                ui.chatInput.value = ''; 
-                ui.chatInput.focus(); 
-            }
+            e.preventDefault(); const msg = ui.chatInput.value.trim();
+            if(msg) { socket.emit('send-message', { message: msg }); appendMsg(msg, 'sent'); ui.chatInput.value = ''; ui.chatInput.focus(); }
         });
 
         function appendMsg(text, type) {
@@ -498,17 +450,22 @@
 
         socket.on('receive-message', ({ message }) => { appendMsg(message, 'received'); if(!isChatOpen) ui.chatBadge.style.display = 'block'; });
 
-        socket.on('partner-found', ({ initiator, partnerNickname }) => {
-            updateStatus('connected', partnerNickname);
+        socket.on('partner-found', (data) => {
+            updateStatus('connected', data.partnerNickname);
             connectedTime = Date.now(); 
+            hasConnectedOnce = true; // Enables reporting system for this specific session
+            
+            // Connect aayal udane report button ON aakum
+            ui.reportBtn.disabled = false; 
+            
             ui.waitingInd.classList.add('hidden');
 
             peer = new SimplePeer({
-                initiator: initiator, stream: localStream,
-                config: { iceServers: [ { urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:global.stun.twilio.com:3478' } ] }
+                initiator: data.initiator, stream: localStream,
+                config: { iceServers: [ { urls: 'stun:stun.l.google.com:19302' } ] }
             });
 
-            peer.on('signal', data => socket.emit('signal', data));
+            peer.on('signal', signalData => socket.emit('signal', signalData));
             peer.on('stream', stream => { ui.remoteVideo.srcObject = stream; ui.remoteVideo.classList.add('active'); });
             peer.on('close', handleRemoteDisconnect); peer.on('error', handleRemoteDisconnect);
         });
@@ -519,11 +476,13 @@
         function handleRemoteDisconnect() {
             if (peer) { peer.destroy(); peer = null; }
             updateStatus('disconnected', 'Stopped');
-            connectedTime = 0;
-            ui.remoteVideo.classList.remove('active');
-            ui.remoteVideo.srcObject = null;
+            connectedTime = 0; 
+            ui.remoteVideo.classList.remove('active'); ui.remoteVideo.srcObject = null;
             ui.waitingInd.classList.add('hidden');
             socket.emit("next");
+            
+            // DO NOT DISABLE REPORT BUTTON HERE.
+            // It remains ON so user can report a hit-and-run!
         }
 
         function updateStatus(state, name="Stranger") {
