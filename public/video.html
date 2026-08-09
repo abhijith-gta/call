@@ -90,6 +90,11 @@
 </head>
 <body>
 
+    <button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme" style="position: absolute; top: 24px; right: 24px; width: 48px; height: 48px; border-radius: 50%; background-color: var(--surface); border: 1px solid var(--border); color: var(--text-primary); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100;">
+        <svg id="moon-icon" class="w-5 h-5 text-[var(--text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        <svg id="sun-icon" class="hidden w-5 h-5 text-[var(--text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+    </button>
+
     <!-- REPORT MODAL -->
     <div id="report-modal" class="fixed inset-0 z-[1000] hidden flex-col items-center justify-center p-4 bg-black/80 backdrop-blur-md">
         <div class="satin-card w-full max-w-xs p-6 rounded-2xl">
@@ -104,7 +109,7 @@
             </div>
             
             <div class="flex gap-3">
-                <button type="button" id="close-report" class="flex-1 p-2.5 rounded-xl border border-gray-600 hover:bg-gray-800 transition">Cancel</button>
+                <button type="button" id="close-report" class="flex-1 p-2.5 rounded-xl border border-gray-600 hover:bg-[var(--input-bg)] transition">Cancel</button>
                 <button type="button" id="submit-report" class="flex-1 p-2.5 rounded-xl bg-yellow-600 text-white font-bold shadow-lg hover:bg-yellow-500 transition">Report</button>
             </div>
         </div>
@@ -181,11 +186,18 @@
 
             <div id="ai-warning">⚠️ Warning</div>
 
-            <div id="remote-wrapper" class="video-wrapper">
+            <div id="remote-wrapper" class="video-wrapper relative">
                 <video id="remote-video" autoplay playsinline></video>
                 <div id="waiting-indicator" class="absolute inset-0 flex flex-col items-center justify-center text-white/50 z-10 hidden">
                     <span class="text-5xl mb-4 animate-pulse">🌍</span>
                     <p class="font-medium mt-2">Finding someone...</p>
+                </div>
+                
+                <!-- ✨ BRAND WATERMARK ✨ -->
+                <div class="absolute bottom-4 right-4 z-20 pointer-events-none opacity-60">
+                    <span class="text-lg md:text-xl font-extrabold tracking-widest lowercase" style="color: var(--accent); text-shadow: 0 0 10px var(--accent-glow);">
+                        swaploop.in
+                    </span>
                 </div>
             </div>
 
@@ -247,12 +259,12 @@
 
     <script>
         // BAN CHECK
-        if (localStorage.getItem('swaploop_ban_v28')) {
-            if (Date.now() < parseInt(localStorage.getItem('swaploop_ban_v28'))) {
+        if (localStorage.getItem('swaploop_ban_v30')) {
+            if (Date.now() < parseInt(localStorage.getItem('swaploop_ban_v30'))) {
                 document.getElementById('ban-screen').classList.remove('hidden');
                 document.getElementById('setup-screen').classList.add('hidden');
                 throw new Error("User is currently banned.");
-            } else localStorage.removeItem('swaploop_ban_v28');
+            } else localStorage.removeItem('swaploop_ban_v30');
         }
 
         // GENERATE DEVICE ID
@@ -321,20 +333,22 @@
             ui.startBtn.disabled = false; 
         }).catch(() => { ui.startBtn.disabled = false; });
 
-        // ✨ FIXED TOGGLE BUTTON LOGIC ✨
-        document.querySelectorAll('.toggle-btn').forEach(btn => {
+        // ✨ INDEPENDENT GROUP SELECTION (Fixed Button Toggle Bug) ✨
+        const toggleBtns = document.querySelectorAll('#setup-screen .toggle-btn');
+        toggleBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 playSound('click');
                 const group = btn.dataset.group;
-                
-                // Aa particuar group-ile buttons matram remove cheyyunnu
+                const val = btn.dataset.val;
+
+                // Remove active class ONLY from buttons of the SAME group
                 document.querySelectorAll(`.toggle-btn[data-group="${group}"]`).forEach(b => b.classList.remove('active'));
                 
                 btn.classList.add('active');
-                
-                if(group === 'gender') myGender = btn.dataset.val;
-                if(group === 'looking') lookingFor = btn.dataset.val;
-                if(group === 'mode') selectedMode = btn.dataset.val;
+
+                if (group === 'gender') myGender = val;
+                if (group === 'looking') lookingFor = val;
+                if (group === 'mode') selectedMode = val;
             });
         });
 
@@ -395,7 +409,6 @@
             } catch (e) {}
         }
 
-        // --- REPORT LOGIC START ---
         ui.reportBtn.addEventListener('click', () => {
             if (!hasConnectedOnce) {
                 ui.aiWarning.textContent = `⚠️ No user connected to report!`;
@@ -449,9 +462,9 @@
                 hasConnectedOnce = false;
                 ui.remoteVideo.classList.remove('active'); ui.remoteVideo.srcObject = null;
                 ui.waitingInd.classList.add('hidden');
-                return; // Do NOT set 24-hr ban
+                return; 
             }
-            localStorage.setItem('swaploop_ban_v28', Date.now() + 24 * 60 * 60 * 1000); 
+            localStorage.setItem('swaploop_ban_v30', Date.now() + 24 * 60 * 60 * 1000); 
             location.reload();
         });
 
@@ -473,7 +486,6 @@
             playSound('click');
             ui.nextBtn.disabled = true; 
             
-            // Bypass face check on Next button if Creator mode
             if (faceModel && ui.localVideo.srcObject && selectedMode !== 'creator') {
                 const faces = await faceModel.estimateFaces(ui.localVideo, false);
                 if (faces.length === 0 || faces[0].probability[0] < 0.50) {
