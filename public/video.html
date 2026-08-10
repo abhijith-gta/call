@@ -24,13 +24,13 @@
         .toggle-btn { background: var(--input-bg); color: var(--text-secondary); border: 1px solid var(--border); transition: all 0.3s ease; cursor: pointer; }
         .toggle-btn.active { background: var(--accent-gradient); color: white; border-color: transparent; box-shadow: 0 4px 15px var(--accent-glow); }
 
-        #video-area { position: relative; background: var(--bg); flex-grow: 1; overflow: hidden; display: flex; flex-direction: column; gap: 12px; padding: 12px; transition: all 0.3s ease; }
-        @media (min-width: 768px) { #video-area { flex-direction: row; gap: 16px; padding: 16px; } }
+        #video-area { position: relative; background: var(--bg); flex-grow: 1; overflow: hidden; display: flex; flex-direction: column; gap: 12px; padding: 12px; padding-top: 60px; transition: all 0.3s ease; }
+        @media (min-width: 768px) { #video-area { flex-direction: row; gap: 16px; padding: 16px; padding-top: 70px; } }
 
-        .video-wrapper { position: relative; flex: 1; width: 100%; height: 100%; background: #111; border: 1px solid var(--border); border-radius: 20px; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+        .video-wrapper { position: relative; flex: 1; width: 100%; height: 100%; background: #111; border: 1px solid var(--border); border-radius: 20px; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.3); transition: all 0.3s ease; }
 
         @media (min-width: 768px) {
-            #chat-ui.creator-active #video-area { display: grid; grid-template-columns: minmax(280px, 350px) 1fr; grid-template-rows: 1fr 1fr; gap: 16px; padding: 16px; background: var(--bg); }
+            #chat-ui.creator-active #video-area { display: grid; grid-template-columns: minmax(320px, 400px) 1fr; grid-template-rows: 1fr 1fr; gap: 16px; padding: 16px; padding-top: 70px; background: var(--bg); }
             #chat-ui.creator-active .video-wrapper { border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
             #chat-ui.creator-active #remote-wrapper { grid-column: 1; grid-row: 1; }
             #chat-ui.creator-active #local-wrapper { grid-column: 1; grid-row: 2; }
@@ -43,8 +43,8 @@
         #remote-video.active { opacity: 1; }
         #local-video { transform: scaleX(-1); }
 
-        .status-pill { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); background: rgba(28, 28, 30, 0.85); backdrop-filter: blur(15px); border: 1px solid var(--border); border-radius: 999px; padding: 8px 20px; display: flex; align-items: center; gap: 12px; z-index: 30; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .control-area { background: var(--surface); backdrop-filter: blur(20px); border-top: 1px solid var(--border); padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); display: flex; justify-content: center; gap: 15px; z-index: 30; }
+        .status-pill { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); background: rgba(28, 28, 30, 0.85); backdrop-filter: blur(15px); border: 1px solid var(--border); border-radius: 999px; padding: 8px 20px; display: flex; align-items: center; gap: 12px; z-index: 38; box-shadow: 0 10px 30px rgba(0,0,0,0.5); pointer-events: none; }
+        .control-area { background: var(--surface); backdrop-filter: blur(20px); border-top: 1px solid var(--border); padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); display: flex; justify-content: center; gap: 15px; z-index: 50; }
 
         .btn-control { background: var(--input-bg); color: var(--text-primary); border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); cursor: pointer; transition: all 0.3s; }
         .btn-control.off { background: rgba(239, 68, 68, 0.2); color: #ef4444; border-color: #ef4444; }
@@ -69,7 +69,6 @@
         .sent { background: var(--msg-sent); align-self: flex-end; border-bottom-right-radius: 4px; color: white; }
         .received { background: var(--msg-received); align-self: flex-start; border-bottom-left-radius: 4px; color: var(--text-primary); border: 1px solid var(--border); backdrop-filter: blur(10px); }
 
-        /* --- TYPING INDICATOR --- */
         .typing-bubble { display: inline-flex; align-items: center; gap: 4px; padding: 10px 14px; width: fit-content; margin-top: 4px; }
         .typing-dot { width: 5px; height: 5px; background-color: var(--text-secondary); border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
         .typing-dot:nth-child(1) { animation-delay: -0.32s; }
@@ -90,7 +89,15 @@
 </head>
 <body>
 
-    <button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme" style="position: absolute; top: 24px; right: 24px; width: 48px; height: 48px; border-radius: 50%; background-color: var(--surface); border: 1px solid var(--border); color: var(--text-primary); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100;">
+    <!-- ✨ GLOBAL TOP-LEFT BRAND LOGO ✨ -->
+    <div class="absolute top-4 left-6 z-50 pointer-events-none">
+        <span class="text-xl md:text-2xl font-extrabold tracking-widest" style="color: var(--accent); text-shadow: 0 0 15px var(--accent-glow);">
+            SwapLoop.in
+        </span>
+    </div>
+
+    <!-- Theme Toggle -->
+    <button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme" style="position: absolute; top: 20px; right: 20px; width: 42px; height: 42px; border-radius: 50%; background-color: var(--surface); border: 1px solid var(--border); color: var(--text-primary); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100;">
         <svg id="moon-icon" class="w-5 h-5 text-[var(--text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
         <svg id="sun-icon" class="hidden w-5 h-5 text-[var(--text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
     </button>
@@ -123,9 +130,9 @@
     </div>
 
     <!-- SETUP SCREEN -->
-    <div id="setup-screen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">                
+    <div id="setup-screen" class="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">                
         <div class="satin-card w-full max-w-sm p-8 rounded-[2rem] text-center">
-            <div class="text-4xl mb-4">📹</div>
+            <div class="text-4xl mb-4 mt-6">📹</div>
             <h1 class="text-3xl font-bold mb-2">Video Call</h1>
             <p id="ai-loading-text" class="text-xs text-[var(--accent)] font-semibold mb-4 animate-pulse">Loading Face Tracking & AI Module...</p>
             
@@ -167,12 +174,6 @@
     <!-- CALL UI -->
     <div id="chat-ui" class="flex flex-col h-full hidden absolute inset-0">
         
-        <div class="h-16 flex items-center px-6 shrink-0 z-10 relative shadow-sm justify-between" style="background: var(--header-bg); border-bottom: 1px solid var(--border);">
-            <div class="text-2xl md:text-3xl font-extrabold tracking-widest cursor-default" style="color: var(--accent); text-shadow: 0 0 15px var(--accent-glow);">
-                swaploop.in
-            </div>
-        </div>
-
         <div id="video-area">
             
             <div class="status-pill">
@@ -186,6 +187,7 @@
 
             <div id="ai-warning">⚠️ Warning</div>
 
+            <!-- REMOTE VIDEO -->
             <div id="remote-wrapper" class="video-wrapper relative">
                 <video id="remote-video" autoplay playsinline></video>
                 <div id="waiting-indicator" class="absolute inset-0 flex flex-col items-center justify-center text-white/50 z-10 hidden">
@@ -193,14 +195,15 @@
                     <p class="font-medium mt-2">Finding someone...</p>
                 </div>
                 
-                <!-- ✨ BRAND WATERMARK ✨ -->
-                <div class="absolute bottom-4 right-4 z-20 pointer-events-none opacity-60">
-                    <span class="text-lg md:text-xl font-extrabold tracking-widest lowercase" style="color: var(--accent); text-shadow: 0 0 10px var(--accent-glow);">
-                        swaploop.in
+                <!-- ✨ BIGGER BRAND WATERMARK ON VIDEO ✨ -->
+                <div class="absolute bottom-4 right-4 z-20 pointer-events-none opacity-70">
+                    <span class="text-2xl md:text-3xl font-extrabold tracking-widest" style="color: var(--accent); text-shadow: 0 0 15px var(--accent-glow);">
+                        SwapLoop.in
                     </span>
                 </div>
             </div>
 
+            <!-- LOCAL VIDEO -->
             <div id="local-wrapper" class="video-wrapper">
                 <video id="local-video" autoplay muted playsinline crossorigin="anonymous"></video>
             </div>
@@ -212,9 +215,7 @@
                     <button type="button" id="close-chat" class="text-[var(--text-secondary)] hover:text-white text-xl leading-none">&times;</button>
                 </div>
                 <div id="messages-area" class="flex-grow p-3 overflow-y-auto flex flex-col scroll-smooth">
-                    <!-- Spacer -->
                     <div class="flex-grow"></div>
-                    <!-- Typing Indicator -->
                     <div id="typing-indicator" class="chat-bubble received typing-bubble hidden">
                         <span class="typing-dot"></span>
                         <span class="typing-dot"></span>
@@ -258,7 +259,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface"></script>
 
     <script>
-        // BAN CHECK
         if (localStorage.getItem('swaploop_ban_v30')) {
             if (Date.now() < parseInt(localStorage.getItem('swaploop_ban_v30'))) {
                 document.getElementById('ban-screen').classList.remove('hidden');
@@ -267,14 +267,12 @@
             } else localStorage.removeItem('swaploop_ban_v30');
         }
 
-        // GENERATE DEVICE ID
         let myClientId = localStorage.getItem('swaploop_client_id');
         if (!myClientId) {
             myClientId = 'device_' + Math.random().toString(36).substr(2, 16);
             localStorage.setItem('swaploop_client_id', myClientId);
         }
 
-        // --- Audio Feedback (Safe Logic) ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playSound(type) {
             try {
@@ -323,8 +321,10 @@
             typingInd: document.getElementById('typing-indicator'), reportBtn: document.getElementById('report-btn'),
             reportModal: document.getElementById('report-modal'), closeReport: document.getElementById('close-report'),
             submitReport: document.getElementById('submit-report'), nextBtn: document.getElementById('next-button'),
-            endBtn: document.getElementById('stop-button')
+            endBtn: document.getElementById('stop-button'),
+            localWrapper: document.getElementById('local-wrapper'), remoteWrapper: document.getElementById('remote-wrapper')
         };
+
 
         blazeface.load().then(face => {
             faceModel = face;
@@ -333,7 +333,6 @@
             ui.startBtn.disabled = false; 
         }).catch(() => { ui.startBtn.disabled = false; });
 
-        // ✨ INDEPENDENT GROUP SELECTION (Fixed Button Toggle Bug) ✨
         const toggleBtns = document.querySelectorAll('#setup-screen .toggle-btn');
         toggleBtns.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -341,9 +340,7 @@
                 const group = btn.dataset.group;
                 const val = btn.dataset.val;
 
-                // Remove active class ONLY from buttons of the SAME group
                 document.querySelectorAll(`.toggle-btn[data-group="${group}"]`).forEach(b => b.classList.remove('active'));
-                
                 btn.classList.add('active');
 
                 if (group === 'gender') myGender = val;
@@ -452,7 +449,6 @@
             ui.waitingInd.classList.add('hidden');
         });
 
-        // ✨ SILENT CALL CUT FOR CREATORS INSTEAD OF BAN ✨
         socket.on('you-are-banned', () => {
             if (selectedMode === 'creator') {
                 if (peer) { peer.destroy(); peer = null; }
@@ -512,7 +508,6 @@
             if(localStream) { localStream.getAudioTracks()[0].enabled = !localStream.getAudioTracks()[0].enabled; this.classList.toggle('off'); }
         });
 
-        // ✨ CHAT LOGIC ✨
         ui.chatToggle.addEventListener('click', () => {
             playSound('click');
             isChatOpen = !isChatOpen; ui.chatOverlay.classList.toggle('active', isChatOpen);
