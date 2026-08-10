@@ -3,83 +3,114 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>SwapLoop - Text Chat</title>
+    <title>SwapLoop - Voice Call</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
-            /* DARK MODE (Premium SwapLoop Identity) */
-            --bg: #0a0a0c;
-            --surface: rgba(24, 24, 28, 0.7);
-            --header-bg: rgba(15, 15, 18, 0.9);
+            /* DARK MODE (Premium Neon Style) */
+            --bg: #0a0a0a;
+            --surface: rgba(28, 28, 30, 0.7);
             --text-primary: #ffffff;
-            --text-secondary: #9ca3af;
-            --accent: #8b5cf6;
+            --text-secondary: #a3a3a3;
+            --accent: #8b5cf6; 
             --accent-glow: rgba(139, 92, 246, 0.5);
-            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #d946ef 100%);
+            --danger: #ef4444;
+            --danger-glow: rgba(239, 68, 68, 0.5);
+            --success: #22c55e;
+            --btn-bg: rgba(255, 255, 255, 0.05);
             --border: rgba(255, 255, 255, 0.08);
+            --audio-level: 0.1;
             
-            /* Custom Chat Bubbles */
+            /* Chat Bubbles */
             --msg-sent: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            --msg-sent-shadow: rgba(139, 92, 246, 0.25);
-            --msg-received: rgba(255, 255, 255, 0.06);
-            
-            --input-bg: rgba(255, 255, 255, 0.05);
-            --btn-hover: rgba(255, 255, 255, 0.1);
+            --msg-received: rgba(255, 255, 255, 0.15);
         }
 
         [data-theme="light"] {
             --bg: #f8fafc;
-            --surface: rgba(255, 255, 255, 0.85);
-            --header-bg: rgba(255, 255, 255, 0.95);
+            --surface: rgba(255, 255, 255, 0.8);
             --text-primary: #0f172a;
             --text-secondary: #64748b;
             --accent: #6366f1;
-            --accent-glow: rgba(99, 102, 241, 0.3);
+            --accent-glow: rgba(99, 102, 241, 0.4);
             --accent-gradient: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+            --danger: #ef4444;
+            --danger-glow: rgba(239, 68, 68, 0.3);
+            --success: #10b981;
+            --btn-bg: rgba(0, 0, 0, 0.03);
             --border: rgba(0, 0, 0, 0.08);
             
-            --msg-sent: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 100%);
-            --msg-sent-shadow: rgba(99, 102, 241, 0.25);
-            --msg-received: #ffffff;
-            
-            --input-bg: rgba(0, 0, 0, 0.03);
-            --btn-hover: rgba(0, 0, 0, 0.08);
+            --msg-sent: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            --msg-received: rgba(0, 0, 0, 0.08);
         }
 
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg);
             color: var(--text-primary);
-            height: 100dvh; 
+            height: 100dvh;
             overflow: hidden;
             display: flex;
             flex-direction: column;
             transition: background-color 0.4s ease, color 0.4s ease;
             background-image: 
-                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.04), transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(217, 70, 239, 0.04), transparent 40%);
+                radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.05), transparent 30%),
+                radial-gradient(circle at 80% 20%, rgba(217, 70, 239, 0.05), transparent 30%);
+            animation: pulse-bg 15s infinite alternate ease-in-out;
+        }
+
+        @keyframes pulse-bg {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
         }
 
         .hidden { display: none !important; }
 
-        /* Setup Card */
+        /* Theme Toggle */
+        .theme-toggle {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--surface);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 100;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .theme-toggle:hover { 
+            transform: scale(1.1) rotate(15deg);
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+        .theme-toggle:active { transform: scale(0.9); }
+
+        /* Glassmorphism Card */
         .satin-card {
             background-color: var(--surface);
             border: 1px solid var(--border);
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             transition: all 0.3s ease;
         }
 
+        /* Toggles */
         .toggle-btn {
-            background: var(--input-bg);
+            background: var(--btn-bg);
             color: var(--text-secondary);
             border: 1px solid var(--border);
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
             cursor: pointer;
         }
         .toggle-btn:hover { border-color: var(--accent); color: var(--text-primary); }
@@ -87,155 +118,118 @@
             background: var(--accent-gradient);
             color: white; border-color: transparent;
             box-shadow: 0 4px 15px var(--accent-glow);
+            transform: translateY(-2px);
         }
 
-        /* Header */
-        .chat-header {
-            background: var(--header-bg);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-bottom: 1px solid var(--border);
-            min-height: 75px;
-            padding-top: 10px;
-            padding-bottom: 10px;
-        }
-
-        .header-theme-btn {
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            background-color: var(--input-bg);
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .header-theme-btn:hover { border-color: var(--accent); transform: rotate(15deg) scale(1.05); }
-        .header-theme-btn:active { transform: scale(0.95); }
-
-        /* Message Bubbles */
-        .chat-bubble {
-            max-width: 80%;
-            padding: 12px 18px;
-            border-radius: 20px;
-            font-size: 0.98rem;
-            line-height: 1.45;
+        /* --- VISUALIZER --- */
+        .vis-container {
             position: relative;
-            animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-            opacity: 0;
-            transform: scale(0.9) translateY(10px);
-            word-wrap: break-word;
-            margin-bottom: 6px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            width: 280px; height: 280px;
+            display: flex; justify-content: center; align-items: center;
+            margin: auto;
         }
-
-        .sent {
-            background: var(--msg-sent);
-            align-self: flex-end;
-            border-bottom-right-radius: 4px;
-            color: white;
-            box-shadow: 0 4px 15px var(--msg-sent-shadow);
-        }
-
-        .received {
-            background: var(--msg-received);
-            align-self: flex-start;
-            border-bottom-left-radius: 4px;
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-            backdrop-filter: blur(10px);
-        }
-
-        @keyframes popIn { to { opacity: 1; transform: scale(1) translateY(0); } }
-
-        /* Bottom Control Bar */
-        .bottom-control-bar {
-            background: var(--header-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid var(--border);
-            padding: 12px 16px;
-            padding-bottom: max(12px, env(safe-area-inset-bottom));
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            z-index: 20;
-        }
-
-        .btn-skip {
-            background: var(--input-bg);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-            border-radius: 50%;
-            width: 48px; height: 48px;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            flex-shrink: 0;
-            cursor: pointer;
-        }
-        .btn-skip:hover { border-color: var(--accent); background: var(--btn-hover); transform: scale(1.05); }
-        .btn-skip:active { transform: scale(0.95); }
-
-        /* Report Button */
-        .btn-report {
-            background: rgba(245, 158, 11, 0.15);
-            color: #f59e0b;
-            border: 1px solid var(--border);
-            border-radius: 50%;
-            width: 48px; height: 48px;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.3s ease;
-            flex-shrink: 0;
-            cursor: pointer;
-            border-color: rgba(245, 158, 11, 0.3);
-        }
-        .btn-report:hover:not(:disabled) {
-            background: #f59e0b; color: white;
-            transform: scale(1.05); box-shadow: 0 4px 15px rgba(245,158,11,0.4);
-        }
-        .btn-report:disabled { opacity: 0.3; cursor: not-allowed; filter: grayscale(80%); }
-
-        .chat-input-wrapper {
-            flex-grow: 1;
-            background: var(--input-bg);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            display: flex;
-            align-items: center;
-            padding: 4px 16px;
-            transition: all 0.3s ease;
-        }
-        .chat-input-wrapper:focus-within { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 2px var(--accent-glow); }
-        .glass-input { background: transparent; border: none; color: var(--text-primary); width: 100%; padding: 10px 0; font-size: 1rem; }
-        .glass-input:focus { outline: none; }                                
-        
-        .btn-send {
+        .vis-core {
+            width: 130px; height: 130px; border-radius: 50%;
             background: var(--accent-gradient);
-            color: white;
-            border-radius: 50%;
-            width: 48px; height: 48px;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px var(--accent-glow);
-            flex-shrink: 0; border: none; cursor: pointer;
+            box-shadow: 0 0 40px var(--accent-glow);
+            transform: scale(calc(1 + var(--audio-level) * 0.9));
+            transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1);
+            z-index: 10; display: flex; align-items: center; justify-content: center;
         }
-        .btn-send:hover { transform: scale(1.05); box-shadow: 0 6px 20px var(--accent-glow); }
-        .btn-send:active { transform: scale(0.95); }
-        .btn-send:disabled { background: var(--input-bg); color: var(--text-secondary); box-shadow: none; cursor: not-allowed; border: 1px solid var(--border); transform: none; }
+        .vis-core::after { content: '🎙️'; font-size: 3rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+        .vis-wave {
+            position: absolute; border: 2px solid var(--accent); border-radius: 50%;
+            width: 100%; height: 100%; opacity: 0;
+            animation: wave 2.5s infinite cubic-bezier(0.1, 0.4, 0.8, 1);
+        }
+        .vis-wave:nth-child(2) { animation-delay: 0.8s; }
+        .vis-wave:nth-child(3) { animation-delay: 1.6s; } 
+        @keyframes wave {
+            0% { transform: scale(0.45); opacity: 0.8; border-width: 4px; }
+            100% { transform: scale(2.2); opacity: 0; border-width: 0px; }
+        }                               
+
+        /* --- DIALER UI CONTROLS --- */
+        .controls-area {
+            padding: 20px; padding-bottom: max(30px, env(safe-area-inset-bottom));
+            display: flex; flex-direction: column; gap: 30px; align-items: center; justify-content: flex-end;
+            min-height: 250px; background: linear-gradient(to top, var(--bg) 20%, transparent 100%);
+        }
+
+        .secondary-controls {
+            display: flex; gap: 30px; justify-content: center; width: 100%;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .icon-btn {
+            width: 60px; height: 60px; border-radius: 50%; background: var(--btn-bg);
+            backdrop-filter: blur(10px); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; border: 1px solid var(--border);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); color: var(--text-primary); cursor: pointer;
+        }
+        .icon-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.1); transform: translateY(-3px); border-color: rgba(255,255,255,0.2);
+        }
+        .icon-btn:active:not(:disabled) { transform: scale(0.95); }
+        .icon-btn.active-state { background: white; color: black; box-shadow: 0 0 15px rgba(255,255,255,0.3); }
+        .icon-btn:disabled { opacity: 0.3; cursor: not-allowed; filter: grayscale(80%); }
+
+        .icon-btn.report-btn { color: #f59e0b; border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.1); }
+        .icon-btn.report-btn:hover:not(:disabled) { background: #f59e0b; color: white; border-color: #f59e0b; box-shadow: 0 4px 15px rgba(245,158,11,0.4); }
+
+        .btn-label { font-size: 12px; margin-top: 8px; color: var(--text-secondary); font-weight: 600; letter-spacing: 0.5px; }
+
+        .main-action-container { position: relative; width: 80px; height: 80px; display: flex; justify-content: center; align-items: center; }
+
+        .btn-end {
+            width: 70px; height: 70px; border-radius: 50%; background: var(--danger); color: white;
+            display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px var(--danger-glow);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: absolute; border: none; cursor: pointer;
+        }
+        .btn-end:hover { transform: scale(1.08); box-shadow: 0 8px 30px var(--danger-glow); }
+        .btn-end:active { transform: scale(0.92); }
+
+        .btn-next {
+            width: auto; height: 60px; border-radius: 30px; background: var(--success); color: white;
+            display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 700; font-size: 1rem;
+            box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: absolute; white-space: nowrap; padding: 0 30px; border: none; cursor: pointer;
+        }
+        .btn-next:hover { transform: scale(1.05) translateY(-2px); box-shadow: 0 8px 25px rgba(34, 197, 94, 0.5); }
+        .btn-next:active { transform: scale(0.95); }
+
+        /* Signal Strength Bar */
+        .signal-bar { display: inline-flex; gap: 3px; align-items: flex-end; height: 16px; margin-left: 10px; }
+        .bar { width: 4px; background: var(--text-secondary); border-radius: 2px; transition: background-color 0.3s; }
+        .bar:nth-child(1) { height: 6px; }
+        .bar:nth-child(2) { height: 11px; }
+        .bar:nth-child(3) { height: 16px; }
+        .signal-good .bar { background: var(--success); }
+        .signal-fair .bar { background: #eab308; }
+        .signal-poor .bar { background: var(--danger); }
+
+        /* --- CHAT OVERLAY --- */
+        #chat-overlay {
+            position: absolute; bottom: 110px; left: 50%; transform: translateX(-50%) translateY(20px);
+            width: 90%; max-width: 350px; height: 320px; background: var(--surface); backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px); border: 1px solid var(--border); border-radius: 20px; z-index: 40;
+            display: flex; flex-direction: column; opacity: 0; pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+        }
+        #chat-overlay.active { opacity: 1; pointer-events: all; transform: translateX(-50%) translateY(0); }
+
+        .chat-bubble { max-width: 85%; padding: 8px 14px; border-radius: 18px; font-size: 0.85rem; line-height: 1.4; word-wrap: break-word; margin-bottom: 6px; animation: popIn 0.3s ease forwards; }
+        .sent { background: var(--msg-sent); align-self: flex-end; border-bottom-right-radius: 4px; color: white; }
+        .received { background: var(--msg-received); align-self: flex-start; border-bottom-left-radius: 4px; color: var(--text-primary); border: 1px solid var(--border); backdrop-filter: blur(10px); }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.9) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
         /* --- INSTAGRAM STYLE TYPING INDICATOR --- */
         .typing-bubble {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 14px 18px;
-            width: fit-content;
-            margin-top: 4px;
+            display: inline-flex; align-items: center; gap: 4px; padding: 10px 14px;
+            width: fit-content; margin-top: 4px;
         }
         .typing-dot {
-            width: 6px; height: 6px;
-            background-color: var(--text-secondary);
-            border-radius: 50%;
+            width: 5px; height: 5px; background-color: var(--text-secondary); border-radius: 50%;
             animation: bounce 1.4s infinite ease-in-out both;
         }
         .typing-dot:nth-child(1) { animation-delay: -0.32s; }
@@ -245,17 +239,22 @@
             40% { transform: scale(1.2); opacity: 1; background-color: var(--accent); }
         }
 
-        #messages-area::-webkit-scrollbar { width: 5px; }
-        #messages-area::-webkit-scrollbar-track { background: transparent; }
-        #messages-area::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3); border-radius: 10px; }
-        #messages-area::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.5); }
+        #chat-badge { position: absolute; top: -2px; right: -2px; width: 14px; height: 14px; background: var(--danger); border-radius: 50%; border: 2px solid var(--bg); display: none; }
         
-        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .chat-input-field { background: var(--btn-bg); border: 1px solid var(--border); color: var(--text-primary); flex-grow: 1; border-radius: 999px; padding: 8px 16px; font-size: 14px; }
+        .chat-input-field:focus { outline: none; border-color: var(--accent); }
 
-        /* Custom AI / Report Warning Toast */
+        /* Logic States */
+        .hidden-scale { transform: scale(0.5); opacity: 0; pointer-events: none; }
+        .visible-scale { transform: scale(1); opacity: 1; pointer-events: auto; }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Custom AI Warning / Toast */
         #ai-warning {
-            position: absolute; top: 90px; left: 50%; transform: translateX(-50%);
+            position: absolute; top: 80px; left: 50%; transform: translateX(-50%);
             background: rgba(239, 68, 68, 0.95); color: white; padding: 12px 24px;
             border-radius: 12px; font-weight: bold; z-index: 100; display: none;
             backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
@@ -263,12 +262,24 @@
         }
 
         /* Report Modal CSS */
-        .radio-label { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 8px; cursor: pointer; background: var(--input-bg); border: 1px solid var(--border); transition: all 0.2s; }
+        .radio-label { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 8px; cursor: pointer; background: var(--btn-bg); border: 1px solid var(--border); transition: all 0.2s; }
         .radio-label:hover { border-color: #f59e0b; }
         input[type="radio"]:checked + span { color: #f59e0b; font-weight: 600; }
     </style>
 </head>
 <body>
+
+    <!-- ✨ GLOBAL TOP-LEFT BRAND LOGO ✨ -->
+    <div class="absolute top-4 left-6 z-50 pointer-events-none">
+        <span class="text-xl md:text-2xl font-extrabold tracking-widest" style="color: var(--accent); text-shadow: 0 0 15px var(--accent-glow);">
+            SwapLoop.in
+        </span>
+    </div>
+
+    <button type="button" id="theme-btn" class="theme-toggle" aria-label="Toggle Theme">
+        <svg id="moon-icon" class="w-5 h-5 text-[var(--text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        <svg id="sun-icon" class="hidden w-5 h-5 text-[var(--text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+    </button>
 
     <!-- REPORT MODAL -->
     <div id="report-modal" class="fixed inset-0 z-[1000] hidden flex-col items-center justify-center p-4 bg-black/80 backdrop-blur-md">
@@ -279,12 +290,12 @@
             <div class="flex flex-col gap-3 mb-6 text-sm">
                 <label class="radio-label"><input type="radio" name="report-reason" value="harassment" checked> <span>Harassment / Abuse</span></label>
                 <label class="radio-label"><input type="radio" name="report-reason" value="spam"> <span>Spam / Bot</span></label>
-                <label class="radio-label"><input type="radio" name="report-reason" value="nudity"> <span>Inappropriate Content</span></label>
+                <label class="radio-label"><input type="radio" name="report-reason" value="nudity"> <span>Inappropriate Audio</span></label>
                 <label class="radio-label"><input type="radio" name="report-reason" value="other"> <span>Other</span></label>
             </div>
             
             <div class="flex gap-3">
-                <button type="button" id="close-report" class="flex-1 p-2.5 rounded-xl border border-gray-600 hover:bg-[var(--btn-hover)] transition">Cancel</button>
+                <button type="button" id="close-report" class="flex-1 p-2.5 rounded-xl border border-gray-600 hover:bg-[var(--btn-bg)] transition">Cancel</button>
                 <button type="button" id="submit-report" class="flex-1 p-2.5 rounded-xl bg-yellow-600 text-white font-bold shadow-lg hover:bg-yellow-500 transition">Report</button>
             </div>
         </div>
@@ -298,27 +309,29 @@
     </div>
 
     <!-- SETUP SCREEN -->
-    <div id="setup-screen" class="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/50 backdrop-blur-md">
-        <div class="satin-card w-full max-w-sm p-8 md:p-10 rounded-[2rem] text-center fade-in">
-            <div class="w-20 h-20 bg-[var(--input-bg)] border border-[var(--border)] rounded-full mx-auto flex items-center justify-center mb-6 shadow-inner">
-                <span class="text-4xl drop-shadow-md">💬</span>
+    <div id="setup-screen" class="flex items-center justify-center h-full p-4 fade-in z-20 absolute inset-0">
+        <div class="satin-card w-full max-w-sm p-8 md:p-10 rounded-[2rem] text-center">
+            <div class="w-24 h-24 bg-[var(--btn-bg)] rounded-full mx-auto flex items-center justify-center mb-8 border border-[var(--border)] shadow-inner">
+                <span class="text-5xl drop-shadow-md">🎙️</span>
             </div>
-            <h1 class="text-4xl font-bold mb-8 tracking-tight">Text Chat</h1>
+            <h1 class="text-4xl font-bold mb-8 tracking-tight">Voice Call</h1>
             
-            <div class="space-y-7">
-                <input id="nickname-input" type="text" placeholder="Enter Nickname" class="w-full p-4 rounded-2xl text-center text-lg font-medium transition-all" style="background: var(--input-bg); border: 1px solid var(--border); color: var(--text-primary); outline: none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+            <div class="space-y-8">
+                <div>
+                    <input id="nickname-input" type="text" placeholder="Enter Nickname" class="w-full p-4 rounded-2xl text-center text-lg font-medium focus:outline-none transition-all duration-300" style="background: var(--btn-bg); border: 1px solid var(--border);">
+                </div>
                 
                 <div class="text-left">
                     <label class="text-xs uppercase tracking-widest text-[var(--text-secondary)] font-bold ml-2 mb-3 block">I am</label>
-                    <div id="my-gender-selector" class="grid grid-cols-2 gap-4">
-                        <button type="button" class="toggle-btn p-4 rounded-2xl font-semibold" data-group="gender" data-val="male">Male</button>
-                        <button type="button" class="toggle-btn p-4 rounded-2xl font-semibold" data-group="gender" data-val="female">Female</button>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button type="button" class="toggle-btn p-4 rounded-2xl font-semibold text-lg" data-group="gender" data-val="male">Male</button>
+                        <button type="button" class="toggle-btn p-4 rounded-2xl font-semibold text-lg" data-group="gender" data-val="female">Female</button>
                     </div>
                 </div>
 
                 <div class="text-left">
                     <label class="text-xs uppercase tracking-widest text-[var(--text-secondary)] font-bold ml-2 mb-3 block">Looking for</label>
-                    <div id="looking-for-selector" class="grid grid-cols-3 gap-3">
+                    <div class="grid grid-cols-3 gap-3">
                         <button type="button" class="toggle-btn p-3 rounded-xl font-medium" data-group="looking" data-val="male">Male</button>
                         <button type="button" class="toggle-btn p-3 rounded-xl font-medium" data-group="looking" data-val="female">Female</button>
                         <button type="button" class="toggle-btn active p-3 rounded-xl font-medium" data-group="looking" data-val="anyone">Anyone</button>
@@ -326,99 +339,118 @@
                 </div>
 
                 <button type="button" id="start-button" class="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold p-5 rounded-2xl mt-4 shadow-lg hover:shadow-indigo-500/50 hover:-translate-y-1 active:scale-95 transition-all duration-300 text-lg">
-                    Start Chatting
+                    Start Call
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- CHAT UI -->
-    <div id="chat-ui" class="flex flex-col h-full hidden absolute inset-0">
+    <!-- CALL SCREEN -->
+    <div id="call-screen" class="hidden flex-col h-full w-full fade-in absolute inset-0 z-10">
         
-        <!-- ✨ 3-PART HEADER (Brand, User Info, Theme) ✨ -->
-        <div class="chat-header flex items-center px-4 md:px-6 shrink-0 z-20 shadow-sm relative">
-            
-            <!-- Left: Brand Logo -->
-            <div class="w-1/3 flex justify-start">
-                <span class="text-lg md:text-xl font-extrabold tracking-widest" style="color: var(--accent); text-shadow: 0 0 10px var(--accent-glow);">
-                    SwapLoop.in
-                </span>
-            </div>
-
-            <!-- Center: Partner Info & Match Tag -->
-            <div class="w-1/3 flex flex-col items-center justify-center text-center">
-                <h2 id="partner-nickname" class="text-lg font-bold leading-tight tracking-tight w-full truncate">Stranger</h2>
-                
-                <div class="flex items-center gap-1.5 mt-0.5">
-                    <span id="status-dot" class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.6)]"></span>
-                    <p id="status-text" class="text-[0.65rem] font-bold text-yellow-500 tracking-widest uppercase">Searching...</p>
-                </div>
-                
-                <!-- Match Tag Show -->
-                <p id="interest-match" class="text-[0.6rem] text-[var(--accent)] font-bold uppercase tracking-widest mt-1 hidden w-full truncate"></p>
-            </div>
-
-            <!-- Right: Theme Toggle -->
-            <div class="w-1/3 flex justify-end">
-                <button type="button" id="theme-btn" class="header-theme-btn" aria-label="Toggle Theme">
-                    <svg id="moon-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-                    <svg id="sun-icon" class="hidden w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                </button>
-            </div>
-            
-        </div>
-
         <div id="ai-warning">⚠️ Warning</div>
 
-        <!-- MESSAGES AREA -->
-        <div id="messages-area" class="flex-grow flex flex-col gap-2 px-4 pt-6 pb-4 overflow-y-auto scroll-smooth">
+        <div class="text-center pt-24 px-4 relative z-10">
+            <h2 id="partner-nickname" class="text-4xl font-bold mb-2 flex items-center justify-center tracking-tight">
+                Stranger
+                <div id="signal-bar" class="signal-bar hidden" title="Connection Strength">
+                    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                </div>
+            </h2>
+            <p id="interest-match" class="text-sm text-[var(--accent)] font-bold uppercase tracking-widest mb-2 hidden"></p>
+            <p id="status-text" class="text-lg text-[var(--text-secondary)] font-medium transition-colors duration-300">Connecting...</p>
+            <p id="call-timer" class="text-2xl font-mono mt-3 opacity-0 text-[var(--text-primary)] transition-opacity duration-300">00:00</p>
+        </div>
+
+        <div class="flex-grow flex flex-col justify-center">
+            <div class="vis-container">
+                <div class="vis-wave"></div>
+                <div class="vis-wave"></div>
+                <div class="vis-wave"></div>
+                <div class="vis-core"></div>
+            </div>
+        </div>
+
+        <!-- ✨ CHAT OVERLAY ✨ -->
+        <div id="chat-overlay">
+            <div class="flex justify-between items-center p-3 border-b border-[var(--border)]">
+                <h3 class="font-semibold text-sm">Live Chat</h3>
+                <button type="button" id="close-chat" class="text-[var(--text-secondary)] hover:text-white text-xl leading-none">&times;</button>
+            </div>
+            <div id="messages-area" class="flex-grow p-3 overflow-y-auto flex flex-col scroll-smooth">
+                <!-- Spacer to push messages to bottom -->
+                <div class="flex-grow"></div>
+                
+                <!-- Typing Indicator -->
+                <div id="typing-indicator" class="chat-bubble received typing-bubble hidden">
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                </div>
+            </div>
+            <form id="chat-form" class="p-2 border-t border-[var(--border)] flex gap-2 shrink-0">
+                <input id="chat-input" type="text" placeholder="Type a message..." class="chat-input-field" autocomplete="off" disabled>
+                <button type="submit" id="send-btn" class="bg-[var(--accent)] text-white rounded-full w-10 h-10 flex items-center justify-center disabled:opacity-50" disabled>
+                    <svg class="w-4 h-4 ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                </button>
+            </form>
+        </div>
+
+        <div class="controls-area relative z-10">
             
-            <div class="text-center text-xs text-[var(--text-secondary)] mt-2 mb-2 uppercase tracking-widest opacity-70 font-semibold bg-[var(--surface)] backdrop-blur-md border border-[var(--border)] py-2 px-4 rounded-full mx-auto shadow-sm">End-to-end encrypted</div>
-            
-            <!-- Spacer to push messages to the bottom -->
-            <div class="flex-grow"></div>
-            
-            <!-- Typing Indicator (Always stays at the bottom) -->
-            <div id="typing-indicator" class="chat-bubble received typing-bubble hidden">
-                <span class="typing-dot"></span>
-                <span class="typing-dot"></span>
-                <span class="typing-dot"></span>
+            <div id="secondary-controls" class="secondary-controls">
+                
+                <!-- Report Button -->
+                <div class="flex flex-col items-center">
+                    <button type="button" id="report-btn" class="icon-btn report-btn" disabled>
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg>
+                    </button>
+                    <span class="btn-label">Report</span>
+                </div>
+
+                <!-- Mute -->
+                <div class="flex flex-col items-center">
+                    <button type="button" id="mute-button" class="icon-btn">
+                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                    </button>
+                    <span class="btn-label">Mute</span>
+                </div>
+
+                <!-- Chat Button -->
+                <div class="flex flex-col items-center">
+                    <button type="button" id="chat-toggle" class="icon-btn relative">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                        <div id="chat-badge"></div>
+                    </button>
+                    <span class="btn-label">Chat</span>
+                </div>
+
+            </div>
+
+            <div class="main-action-container">
+                <button type="button" id="end-button" class="btn-end visible-scale" title="End Call">
+                    <svg class="w-10 h-10 transform rotate-135" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10.707 3.293a1 1 0 010 1.414L6.414 9H16a1 1 0 110 2H6.414l4.293 4.293a1 1 0 01-1.414 1.414l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                </button>
+
+                <button type="button" id="next-button" class="btn-next hidden-scale">
+                    Next Stranger <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+                </button>
             </div>
 
         </div>
+    </div>                                              
+    <audio id="remoteAudio" autoplay playsinline controls style="display: none;"></audio>
 
-        <!-- ACCESSIBLE BOTTOM CONTROL BAR -->
-        <form id="chat-form" class="bottom-control-bar">
-            
-            <button type="button" id="next-button" class="btn-skip" title="Next Stranger">
-                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
-            </button>
-
-            <!-- Report Button -->
-            <button type="button" id="report-btn" class="btn-report" title="Report User" disabled>
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg>
-            </button>
-
-            <div class="chat-input-wrapper">
-                <input id="chat-input" type="text" placeholder="Type a message..." autocomplete="off" class="glass-input" disabled>
-            </div>
-
-            <button type="submit" id="send-button" class="btn-send" disabled>
-                <svg class="w-5 h-5 translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
-            </button>
-            
-        </form>
-    </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         // BAN CHECK
-        if (localStorage.getItem('swaploop_ban_v25')) {
-            if (Date.now() < parseInt(localStorage.getItem('swaploop_ban_v25'))) {
+        if (localStorage.getItem('swaploop_ban_v31')) {
+            if (Date.now() < parseInt(localStorage.getItem('swaploop_ban_v31'))) {
                 document.getElementById('ban-screen').classList.remove('hidden');
                 document.getElementById('setup-screen').classList.add('hidden');
                 throw new Error("User is currently banned.");
-            } else localStorage.removeItem('swaploop_ban_v25');
+            } else localStorage.removeItem('swaploop_ban_v31');
         }
 
         // GENERATE DEVICE ID
@@ -432,38 +464,9 @@
         const themeBtn = document.getElementById('theme-btn');
         const moonIcon = document.getElementById('moon-icon');
         const sunIcon = document.getElementById('sun-icon');
-        
         const savedTheme = localStorage.getItem('theme') || 'dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
         updateIcons(savedTheme);
-
-        // --- Audio Feedback (Wrapped in Try-Catch to prevent UI breaks) ---
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playSound(type) {
-            try {
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                
-                if (type === 'send') {
-                    osc.frequency.setValueAtTime(500, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
-                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                } else if (type === 'receive') {
-                    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(500, audioCtx.currentTime + 0.1);
-                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                } else if (type === 'click') {
-                    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                }
-                
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.1);
-            } catch (e) {}
-        }
 
         themeBtn.addEventListener('click', () => {
             playSound('click');
@@ -476,34 +479,77 @@
 
         function updateIcons(theme) {
             if (theme === 'dark') {
-                moonIcon.classList.remove('hidden');
-                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden'); sunIcon.classList.add('hidden');
             } else {
-                moonIcon.classList.add('hidden');
-                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden'); sunIcon.classList.remove('hidden');
             }
         }
 
-        // --- Chat Logic ---
-        const socket = typeof io !== 'undefined' ? io() : { emit: () => {}, on: () => {} };
+        // --- Sound Logic ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'click') {
+                    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+                } else if (type === 'connect') {
+                    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'end') {
+                    osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.3);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'msg') {
+                    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(500, audioCtx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+                }
+            } catch(e) {}
+        }
+
+        // --- Call & Chat Logic ---
+        const socket = typeof io !== 'undefined' ? io() : { emit: () => {}, on: () => {} }; 
+        let peer = null, localStream = null, isMuted = false, analyser = null, isChatOpen = false;
         let myGender = null, lookingFor = 'anyone';
+        
         let hasConnectedOnce = false;
 
-        const ui = {
+         const ui = {
             setupScreen: document.getElementById('setup-screen'),
-            chatUI: document.getElementById('chat-ui'),
+            callScreen: document.getElementById('call-screen'),
             startBtn: document.getElementById('start-button'),
             nickInput: document.getElementById('nickname-input'),
             partnerName: document.getElementById('partner-nickname'),
             statusText: document.getElementById('status-text'),
-            statusDot: document.getElementById('status-dot'),
-            interestMatch: document.getElementById('interest-match'),
-            typingInd: document.getElementById('typing-indicator'),
-            msgsArea: document.getElementById('messages-area'),
-            form: document.getElementById('chat-form'),
-            input: document.getElementById('chat-input'),
-            sendBtn: document.getElementById('send-button'),
+            timer: document.getElementById('call-timer'),
+            muteBtn: document.getElementById('mute-button'),
             nextBtn: document.getElementById('next-button'),
+            endBtn: document.getElementById('end-button'),
+            remoteAudio: document.getElementById('remoteAudio'),
+            interestMatch: document.getElementById('interest-match'),
+            signalBar: document.getElementById('signal-bar'),
+            // Chat UI
+            chatOverlay: document.getElementById('chat-overlay'),
+            chatToggle: document.getElementById('chat-toggle'),
+            chatBadge: document.getElementById('chat-badge'),
+            closeChat: document.getElementById('close-chat'),
+            msgArea: document.getElementById('messages-area'),
+            chatForm: document.getElementById('chat-form'),
+            chatInput: document.getElementById('chat-input'),
+            sendBtn: document.getElementById('send-btn'),
+            typingInd: document.getElementById('typing-indicator'),
+            // Report UI
             reportBtn: document.getElementById('report-btn'),
             reportModal: document.getElementById('report-modal'),
             closeReport: document.getElementById('close-report'),
@@ -526,16 +572,28 @@
             });
         });
 
-        ui.startBtn.addEventListener('click', () => {
+        ui.startBtn.addEventListener('click', async () => {
             playSound('click');
-            if (!myGender) return alert("Please select your gender.");
-            const nick = ui.nickInput.value.trim() || "Anonymous";
-            socket.emit("set-nickname", nick);
-            
-            ui.setupScreen.classList.add('hidden');
-            ui.chatUI.classList.remove('hidden');
-            
-            findPartner();
+            if (!myGender) {
+                return alert("Please select your gender first.");
+            }
+            try { if (audioCtx.state === 'suspended') await audioCtx.resume(); } catch(e){}
+
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                setupVisualizer(localStream);
+                const nick = ui.nickInput.value.trim() || "Anonymous";
+                socket.emit('set-nickname', nick);
+
+                ui.setupScreen.classList.add('hidden');
+                ui.callScreen.classList.remove('hidden');
+                ui.callScreen.classList.add('flex');
+                
+                findPartner();
+            } catch (err) {
+                console.error(err);
+                alert("Microphone access denied. Please allow microphone permissions to use voice call.");
+            }
         });
 
         // --- REPORT LOGIC START ---
@@ -571,60 +629,82 @@
                 ui.aiWarning.style.borderColor = '#f87171';
             }, 3000);
 
+            // Disconnect immediately after reporting
+            if (peer) { peer.destroy(); peer = null; }
             socket.emit("next");
-            updateStatus('disconnected');
+            updateStatus('ended');
             hasConnectedOnce = false;
-        });
-
-        socket.on('you-are-banned', () => {
-            localStorage.setItem('swaploop_ban_v25', Date.now() + 24 * 60 * 60 * 1000); 
-            location.reload();
         });
         // --- REPORT LOGIC END ---
 
         function findPartner() {
+            resetCallUI();
             updateStatus('searching');
-            ui.reportBtn.disabled = true; 
             
-            const oldBubbles = ui.msgsArea.querySelectorAll('.chat-bubble:not(#typing-indicator)');
+            // CAREFULLY clear chat bubbles without destroying the typing indicator
+            const oldBubbles = ui.msgArea.querySelectorAll('.chat-bubble:not(#typing-indicator)');
             oldBubbles.forEach(bubble => bubble.remove());
-            
             ui.typingInd.classList.add('hidden');
-            ui.interestMatch.classList.add('hidden');
+            
+            ui.reportBtn.disabled = true; // Disable during search
             
             const interestString = sessionStorage.getItem('swaploop_interests') || "";
             const interests = interestString.split(',').map(s => s.trim()).filter(s => s);
             
-            socket.emit("find-partner", { gender: myGender, lookingFor, type: 'text', interests: interests, clientId: myClientId });
+            socket.emit('find-partner', { gender: myGender, lookingFor, type: 'voice', interests: interests, clientId: myClientId });
         }
+
+        ui.endBtn.addEventListener('click', () => {
+            playSound('end');
+            if (peer) { peer.destroy(); peer = null; }
+            socket.emit('next');
+            updateStatus('ended');
+            // Keep report button enabled so they can report after ending call
+        });
 
         ui.nextBtn.addEventListener('click', () => {
             playSound('click');
-            socket.emit("next");
+            if (peer) { peer.destroy(); peer = null; }
+            socket.emit('next');
             findPartner();
         });
 
-        // ✨ TYPING INDICATOR EMISSION ✨
-        let typingTimeout;
-        ui.input.addEventListener('input', () => {
-            ui.sendBtn.disabled = ui.input.value.trim().length === 0;
-            socket.emit('typing', true);
-            clearTimeout(typingTimeout);
-            typingTimeout = setTimeout(() => {
-                socket.emit('typing', false);
-            }, 1500);
+        ui.muteBtn.addEventListener('click', () => {
+            if (!localStream) return;
+            playSound('click');
+            isMuted = !isMuted;
+            localStream.getAudioTracks()[0].enabled = !isMuted;
+            ui.muteBtn.classList.toggle('active-state', isMuted);
         });
 
-        ui.form.addEventListener('submit', (e) => {
+        // ✨ CHAT LOGIC ✨
+        function toggleChat() {
+            isChatOpen = !isChatOpen;
+            ui.chatOverlay.classList.toggle('active', isChatOpen);
+            if(isChatOpen) {
+                ui.chatBadge.style.display = 'none';
+                setTimeout(() => ui.chatInput.focus(), 300);
+            }
+        }
+        ui.chatToggle.addEventListener('click', () => { playSound('click'); toggleChat(); });
+        ui.closeChat.addEventListener('click', toggleChat);
+
+        let typingTimeout;
+        ui.chatInput.addEventListener('input', () => {
+            ui.sendBtn.disabled = !ui.chatInput.value.trim();
+            socket.emit('typing', true);
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => socket.emit('typing', false), 1500);
+        });
+
+        ui.chatForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const msg = ui.input.value.trim();
-            if (msg) {
+            const msg = ui.chatInput.value.trim();
+            if(msg) {
                 socket.emit('send-message', { message: msg });
                 appendMsg(msg, 'sent');
-                playSound('send');
-                ui.input.value = '';
+                ui.chatInput.value = '';
                 ui.sendBtn.disabled = true;
-                
                 socket.emit('typing', false); 
                 clearTimeout(typingTimeout);
             }
@@ -632,70 +712,168 @@
 
         function appendMsg(text, type) {
             const div = document.createElement('div');
-            div.textContent = text;
             div.className = `chat-bubble ${type}`;
-            ui.msgsArea.insertBefore(div, ui.typingInd);
-            setTimeout(() => {
-                ui.msgsArea.scrollTop = ui.msgsArea.scrollHeight;
-            }, 50);
+            div.textContent = text;
+            // Insert the new message EXACTLY before the typing indicator
+            ui.msgArea.insertBefore(div, ui.typingInd);
+            setTimeout(() => { ui.msgArea.scrollTop = ui.msgArea.scrollHeight; }, 50);
         }
 
         socket.on('partner-typing', (isTyping) => {
             if(isTyping) {
                 ui.typingInd.classList.remove('hidden');
-                ui.msgsArea.scrollTop = ui.msgsArea.scrollHeight;
+                ui.msgArea.scrollTop = ui.msgArea.scrollHeight;
             } else {
                 ui.typingInd.classList.add('hidden');
             }
         });
 
-        socket.on('partner-found', (data) => {
-            updateStatus('connected', data.partnerNickname);
-            hasConnectedOnce = true;
-            ui.reportBtn.disabled = false; 
+        socket.on('receive-message', ({ message }) => {
+            ui.typingInd.classList.add('hidden');
+            appendMsg(message, 'received');
+            if(!isChatOpen) {
+                ui.chatBadge.style.display = 'block';
+                playSound('msg');
+            }
+        });
 
-            // Show Matched Tag
-            if (data.commonInterests && data.commonInterests.length > 0) {
-                ui.interestMatch.textContent = `Matched via: ${data.commonInterests[0]}`;
+        function setupVisualizer(stream) {
+            if(analyser) return; 
+            analyser = audioCtx.createAnalyser();
+            const source = audioCtx.createMediaStreamSource(stream);
+            source.connect(analyser);
+            analyser.fftSize = 128; 
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            function draw() {
+                requestAnimationFrame(draw);
+                analyser.getByteFrequencyData(dataArray);
+                let sum = 0;
+                for(let i=0; i<dataArray.length; i++) sum += dataArray[i];
+                let val = (sum / dataArray.length) / 50; 
+                document.documentElement.style.setProperty('--audio-level', val);
+            }
+            draw();
+        }
+
+        let latencyInterval;
+        function startLatencyCheck() {
+            clearInterval(latencyInterval);
+            const bar = ui.signalBar;
+            bar.classList.remove('hidden');
+            
+            latencyInterval = setInterval(() => {
+                const start = Date.now();
+                socket.emit('latency-ping', () => {
+                    const latency = Date.now() - start;
+                    bar.className = 'signal-bar';
+                    if (latency < 150) bar.classList.add('signal-good');
+                    else if (latency < 350) bar.classList.add('signal-fair');
+                    else bar.classList.add('signal-poor');
+                });
+            }, 3000);
+        }
+
+        socket.on('partner-found', ({ initiator, partnerNickname, commonInterests }) => {
+            resetCallUI();
+            updateStatus('connecting', partnerNickname);
+            hasConnectedOnce = true;
+            
+            ui.reportBtn.disabled = false; // ENABLE REPORT WHEN CONNECTED
+            
+            if (commonInterests && commonInterests.length > 0) {
+                ui.interestMatch.textContent = `Matched via: ${commonInterests[0]}`;
                 ui.interestMatch.classList.remove('hidden');
             } else {
                 ui.interestMatch.classList.add('hidden');
             }
-        });
 
-        socket.on('receive-message', ({ message }) => {
-            ui.typingInd.classList.add('hidden'); 
-            appendMsg(message, 'received');
-            playSound('receive');
-        });
+            peer = new SimplePeer({
+                initiator: initiator,
+                stream: localStream,
+                config: { 
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' }
+                    ] 
+                }
+            });
 
-        socket.on('partner-disconnected', () => {
-            updateStatus('disconnected');
-            ui.interestMatch.classList.add('hidden');
+            peer.on('signal', data => socket.emit('signal', data));
+            
+            peer.on('stream', stream => {
+                ui.remoteAudio.srcObject = stream;
+                ui.remoteAudio.volume = 1.0;
+                let playPromise = ui.remoteAudio.play();
+                if (playPromise !== undefined) { playPromise.catch(e => console.log(e)); }
+                
+                playSound('connect');
+                updateStatus('connected', partnerNickname);
+                startLatencyCheck();
+            });
+            peer.on('close', handleRemoteDisconnect);
+            peer.on('error', handleRemoteDisconnect);
         });
+        
+        socket.on('signal', data => { if(peer) peer.signal(data); });
+        socket.on('partner-disconnected', handleRemoteDisconnect);
 
+        function handleRemoteDisconnect() {
+            if (peer) { peer.destroy(); peer = null; }
+            playSound('end');
+            updateStatus('ended');
+            ui.typingInd.classList.add('hidden');
+            // Kept report enabled so user can report hit and runs
+        }
+
+        let timerInt;
         function updateStatus(state, name="Stranger") {
             ui.partnerName.textContent = name;
-            ui.input.disabled = (state !== 'connected');
-            if(state !== 'connected') ui.sendBtn.disabled = true;
-            ui.typingInd.classList.add('hidden');
+            clearInterval(timerInt);
 
             if (state === 'searching') {
-                ui.statusText.textContent = "Searching...";
-                ui.statusText.style.color = "#eab308"; 
-                ui.statusDot.className = "w-2 h-2 rounded-full bg-yellow-500 animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.6)]";
-            } else if (state === 'connected') {
-                ui.statusText.textContent = "Online";
-                ui.statusText.style.color = "#22c55e"; 
-                ui.statusDot.className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]";
-                ui.input.disabled = false;
-                ui.input.focus();
-            } else if (state === 'disconnected') {
-                ui.statusText.textContent = "Disconnected";
-                ui.statusText.style.color = "#ef4444"; 
-                ui.statusDot.className = "w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]";
-                appendMsg("Stranger has disconnected. Click 'Next' to find someone else.", "received"); 
+                ui.statusText.textContent = "Searching for someone...";
+                ui.statusText.style.color = "var(--text-secondary)";
+                ui.signalBar.classList.add('hidden');
+                ui.interestMatch.classList.add('hidden');
+                ui.typingInd.classList.add('hidden');
+            } 
+            else if (state === 'connecting') {
+                ui.statusText.textContent = "Connecting...";
+                ui.statusText.style.color = "var(--accent)";
             }
+            else if (state === 'connected') {
+                ui.statusText.textContent = "00:00";
+                ui.statusText.style.color = "var(--success)";
+                ui.timer.style.opacity = '1';
+                ui.chatInput.disabled = false;
+                
+                let sec = 0;
+                timerInt = setInterval(() => {
+                    sec++;
+                    let m = Math.floor(sec/60).toString().padStart(2,'0');
+                    let s = (sec%60).toString().padStart(2,'0');
+                    ui.timer.textContent = `${m}:${s}`;
+                }, 1000);
+            } 
+            else if (state === 'ended') {
+                ui.statusText.textContent = "Call Ended";
+                ui.statusText.style.color = "var(--danger)";
+                ui.timer.style.opacity = '0';
+                ui.signalBar.classList.add('hidden');
+                clearInterval(latencyInterval);
+                ui.chatInput.disabled = true;
+                
+                ui.endBtn.classList.replace('visible-scale', 'hidden-scale');
+                ui.nextBtn.classList.replace('hidden-scale', 'visible-scale');
+                
+                if (isChatOpen) toggleChat();
+            }
+        }
+
+        function resetCallUI() {
+            ui.endBtn.classList.replace('hidden-scale', 'visible-scale');
+            ui.nextBtn.classList.replace('visible-scale', 'hidden-scale');
+            ui.timer.textContent = "00:00";
+            ui.timer.style.opacity = '0';
         }
     </script>
 </body>
