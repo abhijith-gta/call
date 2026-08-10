@@ -107,6 +107,7 @@ function findMatch(newUserSocketId) {
 
         console.log(`✅ Matched: ${userA.nickname} <-> ${userB.nickname} | Interest: ${matchedInterest || 'None'}`);
 
+        // Frontend-lekku Interest Data Ayakkunnu
         userA.socket.emit("partner-found", { 
             initiator: true, 
             partnerNickname: userB.nickname,
