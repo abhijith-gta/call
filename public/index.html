@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>SwapLoop.in - Random Calls, Real Connections</title>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4490055537023935"
-     crossorigin="anonymous"></script>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a0a">
+    
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4490055537023935" crossorigin="anonymous"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -105,7 +105,7 @@
             text-shadow: 0 0 30px var(--accent-glow);
         }
 
-        /* ✨ CORRECTED TAGS UI STYLES (Side-by-Side Flow) ✨ */
+        /* Tag Container */
         .tag-container {
             display: flex; 
             flex-direction: row; 
@@ -154,7 +154,6 @@
         .tag-remove { cursor: pointer; font-weight: bold; opacity: 0.8; transition: 0.2s; }
         .tag-remove:hover { opacity: 1; transform: scale(1.2); }
 
-        /* Premium Buttons with Neon Hover */
         .choice-button {
             background-color: var(--btn-hover);
             border: 1px solid var(--border);
@@ -199,7 +198,6 @@
         }
         .primary-button:active { transform: scale(0.97); }
 
-        /* Animation */
         .animate-fade-up {
             animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             opacity: 0;
@@ -208,7 +206,6 @@
         @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
         @keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 
-        /* Modals */
         #modal-overlay, #age-gate-overlay {
             background-color: var(--overlay);
             backdrop-filter: blur(12px);
@@ -218,7 +215,6 @@
             transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease; 
         }
 
-        /* Custom Scrollbar for Info Modal */
         #modal-body::-webkit-scrollbar { width: 6px; }
         #modal-body::-webkit-scrollbar-track { background: transparent; }
         #modal-body::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.5); border-radius: 10px; }
@@ -233,18 +229,21 @@
     </button>
 
     <div id="main-content" class="hidden w-full max-w-4xl animate-fade-up">
-        <div class="satin-card p-8 md:p-12 rounded-[2rem] text-center flex flex-col">
-            <div>
+        <div class="satin-card p-8 md:p-12 rounded-[2rem] text-center flex flex-col items-center">
+            <div class="w-full">
                 <h1 class="text-5xl md:text-6xl font-bold mb-4 tracking-tight neon-text">SwapLoop.in</h1>
-                <p class="text-[var(--text-secondary)] mb-10 text-lg font-light tracking-wide uppercase text-sm">Random Calls, Real Connections</p>
+                <p class="text-[var(--text-secondary)] mb-4 text-lg font-light tracking-wide uppercase text-sm">Random Calls, Real Connections</p>
 
-                <!-- ✨ UPDATED TAGS CONTAINER ✨ -->
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-8 border border-green-500/30 bg-green-500/10 text-green-400 font-semibold text-sm shadow-[0_0_15px_rgba(34,197,94,0.15)] transition-all">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.8)]"></span>
+                    <span id="online-count-text">Connecting...</span>
+                </div>
+
                 <div id="tag-container" class="tag-container">
                     <input type="text" id="tag-input" class="tag-input" placeholder="Type an interest & press Enter..." autocomplete="off">
                 </div>
 
-                <!-- 3 Options Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 w-full">
                     <div onclick="navigateTo('/call.html')" class="choice-button p-8 rounded-3xl group">
                         <div class="text-5xl mb-5 group-hover:scale-110 group-hover:-translate-y-2 transition-transform duration-300 drop-shadow-lg">🎤</div>
                         <h2 class="text-2xl font-bold text-[var(--text-primary)] transition-colors duration-300">Voice Call</h2>
@@ -265,7 +264,7 @@
                 </div>
             </div>
             
-            <footer class="text-center pt-8 mt-10 border-t border-[var(--border)]">
+            <footer class="text-center pt-8 mt-10 border-t border-[var(--border)] w-full">
                 <div class="flex justify-center space-x-8 text-sm text-[var(--text-secondary)] font-medium">
                     <a href="#" id="terms-link" class="hover:text-[var(--accent)] transition-colors duration-300">Terms</a>
                     <a href="#" id="privacy-link" class="hover:text-[var(--accent)] transition-colors duration-300">Privacy</a>
@@ -275,7 +274,6 @@
         </div>
     </div>
 
-    <!-- Age Gate Modal -->
     <div id="age-gate-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div id="age-gate-content" class="satin-card w-full max-w-sm p-8 rounded-3xl text-center">
             <div class="text-5xl mb-6 drop-shadow-md">🔞</div>
@@ -288,7 +286,6 @@
         </div>
     </div>
 
-    <!-- Info Modal (AdSense Ready) -->
     <div id="modal-overlay" class="fixed inset-0 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
         <div id="modal-content" class="satin-card w-full max-w-2xl max-h-[85vh] p-8 rounded-3xl transform scale-95 opacity-0 flex flex-col">
             <div class="flex justify-between items-center mb-6 flex-shrink-0 border-b border-[var(--border)] pb-4">
@@ -299,6 +296,7 @@
         </div>
     </div>
 
+    <script src="/socket.io/socket.io.js"></script>
     <script>
         // --- Theme Logic ---
         const themeBtn = document.getElementById('theme-btn');
@@ -345,7 +343,19 @@
             } catch(e) {}
         }
 
-        // --- ✨ TAGS LOGIC FIXED FOR MOBILE (Input Event) ✨ ---
+        // --- Online Users Counter Logic ---
+        const socket = typeof io !== 'undefined' ? io() : null;
+        const onlineCountText = document.getElementById('online-count-text');
+        
+        if (socket) {
+            socket.on('online-count', (count) => {
+                onlineCountText.textContent = `${count} Users Online`;
+            });
+        } else {
+            onlineCountText.parentElement.style.display = 'none';
+        }
+
+        // --- Tags Logic ---
         let userTags = [];
         const tagContainer = document.getElementById('tag-container');
         const tagInput = document.getElementById('tag-input');
@@ -395,7 +405,7 @@
             renderTags();
         }
 
-        // --- Navigation Logic (Saves Interests) ---
+        // --- Navigation Logic ---
         function navigateTo(url) {
             playClickSound();
             sessionStorage.setItem('swaploop_interests', userTags.join(','));
@@ -436,7 +446,6 @@
             window.location.href = 'https://google.com';
         });
 
-        // ✨ AD-SENSE COMPLIANT MODAL DATA ✨
         const modalData = {
             terms: { 
                 title: 'Terms & Conditions', 
