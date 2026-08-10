@@ -4,8 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>SwapLoop - Voice Call</title>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4490055537023935"
-     crossorigin="anonymous"></script>
+    
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4490055537023935" crossorigin="anonymous"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -72,6 +73,15 @@
 
         .hidden { display: none !important; }
 
+        /* ✨ NEON GLOW TEXT ✨ */
+        .neon-text {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
+
         /* Theme Toggle */
         .theme-toggle {
             position: absolute;
@@ -105,7 +115,7 @@
             transition: all 0.3s ease;
         }
 
-        /* Toggles */
+        /* Toggles (Fixed Glow) */
         .toggle-btn {
             background: var(--btn-bg);
             color: var(--text-secondary);
@@ -118,7 +128,8 @@
         .toggle-btn:hover { border-color: var(--accent); color: var(--text-primary); }
         .toggle-btn.active {
             background: var(--accent-gradient);
-            color: white; border-color: transparent;
+            color: white; 
+            border-color: transparent;
             box-shadow: 0 4px 15px var(--accent-glow);
             transform: translateY(-2px);
         }
@@ -271,12 +282,12 @@
 </head>
 <body>
 
-    <!-- ✨ GLOBAL TOP-LEFT BRAND LOGO ✨ -->
-    <div class="absolute top-4 left-6 z-50 pointer-events-none">
-        <span class="text-xl md:text-2xl font-extrabold tracking-widest" style="color: var(--accent); text-shadow: 0 0 15px var(--accent-glow);">
+    <!-- ✨ GLOBAL TOP-LEFT BRAND LOGO (CLICKABLE WITH GLOW) ✨ -->
+    <a href="index.html" class="absolute top-4 left-6 z-[100] transition-transform duration-300 hover:scale-105 inline-block">
+        <span class="text-2xl md:text-3xl font-extrabold tracking-widest neon-text">
             SwapLoop.in
         </span>
-    </div>
+    </a>
 
     <button type="button" id="theme-btn" class="theme-toggle" aria-label="Toggle Theme">
         <svg id="moon-icon" class="w-5 h-5 text-[var(--text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
