@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>SwapLoop - Random Calls, Real Connections</title>
+    <title>SwapLoop.in - Random Calls, Real Connections</title>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a0a">
     
@@ -105,18 +105,18 @@
 
         /* ✨ CORRECTED TAGS UI STYLES (Side-by-Side Flow) ✨ */
         .tag-container {
-            display: flex; /* Flex ബോക്സ് ആക്കി */
-            flex-direction: row; /* വലത്തോട്ട് പോകാൻ */
-            flex-wrap: wrap; /* സ്ഥലം തീരുമ്പോൾ താഴേക്ക് വരാൻ */
+            display: flex; 
+            flex-direction: row; 
+            flex-wrap: wrap; 
             width: 100%;
-            max-width: 500px; /* നല്ല വീതി കൊടുത്തു */
+            max-width: 500px; 
             background-color: var(--input-bg);
             border: 1px solid var(--border);
             padding: 12px 18px;
             border-radius: 16px;
             margin: 0 auto 32px auto;
             transition: all 0.3s ease;
-            gap: 8px; /* ടാഗുകൾ തമ്മിലുള്ള അകലം */
+            gap: 8px; 
             align-items: center;
             min-height: 56px;
             cursor: text;
@@ -133,8 +133,8 @@
             outline: none;
             color: var(--text-primary);
             font-size: 1.05rem;
-            flex: 1; /* ബാക്കിയുള്ള സ്ഥലം എടുക്കാൻ */
-            min-width: 100px; /* പെട്ടെന്ന് താഴേക്ക് പോകാതിരിക്കാൻ */
+            flex: 1; 
+            min-width: 100px; 
         }
         .tag-pill {
             background: var(--accent-gradient);
@@ -145,7 +145,7 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            white-space: nowrap; /* ടാഗിലെ ടെക്സ്റ്റ് മുറിഞ്ഞു പോകാതിരിക്കാൻ */
+            white-space: nowrap; 
             animation: popIn 0.2s ease forwards;
             box-shadow: 0 4px 10px var(--accent-glow);
         }
@@ -215,6 +215,12 @@
         #modal-content, #age-gate-content { 
             transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease; 
         }
+
+        /* Custom Scrollbar for Info Modal */
+        #modal-body::-webkit-scrollbar { width: 6px; }
+        #modal-body::-webkit-scrollbar-track { background: transparent; }
+        #modal-body::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.5); border-radius: 10px; }
+        #modal-body::-webkit-scrollbar-thumb:hover { background: var(--accent); }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
@@ -227,12 +233,12 @@
     <div id="main-content" class="hidden w-full max-w-4xl animate-fade-up">
         <div class="satin-card p-8 md:p-12 rounded-[2rem] text-center flex flex-col">
             <div>
-                <h1 class="text-5xl md:text-6xl font-bold mb-4 tracking-tight neon-text">SwapLoop</h1>
+                <h1 class="text-5xl md:text-6xl font-bold mb-4 tracking-tight neon-text">SwapLoop.in</h1>
                 <p class="text-[var(--text-secondary)] mb-10 text-lg font-light tracking-wide uppercase text-sm">Random Calls, Real Connections</p>
 
                 <!-- ✨ UPDATED TAGS CONTAINER ✨ -->
                 <div id="tag-container" class="tag-container">
-                    <input type="text" id="tag-input" class="tag-input" placeholder="Type an interest & press Space..." autocomplete="off">
+                    <input type="text" id="tag-input" class="tag-input" placeholder="Type an interest & press Enter..." autocomplete="off">
                 </div>
 
                 <!-- 3 Options Grid -->
@@ -272,7 +278,7 @@
         <div id="age-gate-content" class="satin-card w-full max-w-sm p-8 rounded-3xl text-center">
             <div class="text-5xl mb-6 drop-shadow-md">🔞</div>
             <h2 class="text-2xl font-bold mb-4">Age Verification</h2>
-            <p class="text-[var(--text-secondary)] mb-8 leading-relaxed">You must be 18 years or older to use SwapLoop.</p>
+            <p class="text-[var(--text-secondary)] mb-8 leading-relaxed">You must be 18 years or older to use SwapLoop. By entering, you agree to our Terms of Service.</p>
             <div class="flex flex-col gap-4">
                 <button id="age-confirm-yes" class="primary-button w-full p-4 rounded-2xl text-white font-semibold text-lg tracking-wide">Yes, I am 18+</button>
                 <button id="age-confirm-no" class="w-full p-4 rounded-2xl border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--btn-hover)] hover:text-[var(--text-primary)] transition-all duration-300">No, Exit</button>
@@ -280,14 +286,14 @@
         </div>
     </div>
 
-    <!-- Info Modal -->
+    <!-- Info Modal (AdSense Ready) -->
     <div id="modal-overlay" class="fixed inset-0 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
-        <div id="modal-content" class="satin-card w-full max-w-2xl max-h-[80vh] p-8 rounded-3xl transform scale-95 opacity-0 flex flex-col">
-            <div class="flex justify-between items-center mb-6 flex-shrink-0">
-                <h2 id="modal-title" class="text-3xl font-bold neon-text"></h2>
+        <div id="modal-content" class="satin-card w-full max-w-2xl max-h-[85vh] p-8 rounded-3xl transform scale-95 opacity-0 flex flex-col">
+            <div class="flex justify-between items-center mb-6 flex-shrink-0 border-b border-[var(--border)] pb-4">
+                <h2 id="modal-title" class="text-2xl font-bold neon-text"></h2>
                 <button id="modal-close" class="text-[var(--text-secondary)] hover:text-[var(--accent)] text-4xl transition-colors duration-300 leading-none">&times;</button>
             </div>
-            <div id="modal-body" class="overflow-y-auto pr-4 text-[var(--text-secondary)] leading-relaxed text-lg"></div>
+            <div id="modal-body" class="overflow-y-auto pr-4 text-[var(--text-secondary)] leading-relaxed text-sm space-y-4 text-left pb-4"></div>
         </div>
     </div>
 
@@ -322,40 +328,49 @@
         // --- Sound Effect Logic ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playClickSound() {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.frequency.setValueAtTime(450, audioCtx.currentTime); 
-            osc.type = 'sine';
-            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.15);
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.setValueAtTime(450, audioCtx.currentTime); 
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.15);
+            } catch(e) {}
         }
 
-        // --- ✨ TAGS LOGIC ✨ ---
+        // --- ✨ TAGS LOGIC FIXED FOR MOBILE (Input Event) ✨ ---
         let userTags = [];
         const tagContainer = document.getElementById('tag-container');
         const tagInput = document.getElementById('tag-input');
 
         tagContainer.addEventListener('click', () => tagInput.focus());
 
+        tagInput.addEventListener('input', (e) => {
+            if (tagInput.value.includes(' ')) {
+                const tag = tagInput.value.trim().toLowerCase();
+                if (tag && !userTags.includes(tag) && userTags.length < 12) {
+                    userTags.push(tag);
+                    renderTags();
+                }
+                tagInput.value = ''; 
+            }
+        });
+
         tagInput.addEventListener('keydown', (e) => {
-            // സ്പേസ് അല്ലെങ്കിൽ എന്റർ അമർത്തുമ്പോൾ
-            if (e.key === ' ' || e.key === 'Enter') {
+            if (e.key === 'Enter') {
                 e.preventDefault(); 
                 const tag = tagInput.value.trim().toLowerCase();
-                
-                // പുതിയ ടാഗ് ആണെന്നും, 5ൽ കൂടുതൽ ആയിട്ടില്ലെന്നും ഉറപ്പാക്കുന്നു
                 if (tag && !userTags.includes(tag) && userTags.length < 12) {
                     userTags.push(tag);
                     renderTags();
                 }
                 tagInput.value = ''; 
             } else if (e.key === 'Backspace' && tagInput.value === '' && userTags.length > 0) {
-                // ഇൻപുട്ട് കാലിയായിരിക്കുമ്പോൾ ബാക്ക്സ്പേസ് അടിച്ചാൽ അവസാനത്തെ ടാഗ് ഡിലീറ്റ് ആവും
                 userTags.pop();
                 renderTags();
             }
@@ -381,7 +396,6 @@
         // --- Navigation Logic (Saves Interests) ---
         function navigateTo(url) {
             playClickSound();
-            // ടാഗുകൾ എല്ലാം കോമ ഇട്ട് (ഉദാഹരണത്തിന്: "anime,music") സേവ് ചെയ്യുന്നു
             sessionStorage.setItem('swaploop_interests', userTags.join(','));
             setTimeout(() => { window.location.href = url; }, 300);
         }
@@ -420,10 +434,52 @@
             window.location.href = 'https://google.com';
         });
 
+        // ✨ AD-SENSE COMPLIANT MODAL DATA ✨
         const modalData = {
-            terms: { title: 'Terms & Conditions', content: `<p class="mb-4">Welcome to SwapLoop!</p><p>By using our service, you agree to not engage in any abusive, hateful, or illegal behavior. Keep it friendly and respect other users.</p>` },
-            privacy: { title: 'Privacy Policy', content: `<p class="mb-4">Your Privacy Matters.</p><p>We do not store your conversations. Voice chat and text messages are transmitted securely. We only use your data to connect you with others.</p>` },
-            contact: { title: 'Contact Us', content: `<p>Have questions or feedback?</p><p class="mt-4 font-semibold text-[var(--accent)]">Email: abhijithabhi2026@gmail.com</p>` }
+            terms: { 
+                title: 'Terms & Conditions', 
+                content: `
+                    <h3 class="text-[var(--text-primary)] font-bold mb-1 mt-4">1. Acceptance of Terms</h3>
+                    <p class="mb-4">By accessing and using SwapLoop, you agree to be bound by these Terms and Conditions. You must be at least 18 years old to use this service.</p>
+                    
+                    <h3 class="text-[var(--text-primary)] font-bold mb-1">2. User Conduct & Moderation</h3>
+                    <p class="mb-4">You agree not to use SwapLoop to broadcast, transmit, or share any nudity, sexually explicit content, hate speech, harassment, or illegal material. We rely on community reporting and AI tracking. Users receiving multiple reports will face automatic 24-hour device bans. We reserve the right to permanently ban users for violating guidelines.</p>
+                    
+                    <h3 class="text-[var(--text-primary)] font-bold mb-1">3. User-Generated Content</h3>
+                    <p class="mb-4">SwapLoop acts as a peer-to-peer connection service. We do not actively record or store live video or audio streams. You are solely responsible for the content you share during a connection.</p>
+                    
+                    <h3 class="text-[var(--text-primary)] font-bold mb-1">4. Disclaimer of Liability</h3>
+                    <p class="mb-4">The service is provided "as is". SwapLoop and its administrators are not liable for any direct, indirect, or incidental damages or interactions that occur between users on the platform.</p>
+                ` 
+            },
+            privacy: { 
+                title: 'Privacy Policy', 
+                content: `
+                    <p class="mb-4 text-xs opacity-70">Last updated: August 2026</p>
+                    <h3 class="text-[var(--text-primary)] font-bold mb-1">1. Information We Collect</h3>
+                    <p class="mb-4">SwapLoop does not require account creation. We generate and store a randomized, anonymous device identifier in your browser's LocalStorage to enforce moderation bans and prevent spam. We do not collect names, emails, or personal addresses.</p>
+                    
+                    <h3 class="text-[var(--text-primary)] font-bold mb-1">2. Third-Party Ads and Cookies</h3>
+                    <p class="mb-2">We use third-party advertising companies, such as Google AdSense, to serve ads when you visit our website. These companies may use cookies (like the Google DART cookie) to serve ads based on your prior visits to our website and other websites on the internet.</p>
+                    <p class="mb-4">Users may opt-out of the use of the DART cookie by visiting the <a href="https://policies.google.com/technologies/ads" target="_blank" class="text-[var(--accent)] underline">Google Ad and Content Network privacy policy</a>.</p>
+                    
+                    <h3 class="text-[var(--text-primary)] font-bold mb-1">3. Peer-to-Peer Connections</h3>
+                    <p class="mb-4">Voice and Video calls are established using WebRTC technology. This means your IP address may be exposed to the peer you connect with in order to establish the direct media stream. Text chats are securely relayed through our servers.</p>
+                    
+                    <h3 class="text-[var(--text-primary)] font-bold mb-1">4. Data Retention</h3>
+                    <p class="mb-4">We do not store or record your video, audio, or text chat data. Once a connection is closed, the session data is destroyed. Report logs are kept temporarily to enforce our 24-hour ban system.</p>
+                ` 
+            },
+            contact: { 
+                title: 'Contact Us', 
+                content: `
+                    <p class="mb-4">If you have any questions about our Privacy Policy, Terms of Service, or wish to report a persistent issue on the platform, please contact us.</p>
+                    <div class="p-4 bg-[var(--input-bg)] border border-[var(--border)] rounded-xl text-center mt-6">
+                        <p class="font-semibold text-[var(--text-primary)] mb-1">Email Support:</p>
+                        <p class="text-[var(--accent)] text-lg">abhijithabhi2026@gmail.com</p>
+                    </div>
+                ` 
+            }
         };
 
         function openModal(type) {
