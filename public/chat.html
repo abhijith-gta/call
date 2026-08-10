@@ -95,7 +95,9 @@
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border-bottom: 1px solid var(--border);
-            height: 70px;
+            min-height: 75px;
+            padding-top: 10px;
+            padding-bottom: 10px;
         }
 
         .header-theme-btn {
@@ -253,7 +255,7 @@
 
         /* Custom AI / Report Warning Toast */
         #ai-warning {
-            position: absolute; top: 80px; left: 50%; transform: translateX(-50%);
+            position: absolute; top: 90px; left: 50%; transform: translateX(-50%);
             background: rgba(239, 68, 68, 0.95); color: white; padding: 12px 24px;
             border-radius: 12px; font-weight: bold; z-index: 100; display: none;
             backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
@@ -282,8 +284,8 @@
             </div>
             
             <div class="flex gap-3">
-                <button id="close-report" class="flex-1 p-2.5 rounded-xl border border-gray-600 hover:bg-[var(--btn-hover)] transition">Cancel</button>
-                <button id="submit-report" class="flex-1 p-2.5 rounded-xl bg-yellow-600 text-white font-bold shadow-lg hover:bg-yellow-500 transition">Report</button>
+                <button type="button" id="close-report" class="flex-1 p-2.5 rounded-xl border border-gray-600 hover:bg-[var(--btn-hover)] transition">Cancel</button>
+                <button type="button" id="submit-report" class="flex-1 p-2.5 rounded-xl bg-yellow-600 text-white font-bold shadow-lg hover:bg-yellow-500 transition">Report</button>
             </div>
         </div>
     </div>
@@ -309,17 +311,17 @@
                 <div class="text-left">
                     <label class="text-xs uppercase tracking-widest text-[var(--text-secondary)] font-bold ml-2 mb-3 block">I am</label>
                     <div id="my-gender-selector" class="grid grid-cols-2 gap-4">
-                        <button type="button" class="toggle-btn p-4 rounded-2xl font-semibold" data-gender="male">Male</button>
-                        <button type="button" class="toggle-btn p-4 rounded-2xl font-semibold" data-gender="female">Female</button>
+                        <button type="button" class="toggle-btn p-4 rounded-2xl font-semibold" data-group="gender" data-val="male">Male</button>
+                        <button type="button" class="toggle-btn p-4 rounded-2xl font-semibold" data-group="gender" data-val="female">Female</button>
                     </div>
                 </div>
 
                 <div class="text-left">
                     <label class="text-xs uppercase tracking-widest text-[var(--text-secondary)] font-bold ml-2 mb-3 block">Looking for</label>
                     <div id="looking-for-selector" class="grid grid-cols-3 gap-3">
-                        <button type="button" class="toggle-btn p-3 rounded-xl font-medium" data-gender="male">Male</button>
-                        <button type="button" class="toggle-btn p-3 rounded-xl font-medium" data-gender="female">Female</button>
-                        <button type="button" class="toggle-btn active p-3 rounded-xl font-medium" data-gender="anyone">Anyone</button>
+                        <button type="button" class="toggle-btn p-3 rounded-xl font-medium" data-group="looking" data-val="male">Male</button>
+                        <button type="button" class="toggle-btn p-3 rounded-xl font-medium" data-group="looking" data-val="female">Female</button>
+                        <button type="button" class="toggle-btn active p-3 rounded-xl font-medium" data-group="looking" data-val="anyone">Anyone</button>
                     </div>
                 </div>
 
@@ -333,31 +335,42 @@
     <!-- CHAT UI -->
     <div id="chat-ui" class="flex flex-col h-full hidden absolute inset-0">
         
-        <!-- HEADER -->
-        <div class="chat-header flex items-center px-5 shrink-0 z-20 shadow-sm relative justify-between">
-            <div class="flex-1 flex flex-col justify-center">
-                <h2 id="partner-nickname" class="text-lg font-bold leading-tight tracking-tight">Stranger</h2>
-                <div class="flex items-center gap-2 mt-0.5">
+        <!-- ✨ 3-PART HEADER (Brand, User Info, Theme) ✨ -->
+        <div class="chat-header flex items-center px-4 md:px-6 shrink-0 z-20 shadow-sm relative">
+            
+            <!-- Left: Brand Logo -->
+            <div class="w-1/3 flex justify-start">
+                <span class="text-lg md:text-xl font-extrabold tracking-widest" style="color: var(--accent); text-shadow: 0 0 10px var(--accent-glow);">
+                    SwapLoop.in
+                </span>
+            </div>
+
+            <!-- Center: Partner Info & Match Tag -->
+            <div class="w-1/3 flex flex-col items-center justify-center text-center">
+                <h2 id="partner-nickname" class="text-lg font-bold leading-tight tracking-tight w-full truncate">Stranger</h2>
+                
+                <div class="flex items-center gap-1.5 mt-0.5">
                     <span id="status-dot" class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.6)]"></span>
-                    <p id="status-text" class="text-xs font-semibold text-yellow-500 tracking-wide uppercase">Searching...</p>
+                    <p id="status-text" class="text-[0.65rem] font-bold text-yellow-500 tracking-widest uppercase">Searching...</p>
                 </div>
+                
+                <!-- Match Tag Show -->
+                <p id="interest-match" class="text-[0.6rem] text-[var(--accent)] font-bold uppercase tracking-widest mt-1 hidden w-full truncate"></p>
             </div>
 
-            <div class="absolute left-1/2 transform -translate-x-1/2 text-xl font-extrabold tracking-widest cursor-default" style="color: var(--accent); text-shadow: 0 0 15px var(--accent-glow);">
-                swaploop.in
-            </div>
-
-            <div class="flex-1 flex justify-end items-center">
-                <button id="theme-btn" class="header-theme-btn" aria-label="Toggle Theme">
+            <!-- Right: Theme Toggle -->
+            <div class="w-1/3 flex justify-end">
+                <button type="button" id="theme-btn" class="header-theme-btn" aria-label="Toggle Theme">
                     <svg id="moon-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
                     <svg id="sun-icon" class="hidden w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                 </button>
             </div>
+            
         </div>
 
         <div id="ai-warning">⚠️ Warning</div>
 
-        <!-- MESSAGES AREA (Instagram Style Layout) -->
+        <!-- MESSAGES AREA -->
         <div id="messages-area" class="flex-grow flex flex-col gap-2 px-4 pt-6 pb-4 overflow-y-auto scroll-smooth">
             
             <div class="text-center text-xs text-[var(--text-secondary)] mt-2 mb-2 uppercase tracking-widest opacity-70 font-semibold bg-[var(--surface)] backdrop-blur-md border border-[var(--border)] py-2 px-4 rounded-full mx-auto shadow-sm">End-to-end encrypted</div>
@@ -449,9 +462,7 @@
                 
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.1);
-            } catch (e) {
-                // Ignore audio errors on first tap to prevent UI breaking
-            }
+            } catch (e) {}
         }
 
         themeBtn.addEventListener('click', () => {
@@ -486,6 +497,7 @@
             partnerName: document.getElementById('partner-nickname'),
             statusText: document.getElementById('status-text'),
             statusDot: document.getElementById('status-dot'),
+            interestMatch: document.getElementById('interest-match'),
             typingInd: document.getElementById('typing-indicator'),
             msgsArea: document.getElementById('messages-area'),
             form: document.getElementById('chat-form'),
@@ -499,20 +511,20 @@
             aiWarning: document.getElementById('ai-warning')
         };
 
-        function setupSelectors(id, callback) {
-            const container = document.getElementById(id);
-            const btns = container.querySelectorAll('.toggle-btn');
-            btns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    playSound('click');
-                    btns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    callback(btn.dataset.gender);
-                });
+        const toggleBtns = document.querySelectorAll('#setup-screen .toggle-btn');
+        toggleBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                playSound('click');
+                const group = btn.dataset.group;
+                const val = btn.dataset.val;
+
+                document.querySelectorAll(`.toggle-btn[data-group="${group}"]`).forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                if (group === 'gender') myGender = val;
+                if (group === 'looking') lookingFor = val;
             });
-        }
-        setupSelectors('my-gender-selector', val => myGender = val);
-        setupSelectors('looking-for-selector', val => lookingFor = val);
+        });
 
         ui.startBtn.addEventListener('click', () => {
             playSound('click');
@@ -551,7 +563,6 @@
             ui.aiWarning.style.borderColor = '#22c55e';
             ui.aiWarning.style.display = 'block';
             
-            // Disable report button until next match
             ui.reportBtn.disabled = true;
             
             setTimeout(() => { 
@@ -560,7 +571,6 @@
                 ui.aiWarning.style.borderColor = '#f87171';
             }, 3000);
 
-            // Disconnect
             socket.emit("next");
             updateStatus('disconnected');
             hasConnectedOnce = false;
@@ -576,11 +586,11 @@
             updateStatus('searching');
             ui.reportBtn.disabled = true; 
             
-            // CAREFULLY clear chat bubbles without destroying the typing indicator
             const oldBubbles = ui.msgsArea.querySelectorAll('.chat-bubble:not(#typing-indicator)');
             oldBubbles.forEach(bubble => bubble.remove());
             
             ui.typingInd.classList.add('hidden');
+            ui.interestMatch.classList.add('hidden');
             
             const interestString = sessionStorage.getItem('swaploop_interests') || "";
             const interests = interestString.split(',').map(s => s.trim()).filter(s => s);
@@ -598,9 +608,7 @@
         let typingTimeout;
         ui.input.addEventListener('input', () => {
             ui.sendBtn.disabled = ui.input.value.trim().length === 0;
-            
             socket.emit('typing', true);
-            
             clearTimeout(typingTimeout);
             typingTimeout = setTimeout(() => {
                 socket.emit('typing', false);
@@ -626,16 +634,12 @@
             const div = document.createElement('div');
             div.textContent = text;
             div.className = `chat-bubble ${type}`;
-            
-            // Insert the new message EXACTLY before the typing indicator
             ui.msgsArea.insertBefore(div, ui.typingInd);
-            
             setTimeout(() => {
                 ui.msgsArea.scrollTop = ui.msgsArea.scrollHeight;
             }, 50);
         }
 
-        // ✨ TYPING INDICATOR RECEPTION ✨
         socket.on('partner-typing', (isTyping) => {
             if(isTyping) {
                 ui.typingInd.classList.remove('hidden');
@@ -645,10 +649,18 @@
             }
         });
 
-        socket.on('partner-found', ({ partnerNickname }) => {
-            updateStatus('connected', partnerNickname);
+        socket.on('partner-found', (data) => {
+            updateStatus('connected', data.partnerNickname);
             hasConnectedOnce = true;
-            ui.reportBtn.disabled = false; // ENABLE REPORT WHEN CONNECTED
+            ui.reportBtn.disabled = false; 
+
+            // Show Matched Tag
+            if (data.commonInterests && data.commonInterests.length > 0) {
+                ui.interestMatch.textContent = `Matched via: ${data.commonInterests[0]}`;
+                ui.interestMatch.classList.remove('hidden');
+            } else {
+                ui.interestMatch.classList.add('hidden');
+            }
         });
 
         socket.on('receive-message', ({ message }) => {
@@ -659,7 +671,7 @@
 
         socket.on('partner-disconnected', () => {
             updateStatus('disconnected');
-            // Report stays enabled to report hit-and-run users
+            ui.interestMatch.classList.add('hidden');
         });
 
         function updateStatus(state, name="Stranger") {
