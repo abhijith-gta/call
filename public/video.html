@@ -4,8 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>SwapLoop - Video Call</title>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4490055537023935"
-     crossorigin="anonymous"></script>
+    
+    <!-- ✨ GOOGLE ADSENSE SCRIPT ✨ -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4490055537023935" crossorigin="anonymous"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -19,12 +21,37 @@
             --msg-sent: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); --msg-received: rgba(255, 255, 255, 0.15);
         }
 
+        /* ✨ LIGHT MODE FIX ✨ */
+        [data-theme="light"] {
+            --bg: #f8fafc;
+            --surface: rgba(255, 255, 255, 0.8);
+            --header-bg: rgba(255, 255, 255, 0.95);
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --accent-gradient: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+            --border: rgba(0, 0, 0, 0.08);
+            --input-bg: rgba(0, 0, 0, 0.03);
+            --msg-sent: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            --msg-received: #ffffff;
+        }
+
         body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text-primary); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; transition: all 0.4s ease; }
         .hidden { display: none !important; }
 
+        /* ✨ NEON GLOW TEXT ✨ */
+        .neon-text {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
+
         .satin-card { background-color: var(--surface); border: 1px solid var(--border); backdrop-filter: blur(20px); }
         .toggle-btn { background: var(--input-bg); color: var(--text-secondary); border: 1px solid var(--border); transition: all 0.3s ease; cursor: pointer; }
-        .toggle-btn.active { background: var(--accent-gradient); color: white; border-color: transparent; box-shadow: 0 4px 15px var(--accent-glow); }
+        .toggle-btn.active { background: var(--accent-gradient); color: white; border-color: transparent; box-shadow: 0 4px 15px var(--accent-glow); transform: translateY(-2px); }
 
         #video-area { position: relative; background: var(--bg); flex-grow: 1; overflow: hidden; display: flex; flex-direction: column; gap: 12px; padding: 12px; padding-top: 60px; transition: all 0.3s ease; }
         @media (min-width: 768px) { #video-area { flex-direction: row; gap: 16px; padding: 16px; padding-top: 70px; } }
@@ -91,12 +118,12 @@
 </head>
 <body>
 
-    <!-- ✨ GLOBAL TOP-LEFT BRAND LOGO ✨ -->
-    <div class="absolute top-4 left-6 z-50 pointer-events-none">
-        <span class="text-xl md:text-2xl font-extrabold tracking-widest" style="color: var(--accent); text-shadow: 0 0 15px var(--accent-glow);">
+    <!-- ✨ GLOBAL TOP-LEFT BRAND LOGO (CLICKABLE WITH GLOW) ✨ -->
+    <a href="index.html" class="absolute top-4 left-6 z-[100] transition-transform duration-300 hover:scale-105 inline-block">
+        <span class="text-2xl md:text-3xl font-extrabold tracking-widest neon-text">
             SwapLoop.in
         </span>
-    </div>
+    </a>
 
     <!-- Theme Toggle -->
     <button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme" style="position: absolute; top: 20px; right: 20px; width: 42px; height: 42px; border-radius: 50%; background-color: var(--surface); border: 1px solid var(--border); color: var(--text-primary); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100;">
@@ -199,7 +226,7 @@
                 
                 <!-- ✨ BIGGER BRAND WATERMARK ON VIDEO ✨ -->
                 <div class="absolute bottom-4 right-4 z-20 pointer-events-none opacity-70">
-                    <span class="text-2xl md:text-3xl font-extrabold tracking-widest" style="color: var(--accent); text-shadow: 0 0 15px var(--accent-glow);">
+                    <span class="text-2xl md:text-3xl font-extrabold tracking-widest neon-text">
                         SwapLoop.in
                     </span>
                 </div>
@@ -273,6 +300,34 @@
         if (!myClientId) {
             myClientId = 'device_' + Math.random().toString(36).substr(2, 16);
             localStorage.setItem('swaploop_client_id', myClientId);
+        }
+
+        // --- Theme Logic Fix ---
+        const themeBtn = document.getElementById('theme-btn');
+        const moonIcon = document.getElementById('moon-icon');
+        const sunIcon = document.getElementById('sun-icon');
+        
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        updateIcons(savedTheme);
+
+        themeBtn.addEventListener('click', () => {
+            playSound('click');
+            const current = document.documentElement.getAttribute('data-theme');
+            const newTheme = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateIcons(newTheme);
+        });
+
+        function updateIcons(theme) {
+            if (theme === 'dark') {
+                moonIcon.classList.remove('hidden');
+                sunIcon.classList.add('hidden');
+            } else {
+                moonIcon.classList.add('hidden');
+                sunIcon.classList.remove('hidden');
+            }
         }
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
