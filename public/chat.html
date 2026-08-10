@@ -111,13 +111,12 @@
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border-bottom: 1px solid var(--border);
-            min-height: 75px;
+            min-height: 70px;
             padding-top: 10px;
             padding-bottom: 10px;
         }
 
         .header-theme-btn {
-            width: 40px; height: 40px;
             border-radius: 50%;
             background-color: var(--input-bg);
             border: 1px solid var(--border);
@@ -286,15 +285,15 @@
 </head>
 <body>
 
-    <!-- ✨ GLOBAL TOP-LEFT BRAND LOGO FOR SETUP SCREEN (CLICKABLE WITH GLOW) ✨ -->
-    <a href="index.html" id="setup-logo" class="absolute top-4 left-6 z-[100] transition-transform duration-300 hover:scale-105 inline-block">
-        <span class="text-2xl md:text-3xl font-extrabold tracking-widest neon-text">
+    <!-- ✨ GLOBAL TOP-LEFT BRAND LOGO FOR SETUP SCREEN ✨ -->
+    <a href="index.html" id="setup-logo" class="absolute top-4 left-4 md:left-6 z-[100] transition-transform duration-300 hover:scale-105 inline-block">
+        <span class="text-xl md:text-3xl font-extrabold tracking-widest neon-text">
             SwapLoop.in
         </span>
     </a>
 
     <!-- Theme Toggle (Only for Setup Screen) -->
-    <button type="button" id="theme-btn" class="theme-toggle" aria-label="Toggle Theme" style="position: absolute; top: 24px; right: 24px; width: 48px; height: 48px; border-radius: 50%; background-color: var(--surface); border: 1px solid var(--border); color: var(--text-primary); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100;">
+    <button type="button" id="theme-btn" class="theme-toggle" aria-label="Toggle Theme" style="position: absolute; top: 20px; right: 20px; width: 42px; height: 42px; border-radius: 50%; background-color: var(--surface); border: 1px solid var(--border); color: var(--text-primary); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100;">
         <svg id="moon-icon" class="w-5 h-5 text-[var(--text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
         <svg id="sun-icon" class="hidden w-5 h-5 text-[var(--text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
     </button>
@@ -364,36 +363,36 @@
     <!-- CHAT UI -->
     <div id="chat-ui" class="flex flex-col h-full hidden absolute inset-0">
         
-        <!-- ✨ 3-PART HEADER (Brand, User Info, Theme) ✨ -->
-        <div class="chat-header flex items-center px-4 md:px-6 shrink-0 z-20 shadow-sm relative">
+        <!-- ✨ 3-PART HEADER FIX (Dynamic Sizing) ✨ -->
+        <div class="chat-header flex items-center justify-between px-3 md:px-6 shrink-0 z-20 shadow-sm relative gap-2">
             
             <!-- Left: Brand Logo -->
-            <div class="w-1/3 flex justify-start">
+            <div class="flex-shrink-0">
                 <a href="index.html" class="transition-transform duration-300 hover:scale-105 inline-block">
-                    <span class="text-xl md:text-2xl font-extrabold tracking-widest neon-text">
+                    <span class="text-[1.1rem] sm:text-xl md:text-2xl font-extrabold tracking-wide md:tracking-widest neon-text">
                         SwapLoop.in
                     </span>
                 </a>
             </div>
 
             <!-- Center: Partner Info & Match Tag -->
-            <div class="w-1/3 flex flex-col items-center justify-center text-center">
-                <h2 id="partner-nickname" class="text-lg font-bold leading-tight tracking-tight w-full truncate">Stranger</h2>
+            <div class="flex-1 flex flex-col items-center justify-center text-center overflow-hidden px-1">
+                <h2 id="partner-nickname" class="text-sm sm:text-lg font-bold leading-tight tracking-tight w-full truncate">Stranger</h2>
                 
-                <div class="flex items-center gap-1.5 mt-0.5">
-                    <span id="status-dot" class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.6)]"></span>
-                    <p id="status-text" class="text-[0.65rem] font-bold text-yellow-500 tracking-widest uppercase">Searching...</p>
+                <div class="flex items-center justify-center gap-1.5 mt-0.5 w-full">
+                    <span id="status-dot" class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-yellow-500 animate-pulse shrink-0 shadow-[0_0_8px_rgba(234,179,8,0.6)]"></span>
+                    <p id="status-text" class="text-[0.55rem] sm:text-[0.65rem] font-bold text-yellow-500 tracking-wider uppercase truncate">Searching...</p>
                 </div>
                 
                 <!-- Match Tag Show -->
-                <p id="interest-match" class="text-[0.6rem] text-[var(--accent)] font-bold uppercase tracking-widest mt-1 hidden w-full truncate"></p>
+                <p id="interest-match" class="text-[0.55rem] sm:text-[0.6rem] text-[var(--accent)] font-bold uppercase tracking-widest mt-1 hidden w-full truncate"></p>
             </div>
 
             <!-- Right: Theme Toggle for Chat -->
-            <div class="w-1/3 flex justify-end">
-                <button type="button" id="theme-btn-chat" class="header-theme-btn" aria-label="Toggle Theme">
-                    <svg class="w-5 h-5 moon-icon-chat" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-                    <svg class="hidden w-5 h-5 sun-icon-chat" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <div class="flex-shrink-0 flex justify-end">
+                <button type="button" id="theme-btn-chat" class="header-theme-btn w-8 h-8 md:w-10 md:h-10" aria-label="Toggle Theme">
+                    <svg class="w-4 h-4 md:w-5 md:h-5 moon-icon-chat" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    <svg class="hidden w-4 h-4 md:w-5 md:h-5 sun-icon-chat" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                 </button>
             </div>
             
@@ -571,9 +570,8 @@
             socket.emit("set-nickname", nick);
             
             ui.setupScreen.classList.add('hidden');
-            ui.setupLogo.classList.add('hidden'); // Hide outer logo when entering chat
+            ui.setupLogo.classList.add('hidden'); 
             
-            // ✨ FIX: Hide outer theme toggle when entering chat ✨
             document.getElementById('theme-btn').classList.add('hidden'); 
             
             ui.chatUI.classList.remove('hidden');
@@ -618,7 +616,6 @@
             updateStatus('disconnected');
             hasConnectedOnce = false;
         });
-        // --- REPORT LOGIC END ---
 
         function findPartner() {
             updateStatus('searching');
@@ -642,7 +639,6 @@
             findPartner();
         });
 
-        // ✨ TYPING INDICATOR EMISSION ✨
         let typingTimeout;
         ui.input.addEventListener('input', () => {
             ui.sendBtn.disabled = ui.input.value.trim().length === 0;
