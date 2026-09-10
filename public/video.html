@@ -193,14 +193,6 @@
                     </div>
                 </div>
 
-                <!-- ✨ CAMERA / OBS VIRTUAL CAMERA SELECTION ✨ -->
-                <div class="text-left">
-                    <label class="text-xs uppercase tracking-widest text-[var(--text-secondary)] font-bold ml-2 mb-2 block">Camera / OBS Source</label>
-                    <select id="camera-select" class="glass-input w-full p-3 rounded-xl text-xs font-semibold cursor-pointer outline-none">
-                        <option value="">Default Camera (Auto)</option>
-                    </select>
-                </div>
-
                 <button type="button" id="start-button" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold p-3.5 rounded-xl mt-2 shadow-lg disabled:opacity-50" disabled>
                     Start Camera
                 </button>
@@ -371,6 +363,7 @@
         let aiScanInterval = null;
         let noFaceTime = 0; 
         let connectedTime = 0; 
+        let isObsActive = false;
 
         const ui = {
             setupScreen: document.getElementById('setup-screen'), chatUI: document.getElementById('chat-ui'),
@@ -387,38 +380,8 @@
             reportModal: document.getElementById('report-modal'), closeReport: document.getElementById('close-report'),
             submitReport: document.getElementById('submit-report'), nextBtn: document.getElementById('next-button'),
             endBtn: document.getElementById('stop-button'),
-            localWrapper: document.getElementById('local-wrapper'), remoteWrapper: document.getElementById('remote-wrapper'),
-            cameraSelect: document.getElementById('camera-select')
+            localWrapper: document.getElementById('local-wrapper'), remoteWrapper: document.getElementById('remote-wrapper')
         };
-
-        // --- OBS & Camera Device Detection ---
-        async function loadCameraDevices() {
-            if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
-            try {
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                const videoInputs = devices.filter(d => d.kind === 'videoinput');
-                if (videoInputs.length > 0 && ui.cameraSelect) {
-                    const currentSelection = ui.cameraSelect.value;
-                    ui.cameraSelect.innerHTML = '<option value="">Default Camera (Auto)</option>';
-                    videoInputs.forEach((device, index) => {
-                        const opt = document.createElement('option');
-                        opt.value = device.deviceId;
-                        let label = device.label || `Camera ${index + 1}`;
-                        if (label.toLowerCase().includes('obs')) {
-                            label = `🎥 ${label} (OBS Virtual Camera)`;
-                        }
-                        opt.textContent = label;
-                        if (device.deviceId === currentSelection) opt.selected = true;
-                        ui.cameraSelect.appendChild(opt);
-                    });
-                }
-            } catch(e) {}
-        }
-
-        loadCameraDevices();
-        if (navigator.mediaDevices && navigator.mediaDevices.ondevicechange !== undefined) {
-            navigator.mediaDevices.ondevicechange = loadCameraDevices;
-        }
 
         blazeface.load().then(face => {
             faceModel = face;
@@ -448,17 +411,15 @@
             if (!myGender) return alert("Please select your gender.");
             ui.startBtn.textContent = "Scanning Camera..."; ui.startBtn.disabled = true;
 
-            const selectedDeviceId = ui.cameraSelect ? ui.cameraSelect.value : '';
-            const isObsCamera = ui.cameraSelect && ui.cameraSelect.selectedOptions[0] && ui.cameraSelect.selectedOptions[0].text.toLowerCase().includes('obs');
-
-            const videoConstraints = selectedDeviceId ? { deviceId: { exact: selectedDeviceId } } : true;
-
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: true });
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 ui.localVideo.srcObject = localStream;
 
-                // If streaming from OBS, don't mirror the local video
-                if (isObsCamera) {
+                const videoTrack = localStream.getVideoTracks()[0];
+                isObsActive = videoTrack && videoTrack.label && videoTrack.label.toLowerCase().includes('obs');
+
+                // If OBS stream, do not mirror video horizontally
+                if (isObsActive) {
                     ui.localVideo.style.transform = 'none';
                 } else {
                     ui.localVideo.style.transform = 'scaleX(-1)';
@@ -467,8 +428,7 @@
                 await new Promise(r => { ui.localVideo.onloadedmetadata = () => ui.localVideo.play().then(r); });
                 await new Promise(r => setTimeout(r, 600));
 
-                // If OBS or Creator mode is selected, bypass initial strict face rejection
-                if (faceModel && selectedMode !== 'creator' && !isObsCamera) {
+                if (faceModel && selectedMode !== 'creator' && !isObsActive) {
                     const faces = await faceModel.estimateFaces(ui.localVideo, false);
                     if (faces.length === 0 || faces[0].probability[0] < 0.50) {
                         alert("⚠️ Please show your face clearly to enter SwapLoop.");
@@ -477,8 +437,7 @@
                     }
                 }
                 
-                if (faceModel) aiScanInterval = setInterval(() => scanVideoContent(isObsCamera), 1000);
-                loadCameraDevices(); // Refresh labels once permission is granted
+                if (faceModel) aiScanInterval = setInterval(scanVideoContent, 1000);
                 
             } catch (err) { alert("Camera access required!"); ui.startBtn.textContent = "Start Camera"; ui.startBtn.disabled = false; return; }
 
@@ -489,13 +448,14 @@
             updateStatus('disconnected', 'Ready');
         });
 
-        async function scanVideoContent(isObsCamera = false) {
+        async function scanVideoContent() {
             if (!faceModel || ui.localVideo.paused) return;
             try {
                 const faces = await faceModel.estimateFaces(ui.localVideo, false);
                 const hasFace = faces.length > 0 && faces[0].probability[0] > 0.60;
 
-                if (peer && connectedTime > 0 && selectedMode !== 'creator' && !isObsCamera) {
+                // Never auto-disconnect if user is on Creator mode or OBS Virtual Camera
+                if (peer && connectedTime > 0 && selectedMode !== 'creator' && !isObsActive) {
                     if (!hasFace) {
                         noFaceTime++;
                         if (noFaceTime <= 5) ui.aiWarning.style.display = 'none';
@@ -591,9 +551,7 @@
             playSound('click');
             ui.nextBtn.disabled = true; 
             
-            const isObs = ui.cameraSelect && ui.cameraSelect.selectedOptions[0] && ui.cameraSelect.selectedOptions[0].text.toLowerCase().includes('obs');
-
-            if (faceModel && ui.localVideo.srcObject && selectedMode !== 'creator' && !isObs) {
+            if (faceModel && ui.localVideo.srcObject && selectedMode !== 'creator' && !isObsActive) {
                 const faces = await faceModel.estimateFaces(ui.localVideo, false);
                 if (faces.length === 0 || faces[0].probability[0] < 0.50) {
                     ui.aiWarning.textContent = `⚠️ Please show your face to search!`;
